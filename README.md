@@ -1,71 +1,158 @@
-# MBT-5 Semantic Regulator
+# MBT-5 Semantic Regulator  
+### Geometry-Based Confidence & Hallucination Detection for LLMs (Inference-Time)
 
-## Geometry-Only Control of LLM Output at Inference Time
+**MBT-5** is a geometry-only, inference-time regulator for large language models that estimates **output confidence and hallucination risk without training, fine-tuning, classifiers, or content inspection**.
 
-This repository implements **MBT-5**, a lightweight inference-time regulator that constrains LLM outputs using **embedding-space geometry**, not training, fine-tuning, or reward models.
-
-The system treats semantic drift as **geometric curvature**, detects violations as **energy spikes**, and enforces correction through a **surgical feedback loop**.
+It works by measuring **semantic stability** and **geometric drift** in embedding space.
 
 No gradients.  
 No retraining.  
-No classifiers.
+No moderation rules.  
+No keyword filters.
 
 ---
 
-## Core Idea
+## Why This Exists
 
-1. Text → embedding space  
-2. Define a **target manifold** from exemplar statements  
-3. Compute a **robust geometric center** (Weiszfeld median)  
-4. Measure deviation as:
+LLMs do not “know” when they are wrong.  
+They produce fluent text even when internal consistency collapses.
 
-\[
-\text{Shock} = \Gamma \|\mathbf{x} - \mathbf{x}_{\text{manifold}}\|^2
-\]
+Current approaches try to fix this by:
+- Aligning behavior during training  
+- Blocking topics  
+- Inspecting content  
+- Forcing refusals  
 
-5. If shock exceeds threshold → force rewrite  
-6. Repeat until stable or budget exhausted  
+These methods are brittle, invasive, and increasingly counter-productive.
+
+**MBT-5 takes a different approach**:
+
+> Instead of asking *“Is this answer allowed?”*  
+> MBT-5 asks *“Is this answer geometrically stable?”*
+
+---
+
+## Core Insight
+
+LLMs move through **semantic space**, not logic trees.
+
+When an answer is:
+- factual → embeddings cluster tightly  
+- uncertain → embeddings spread  
+- hallucinated → embeddings fracture  
+
+MBT-5 measures this **fracture** directly.
+
+---
+
+## System Overview
+
+MBT-5 consists of **three composable layers**, all inference-time:
+
+### 1. Geometric Stability (Zero-Box Mode)
+**No manifold. No setup. Just ask questions.**
+
+- Generate multiple answer variants  
+- Embed them  
+- Measure internal disagreement (“entropy”)  
+- Return a confidence score alongside the response  
+
+This is the **Zero-Box Stability Pilot** — the MVP most people will use.
+
+**Result:**  
+> “Here is the answer — and here is how confident the model is.”
+
+---
+
+### 2. Manifold Confinement (Optional)
+For domain-specific control:
+
+- Define a semantic manifold (e.g. law, physics, medicine)  
+- Compute a robust geometric center (Weiszfeld median)  
+- Penalize radial escape from that manifold  
+- Force rewrite if deviation exceeds threshold  
 
 This is **semantic confinement**, not fact-checking.
 
 ---
 
-## What This Is (and Isn’t)
+### 3. Token-Level Fault Localization
+When instability is detected:
+
+- Perform leave-one-out token analysis  
+- Identify which word causes geometric shock  
+- Optionally trigger self-repair or re-prompting  
+
+This allows **local explanation without inspecting meaning**.
+
+---
+
+## What MBT-5 Is (and Isn’t)
 
 ### ✔️ Is
-- Inference-time regulator
-- Geometry-based
-- Model-agnostic
-- Works with OpenAI / Anthropic / local LLMs
-- Detects and localises hallucinations
-- Enforces topical fidelity
+- Inference-time  
+- Geometry-based  
+- Model-agnostic (OpenAI, Anthropic, local LLMs)  
+- Privacy-preserving  
+- External confidence signal  
+- Hallucination *risk* detector  
+- Domain-aware (if desired)  
 
 ### ❌ Is Not
-- Training
-- Fine-tuning
-- RAG
-- Safety alignment
-- Truth oracle
+- Training  
+- Fine-tuning  
+- RAG  
+- Safety alignment  
+- Keyword filtering  
+- A “truth oracle”  
+
+MBT-5 does **not** decide truth.  
+It estimates **epistemic stability**.
 
 ---
 
-## Components
+## Key Mechanisms (Mapped to Code)
 
-### Geometric Median
-Robust against outliers and adversarial drift.
+### Geometric Median (Weiszfeld)
+Robust semantic center resistant to outliers.
 
-### Curvature Shock
-Squared distance acts as an energy penalty for semantic escape.
-
-### Leave-One-Out Token Analysis
-Identifies *which word* causes instability.
-
-### Surgical Rewrite Loop
-Hard constraint enforcement — no polite nudging.
+Used in:
+- Embedding consensus  
+- Leave-one-out tests  
+- Stability baselines  
 
 ---
 
-## Demos
+### Curvature / Shock
+Semantic deviation measured as energy:
+
+\[
+\text{Shock} = \Gamma \lVert \mathbf{x} - \mathbf{x}_{center} \rVert^2
+\]
+
+High shock ⇒ semantic escape.
+
+---
+
+### Internal Entropy (Zero-Box)
+Measures **self-disagreement** across multiple model answers.
+
+Low entropy ⇒ high confidence  
+High entropy ⇒ hallucination risk
+
+---
+
+### Token-Level Shock Mapping
+Removes words one-by-one to identify instability sources.
+
+Used for:
+- Debugging  
+- Visualization  
+- Self-repair experiments  
+
+---
+
+## Demos Included
 
 | Demo | Description |
 |----|----|
@@ -73,21 +160,67 @@ Hard constraint enforcement — no polite nudging.
 | `embedding_outliers.py` | Hallucination detection via curvature |
 | `token_self_repair.py` | Token-level fault isolation |
 | `council_consensus.py` | Multi-agent semantic consensus |
-| `ui/mbt5_pilot.ipynb` | Interactive “LOCK REALITY” pilot |
+| `mts_leave_one_out.py` | Robust hallucination detection |
+| `ui/zero_box_pilot.ipynb` | **Zero-Box Stability UI (MVP)** |
+| `ui/mbt5_pilot.ipynb` | Manifold-constrained pilot |
 
 ---
 
-## Why This Works
+## The Zero-Box Stability Pilot (MVP)
 
-LLMs do not reason symbolically — they move through **embedding space**.
+The Zero-Box Pilot is the **recommended entry point**.
 
-MBT-5 does not tell the model *what* to say.  
-It tells the model *where it is allowed to exist*.
+**User flow:**
+1. Paste API key  
+2. Ask a question normally  
+3. Receive:  
+   - Answer  
+   - Confidence label  
+   - Internal entropy score  
+
+No configuration.  
+No manifolds.  
+No expertise required.
+
+Suitable for:
+- Red-team evaluation  
+- Internal tooling  
+- Product demos  
+- Risk assessment layers  
+
+---
+
+## Why This Matters (Product View)
+
+MBT-5 enables a **new safety primitive**:
+
+> *Warn users when the model is unstable instead of pretending certainty.*
+
+Analogous to:
+- Credit risk scores  
+- Weather confidence bands  
+- Vehicle stability control  
+
+This avoids:
+- Over-moderation  
+- User frustration  
+- Privacy invasion  
+- Alignment failure cascades  
 
 ---
 
 ## Status
 
-Experimental but functional.  
-Geometry-first by design.  
-No claims beyond demonstrated behaviour.
+- Experimental  
+- Functional  
+- Geometry-first  
+- Demonstrated in notebooks  
+- Designed for external integration  
+
+No claims beyond observed behavior.
+
+---
+
+## One-Sentence Summary
+
+> **MBT-5 adds an external, privacy-preserving confidence signal to LLM outputs using semantic geometry — entirely at inference time.**
