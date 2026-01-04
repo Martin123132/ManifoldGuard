@@ -1,124 +1,93 @@
-# 🛡️ MBT-5 Reality Guardian  
-### A Geometric Hallucination Regulator for Large Language Models
+# MBT-5 Semantic Regulator
 
-**MBT-5** (Manifold-Based Trajectory v5) is a semantic regulation layer for LLMs.  
-It detects and suppresses hallucinations by measuring **geometric drift** between generated text and a user-defined reference manifold.
+## Geometry-Only Control of LLM Output at Inference Time
 
-This system does not rely on rules, classifiers, or safety policies.  
-It operates purely on **embedding geometry**.
+This repository implements **MBT-5**, a lightweight inference-time regulator that constrains LLM outputs using **embedding-space geometry**, not training, fine-tuning, or reward models.
 
----
+The system treats semantic drift as **geometric curvature**, detects violations as **energy spikes**, and enforces correction through a **surgical feedback loop**.
 
-## What MBT-5 Does
-
-MBT-5 treats language generation as motion through a high-dimensional semantic space.
-
-It:
-
-- Constructs a **reference manifold** from user-provided texts
-- Measures **semantic distance** between model output and that manifold
-- Interprets large deviations as **hallucinations or domain drift**
-- Actively **corrects or suppresses** misaligned outputs
-- Refuses to emit output when alignment cannot be recovered
-
-In practice, this allows you to **constrain an LLM to a specific technical, legal, or stylistic reality** without rewriting prompts or relying on behavioral instructions.
+No gradients.  
+No retraining.  
+No classifiers.
 
 ---
 
-## Core Concepts
+## Core Idea
 
-### 1. Semantic Manifold
-A manifold is defined by 3–10 short reference texts representing the domain you want the model to stay within (e.g. CUDA kernels, Rust memory safety, legal filings).
+1. Text → embedding space  
+2. Define a **target manifold** from exemplar statements  
+3. Compute a **robust geometric center** (Weiszfeld median)  
+4. Measure deviation as:
 
-The manifold center is computed as the **geometric (L1) median** of the embeddings.
+\[
+\text{Shock} = \Gamma \|\mathbf{x} - \mathbf{x}_{\text{manifold}}\|^2
+\]
+
+5. If shock exceeds threshold → force rewrite  
+6. Repeat until stable or budget exhausted  
+
+This is **semantic confinement**, not fact-checking.
 
 ---
 
-### 2. Shock
-Shock is the squared Euclidean distance between a generated response and the manifold center:
+## What This Is (and Isn’t)
 
-shock = || embedding(output) − manifold_center ||²
+### ✔️ Is
+- Inference-time regulator
+- Geometry-based
+- Model-agnostic
+- Works with OpenAI / Anthropic / local LLMs
+- Detects and localises hallucinations
+- Enforces topical fidelity
 
-Low shock = output belongs to the domain  
-High shock = semantic drift / hallucination
+### ❌ Is Not
+- Training
+- Fine-tuning
+- RAG
+- Safety alignment
+- Truth oracle
 
 ---
 
-### 3. Recursive Healing
-If shock exceeds a threshold:
+## Components
 
-1. The output is rejected
-2. Feedback is generated describing the drift
-3. The model is re-queried
-4. Shock is re-evaluated
+### Geometric Median
+Robust against outliers and adversarial drift.
 
-This continues until:
-- Alignment is recovered, or
-- A hard rejection threshold is reached
+### Curvature Shock
+Squared distance acts as an energy penalty for semantic escape.
+
+### Leave-One-Out Token Analysis
+Identifies *which word* causes instability.
+
+### Surgical Rewrite Loop
+Hard constraint enforcement — no polite nudging.
+
+---
+
+## Demos
+
+| Demo | Description |
+|----|----|
+| `time_series_mbt5.py` | MBT-5 as geometric shock absorber |
+| `embedding_outliers.py` | Hallucination detection via curvature |
+| `token_self_repair.py` | Token-level fault isolation |
+| `council_consensus.py` | Multi-agent semantic consensus |
+| `ui/mbt5_pilot.ipynb` | Interactive “LOCK REALITY” pilot |
 
 ---
 
 ## Why This Works
 
-Hallucinations are not random errors.  
-They are **geometric departures** from the semantic neighborhood implied by the task.
+LLMs do not reason symbolically — they move through **embedding space**.
 
-MBT-5 does not attempt to decide what is “true”.  
-It enforces **domain coherence**.
-
-If a model cannot produce an answer that belongs to the declared manifold, **it is prevented from speaking**.
+MBT-5 does not tell the model *what* to say.  
+It tells the model *where it is allowed to exist*.
 
 ---
 
-## Example Use Cases
+## Status
 
-- Preventing speculative answers in technical domains
-- Suppressing “helpful” but incorrect explanations
-- Enforcing professional tone without prompt engineering
-- Detecting policy-driven or stylistic drift
-- Auditing LLM outputs for domain violations
-
----
-
-## Installation
-
-```bash
-git clone https://github.com/YOUR_USERNAME/MBT-5-Reality-Guardian.git
-cd MBT-5-Reality-Guardian
-pip install -r requirements.txt
-
-
-⸻
-
-Running the Pilot
-
-Run pilot_app.py inside Jupyter or VS Code.
-	1.	Paste your API key (never stored)
-	2.	Define a manifold (3–5 domain lines)
-	3.	Lock reality
-	4.	Query the model
-	5.	Observe shock, correction, or rejection
-
-⸻
-
-Repository Structure
-
-MBT-5-Reality-Guardian/
-├── mbt5_core.py        # Geometry + embedding logic
-├── pilot_app.py        # Interactive UI + recursive pilot
-├── examples/           # Sample manifolds
-├── requirements.txt
-└── README.md
-
-
-⸻
-
-Mathematical Summary
-	•	Embeddings: all-MiniLM-L6-v2 (384-D)
-	•	Manifold center: L1 geometric median
-	•	Drift metric: squared L2 distance
-	•	Control method: recursive rejection + regeneration
-
-This is a control system, not a classifier.
-
-
+Experimental but functional.  
+Geometry-first by design.  
+No claims beyond demonstrated behaviour.
