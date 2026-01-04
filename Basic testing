@@ -1,0 +1,565 @@
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.linalg import solve_banded
+
+# 1. GENERATE "CHAOTIC" DATA (Simulated Volatile Stock)
+np.random.seed(42)
+n_days = 500
+x = np.linspace(0, 10, n_days)
+dx = x[1] - x[0]
+
+# Base trend + high-frequency noise (the "shocks")
+base_price = 100 + 10 * np.sin(x) + 2 * x
+noise = np.random.normal(0, 5, n_days)
+u_noisy = base_price + noise
+
+# 2. MBT-5 SOLVER PARAMETERS
+dt = 0.01        # "Time" step for the smoothing evolution
+Gamma = 0.5      # MBT-5 Curvature Strength (Increase for smoother results)
+iterations = 50  # How many passes to stabilize the "field"
+
+# 3. SETUP THE MBT-5 SEMI-IMPLICIT MATRIX
+# This is the "Geometric Resistance" that prevents data shocks
+main_diag = 1 + 2 * Gamma * dt / (dx**2)
+off_diag  = -Gamma * dt / (dx**2)
+
+A = np.zeros((3, n_days))
+A[1] = main_diag
+A[0, 1:] = off_diag
+A[2, :-1] = off_diag
+
+# 4. RUN THE STABILIZATION
+u_mbt = u_noisy.copy()
+for _ in range(iterations):
+    # This solves the geometric damping equation: (I - dt*Γ∂²) u = rhs
+    u_mbt = solve_banded((1, 1), A, u_mbt)
+
+# 5. VISUALIZE RESULTS
+plt.figure(figsize=(12, 6))
+plt.plot(u_noisy, color='lightgray', alpha=0.7, label="Raw Volatile Data (Shocks)")
+plt.plot(u_mbt, color='green', linewidth=2, label="MBT-5 Stabilized Trend (Geometric)")
+plt.title("Applying MBT-5 Geometric Stabilization to Volatile Time Series")
+plt.xlabel("Time Steps")
+plt.ylabel("Value")
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.show()
+
+
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. SETUP: Simulating "Knowledge Embeddings"
+# Imagine these are 50 versions of the same fact.
+# Most are clustered together (Truth), but one is far away (Hallucination).
+n_points = 50
+truth_cluster = np.random.normal(0, 0.5, (n_points, 2))
+hallucination = np.array([[5.0, 5.0]]) # The "Shock" / Outlier
+data = np.vstack([truth_cluster, hallucination])
+
+# 2. MBT-5 CURVATURE DAMPING (Simplified for 2D)
+# We treat the distance from the center as a "potential field"
+gamma = 0.5 # Curvature strength
+center = np.mean(truth_cluster, axis=0)
+distances = np.linalg.norm(data - center, axis=1)
+
+# The MBT-5 logic: Penalize high-gradient (high distance) points
+# We calculate a "Suspicion Score" based on geometric curvature
+suspicion_scores = gamma * (distances**2)
+
+# 3. VISUALIZE THE "GEOMETRIC TRUTH"
+plt.figure(figsize=(10, 6))
+# Plot the "Truth"
+plt.scatter(data[:-1, 0], data[:-1, 1], c='blue', label='Consistent Facts', alpha=0.6)
+# Plot the "Hallucination"
+plt.scatter(data[-1, 0], data[-1, 1], c='red', s=100, label='Hallucination (Shock)')
+
+# Draw the "Geometric Stabilization" field
+circle = plt.Circle(center, 1.5, color='green', fill=False, linestyle='--', label='MBT-5 Stable Zone')
+plt.gca().add_patch(circle)
+
+plt.title("MBT-5 Geometric Hallucination Detection")
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+
+print(f"Hallucination Suspicion Score: {suspicion_scores[-1]:.2f}")
+print(f"Average Factual Suspicion Score: {np.mean(suspicion_scores[:-1]):.2f}")
+
+
+ 
+Hallucination Suspicion Score: 25.58
+Average Factual Suspicion Score: 0.21
+
+
+
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# 1. Initialize a factual embedding model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# 2. Simulated LLM Responses (4 True, 1 Hallucination)
+responses = [
+    "The capital of France is Paris.",
+    "Paris is the capital city of France.",
+    "France's capital and largest city is Paris.",
+    "Paris serves as the administrative center of France.",
+    "The capital of France is London." # Hallucination (The "Shock")
+]
+
+# 3. Convert text to "Geometry" (Embeddings)
+embeddings = model.encode(responses)
+
+# 4. MBT-5 Geometric Suspicion Test
+# We treat the average factual response as the "Stable Attractor"
+gamma = 1.0 # MBT-5 Curvature Strength
+centroid = np.mean(embeddings[:-1], axis=0)
+
+def calculate_mbt5_suspicion(emb, center, g):
+    # This mimics the Γ-term: measuring resistance to the local gradient
+    distance = np.linalg.norm(emb - center)
+    return g * (distance**2)
+
+# 5. Run the detection
+print("--- MBT-5 Hallucination Report ---")
+for i, resp in enumerate(responses):
+    score = calculate_mbt5_suspicion(embeddings[i], centroid, gamma)
+    status = "⚠️ SUSPECTED HALLUCINATION" if score > 1.0 else "✅ FACTUAL"
+    print(f"Score: {score:.2f} | {status} | Text: {resp}")
+
+
+WARNING:torchao.kernel.intmm:Warning: Detected no triton, on systems without Triton certain kernels will not work
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/utils/_auth.py:94: UserWarning: 
+The secret `HF_TOKEN` does not exist in your Colab secrets.
+To authenticate with the Hugging Face Hub, create a token in your settings tab (https://huggingface.co/settings/tokens), set it as secret in your Google Colab and restart your session.
+You will be able to reuse this secret in all of your notebooks.
+Please note that authentication is recommended but still optional to access public models or datasets.
+  warnings.warn(
+modules.json: 100%
+ 349/349 [00:00<00:00, 20.1kB/s]
+config_sentence_transformers.json: 100%
+ 116/116 [00:00<00:00, 9.97kB/s]
+README.md: 
+ 10.5k/? [00:00<00:00, 610kB/s]
+sentence_bert_config.json: 100%
+ 53.0/53.0 [00:00<00:00, 4.23kB/s]
+config.json: 100%
+ 612/612 [00:00<00:00, 46.6kB/s]
+model.safetensors: 100%
+ 90.9M/90.9M [00:01<00:00, 106MB/s]
+tokenizer_config.json: 100%
+ 350/350 [00:00<00:00, 29.6kB/s]
+vocab.txt: 
+ 232k/? [00:00<00:00, 6.15MB/s]
+tokenizer.json: 
+ 466k/? [00:00<00:00, 22.6MB/s]
+special_tokens_map.json: 100%
+ 112/112 [00:00<00:00, 9.99kB/s]
+config.json: 100%
+ 190/190 [00:00<00:00, 17.3kB/s]
+--- MBT-5 Hallucination Report ---
+Score: 0.06 | ✅ FACTUAL | Text: The capital of France is Paris.
+Score: 0.05 | ✅ FACTUAL | Text: Paris is the capital city of France.
+Score: 0.10 | ✅ FACTUAL | Text: France's capital and largest city is Paris.
+Score: 0.27 | ✅ FACTUAL | Text: Paris serves as the administrative center of France.
+Score: 0.38 | ✅ FACTUAL | Text: The capital of France is London.
+
+
+
+
+def get_word_shocks(sentence, gamma_strength=1.0):
+    words = sentence.split()
+    base_emb = model.encode([sentence])[0]
+
+    # We compare the sentence to its own "Stable Version" (the Centroid)
+    # For this test, let's use the average factual embedding from your last run
+    word_scores = []
+
+    for i in range(len(words)):
+        # Create a version of the sentence with one word missing
+        leave_one_out = " ".join([w for j, w in enumerate(words) if i != j])
+        new_emb = model.encode([leave_one_out])[0]
+
+        # How much did the 'Geometric Shock' change when we removed this word?
+        # A big drop means THIS word was the source of the hallucination.
+        shock_reduction = np.linalg.norm(base_emb - centroid) - np.linalg.norm(new_emb - centroid)
+        word_scores.append(max(0, shock_reduction))
+
+    return words, word_scores
+
+# Test it on the hallucination
+lie = "The capital of France is London"
+words, shocks = get_word_shocks(lie)
+
+print("\n--- Geometric Shock Heatmap ---")
+for w, s in zip(words, shocks):
+    intensity = "🔥" * int(s * 20) # More fire = more shock
+    print(f"{w:<10} {intensity} ({s:.4f})")
+
+
+
+--- Geometric Shock Heatmap ---
+The         (0.0000)
+capital     (0.0000)
+of          (0.0000)
+France      (0.0000)
+is          (0.0000)
+London     🔥🔥 (0.1468)
+
+
+def self_correcting_llm(original_sentence, gamma_threshold=0.1):
+    print(f"Original: {original_sentence}")
+
+    # 1. Identify the 'Shock Word'
+    words, shocks = get_word_shocks(original_sentence)
+    max_shock = max(shocks)
+
+    if max_shock > gamma_threshold:
+        bad_word_index = np.argmax(shocks)
+        bad_word = words[bad_word_index]
+
+        print(f"🚨 Shock detected at '{bad_word}' (Score: {max_shock:.4f})")
+        print("🔄 Triggering Self-Correction...")
+
+        # 2. In a real scenario, this would be a new API call.
+        # Here, we simulate the 'Correction' by swapping the shock word
+        # with a known stable attractor (Paris).
+        corrected_sentence = original_sentence.replace(bad_word, "[STABILIZED]")
+        print(f"Regulated Output: {corrected_sentence.replace('[STABILIZED]', 'Paris')}")
+    else:
+        print("✅ Sentence is geometrically stable.")
+
+# Run the test
+self_correcting_llm("The capital of France is London")
+
+Original: The capital of France is London
+🚨 Shock detected at 'London' (Score: 0.1468)
+🔄 Triggering Self-Correction...
+Regulated Output: The capital of France is Paris
+
+
+from sentence_transformers import SentenceTransformer
+import numpy as np
+from scipy.spatial import ConvexHull
+
+# 1. SETUP: The "Council" of 10 Agents
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+responses = [
+    "The capital of France is Paris.",
+    "Paris is France's capital city.",
+    "France is governed from Paris.",
+    "The French government is located in Paris.",
+    "Paris is the seat of the French government.",
+    "The administrative center of France is Paris.",
+    "France's main capital city is Paris.",
+    "Paris is known as the capital of France.",
+    "The capital of France is Marseille.", # Agent 9: Hallucination
+    "The capital of France is Lyon."      # Agent 10: Hallucination
+]
+
+# 2. CONVERT TO GEOMETRIC FIELD
+embeddings = model.encode(responses)
+
+# 3. MBT-5 "STABLE ATTRACTOR" CALCULATION
+# We find the geometric 'center of gravity' for the most consistent points
+gamma = 1.5
+centroid = np.mean(embeddings, axis=0)
+
+# Calculate Geometric Volume (Entropy)
+# Recent 2025 research shows: Smaller Volume = Higher Truth
+hull = ConvexHull(embeddings[:, :3]) # Using first 3 dimensions for volume demo
+print(f"Total Semantic Volume (Entropy): {hull.volume:.4f}")
+
+# 4. FINDING THE TRUTH
+def get_geometric_consensus(embs, responses, g):
+    scores = []
+    center = np.median(embs, axis=0) # Geometric Median is more robust than Mean
+    for e in embs:
+        # The MBT-5 shock term (Γ * dist^2)
+        shock = g * np.linalg.norm(e - center)**2
+        scores.append(shock)
+
+    # Sort by 'Stability'
+    ranked = sorted(zip(scores, responses), key=lambda x: x[0])
+    return ranked
+
+results = get_geometric_consensus(embeddings, responses, gamma)
+
+print("\n--- COUNCIL OF JUDGES: CONSENSUS REPORT ---")
+for i, (score, text) in enumerate(results):
+    status = "🏆 CONSENSUS TRUTH" if i == 0 else "❌ REJECTED (SHOCK)" if score > 1.0 else "✅ SUPPORTING"
+    print(f"[{status}] Score: {score:.4f} | {text}")
+
+
+Total Semantic Volume (Entropy): 0.0001
+
+--- COUNCIL OF JUDGES: CONSENSUS REPORT ---
+[🏆 CONSENSUS TRUTH] Score: 0.0793 | The capital of France is Paris.
+[✅ SUPPORTING] Score: 0.1123 | Paris is France's capital city.
+[✅ SUPPORTING] Score: 0.1709 | France's main capital city is Paris.
+[✅ SUPPORTING] Score: 0.1764 | Paris is known as the capital of France.
+[✅ SUPPORTING] Score: 0.3116 | Paris is the seat of the French government.
+[✅ SUPPORTING] Score: 0.3484 | The French government is located in Paris.
+[✅ SUPPORTING] Score: 0.3656 | France is governed from Paris.
+[✅ SUPPORTING] Score: 0.4657 | The administrative center of France is Paris.
+[✅ SUPPORTING] Score: 0.5181 | The capital of France is Marseille.
+[✅ SUPPORTING] Score: 0.6510 | The capital of France is Lyon.
+
+
+
+
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+gamma = 2.0  # Crank up the Curvature Strength for the stress test
+
+# Three different "Fields" to test
+test_scenarios = {
+    "HARD_FACT": [
+        "Water boils at 100 degrees Celsius at sea level.",
+        "The boiling point of water is 100°C.",
+        "At standard pressure, water boils at 100 degrees."
+    ],
+    "SUBJECTIVE_OPINION": [
+        "Python is the best programming language for beginners.",
+        "JavaScript is the best language to learn first.",
+        "Many people prefer starting with Java for its structure."
+    ],
+    "HALLUCINATION_TRAP": [
+        "The moon is made of green cheese.",
+        "The moon's surface is comprised of lunar basalt and regolith.",
+        "The moon is a giant hollow space station built by aliens."
+    ]
+}
+
+def stress_test_geometry(scenarios):
+    print(f"{'SCENARIO':<20} | {'VOLUME (ENTROPY)':<18} | {'MAX SHOCK'}")
+    print("-" * 60)
+
+    for name, sentences in scenarios.items():
+        embs = model.encode(sentences)
+        center = np.mean(embs, axis=0)
+
+        # Calculate individual shocks
+        shocks = [gamma * np.linalg.norm(e - center)**2 for e in embs]
+        max_shock = max(shocks)
+
+        # Calculate Volume (Spread)
+        volume = np.var(embs) * 100 # Using variance as a proxy for entropy spread
+
+        print(f"{name:<20} | {volume:<18.4f} | {max_shock:.4f}")
+
+stress_test_geometry(test_scenarios)
+
+SCENARIO             | VOLUME (ENTROPY)   | MAX SHOCK
+------------------------------------------------------------
+HARD_FACT            | 0.2603             | 0.2609
+SUBJECTIVE_OPINION   | 0.2603             | 0.6393
+HALLUCINATION_TRAP   | 0.2604             | 0.7668
+
+
+# ==========================================
+# MTS LEAVE-ONE-OUT SEMANTIC GEOMETRY
+# Motion–TimeSpace (MTS) Hallucination Detector
+# ==========================================
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sentence_transformers import SentenceTransformer
+from sklearn.decomposition import PCA
+
+# ----------------
+# 1) LOAD MODEL
+# ----------------
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# ----------------
+# 2) RESPONSES
+# ----------------
+responses = [
+    "The capital of France is Paris.",
+    "Paris is the capital city of France.",
+    "France's capital is Paris.",
+    "The capital of France is Lyon.",     # hallucination
+    "The capital of France is London."    # hallucination
+]
+
+embeddings = model.encode(responses)
+
+# MTS curvature strength (Γ in your notation)
+Gamma = 1.0
+
+# ----------------
+# 3) MTS GEOMETRIC MEDIAN (WEISZFELD)
+# ----------------
+def mts_geometric_median(X, eps=1e-7, max_iter=2000):
+    y = np.mean(X, axis=0)
+    for _ in range(max_iter):
+        d = np.linalg.norm(X - y, axis=1)
+        d = np.maximum(d, eps)
+        w = 1.0 / d
+        y_new = np.sum(X * w[:, None], axis=0) / np.sum(w)
+        if np.linalg.norm(y_new - y) < eps:
+            return y_new
+        y = y_new
+    return y
+
+# ----------------
+# 4) MTS LEAVE-ONE-OUT CURVATURE SHOCK
+# ----------------
+mts_shocks = []
+
+for i in range(len(embeddings)):
+    others = np.delete(embeddings, i, axis=0)
+    mts_center = mts_geometric_median(others)
+    shock = Gamma * np.linalg.norm(embeddings[i] - mts_center) ** 2
+    mts_shocks.append(shock)
+
+mts_shocks = np.array(mts_shocks)
+
+# ----------------
+# 5) ROBUST MTS THRESHOLD (MEDIAN + k*MAD)
+# ----------------
+def mts_robust_threshold(values, k=3.0, eps=1e-12):
+    med = np.median(values)
+    mad = np.median(np.abs(values - med)) + eps
+    return med + k * mad, med, mad
+
+threshold, median, mad = mts_robust_threshold(mts_shocks)
+
+# ----------------
+# 6) REPORT
+# ----------------
+print("\n--- MTS LEAVE-ONE-OUT GEOMETRIC REPORT ---")
+print(f"Median={median:.4f} | MAD={mad:.4f} | Threshold={threshold:.4f}\n")
+
+order = np.argsort(mts_shocks)
+for i in order:
+    status = "🚨 HALLUCINATION" if mts_shocks[i] > threshold else "✅ STABLE"
+    print(f"{mts_shocks[i]:.4f} | {status} | [{i}] {responses[i]}")
+
+# ----------------
+# 7) VISUALISATION (SEMANTIC GEOMETRY)
+# ----------------
+pca = PCA(n_components=2, random_state=0)
+pts_2d = pca.fit_transform(embeddings)
+
+plt.figure(figsize=(9, 6))
+
+for i in range(len(responses)):
+    color = "red" if mts_shocks[i] > threshold else "green"
+    plt.scatter(pts_2d[i, 0], pts_2d[i, 1], c=color)
+    plt.text(
+        pts_2d[i, 0] + 0.02,
+        pts_2d[i, 1] + 0.02,
+        str(i),
+        fontsize=10
+    )
+
+plt.title("MTS Leave-One-Out Semantic Geometry")
+plt.grid(alpha=0.3)
+plt.show()
+
+# ==========================================
+# MTS TOKEN-LEVEL SELF-CORRECTION
+# Geometry-only, No Re-Prompting
+# ==========================================
+
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+# ----------------
+# 1) LOAD MODEL
+# ----------------
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+Gamma = 1.0
+
+# ----------------
+# 2) STABLE REFERENCE SET
+# ----------------
+stable_sentences = [
+    "The capital of France is Paris.",
+    "Paris is the capital city of France.",
+    "France's capital is Paris."
+]
+
+stable_embeddings = model.encode(stable_sentences)
+stable_center = np.median(stable_embeddings, axis=0)
+
+# ----------------
+# 3) MTS TOKEN SHOCK ANALYSIS
+# ----------------
+def mts_token_shocks(sentence, reference_center):
+    words = sentence.split()
+    base_emb = model.encode([sentence])[0]
+    base_dist = np.linalg.norm(base_emb - reference_center)
+
+    shocks = []
+
+    for i, word in enumerate(words):
+        reduced = " ".join(w for j, w in enumerate(words) if j != i)
+        red_emb = model.encode([reduced])[0]
+        red_dist = np.linalg.norm(red_emb - reference_center)
+
+        # Positive = removing this word reduces curvature
+        shock = max(0.0, base_dist - red_dist)
+        shocks.append(shock)
+
+    return words, np.array(shocks)
+
+# ----------------
+# 4) MTS SELF-CORRECTOR
+# ----------------
+def mts_self_correct(sentence, reference_center, replacement="Paris", threshold=0.05):
+    words, shocks = mts_token_shocks(sentence, reference_center)
+    max_shock = shocks.max()
+
+    print(f"\nOriginal: {sentence}")
+    print(f"Max token shock: {max_shock:.4f}")
+
+    if max_shock < threshold:
+        print("✅ Sentence is already MTS-stable.")
+        return sentence
+
+    idx = shocks.argmax()
+    bad_word = words[idx]
+
+    print(f"🚨 Shock source: '{bad_word}'")
+
+    corrected = words.copy()
+    corrected[idx] = replacement
+    corrected_sentence = " ".join(corrected)
+
+    print(f"🔧 Corrected: {corrected_sentence}")
+
+    return corrected_sentence
+
+# ----------------
+# 5) TEST CASES
+# ----------------
+tests = [
+    "The capital of France is London",
+    "The capital of France is Lyon"
+]
+
+for t in tests:
+    mts_self_correct(t, stable_center)
+
+Original: The capital of France is London
+Max token shock: 0.1848
+🚨 Shock source: 'London'
+🔧 Corrected: The capital of France is Paris
+
+Original: The capital of France is Lyon
+Max token shock: 0.3402
+🚨 Shock source: 'Lyon'
+🔧 Corrected: The capital of France is Paris
+
