@@ -1,80 +1,83 @@
-<img width="1920" height="640" alt="a653b64f-4fd4-46ec-b425-dcab2cb3c7b4" src="https://github.com/user-attachments/assets/57aa4d12-7d14-4726-a8f1-bd921692d94e" />
+<img width="1920" height="640" alt="MBT-5 banner" src="https://github.com/user-attachments/assets/57aa4d12-7d14-4726-a8f1-bd921692d94e" />
 
-MBT-5 tests whether an AI output stays inside a supplied semantic and relational reference manifold.
-It runs at inference time.
-No training.  
-No fine-tuning.  
-No model-weight inspection.  
-No hidden classifier.
-The regulator checks candidate outputs and either:
-1. emits the safest supported candidate, or
-2. blocks / abstains when every candidate is unsafe.
+# MBT-5 Geometry-Only Output Regulator
+
+MBT-5 tests whether AI candidate outputs remain inside a supplied semantic and relational reference manifold.
+
+It runs at inference time:
+
+- no training
+- no fine-tuning
+- no model-weight inspection
+- no hidden classifier
+
+The regulator checks candidate outputs and either emits the safest supported candidate or blocks when every candidate is unsafe.
+
 ## Core Claim
-MBT-5 treats AI hallucination as **semantic or relational drift**.
-A hallucination is not defined here as “lack of access to universal fact”.  
-It is defined as the model leaving the intended answer manifold and producing unsupported content.
+
+MBT-5 treats hallucination as semantic or relational drift from supplied reference structure. It is not a fact oracle and does not claim direct access to external truth.
+
 ```text
 Universe does facts.
 Humans describe the universe.
 AI describes human descriptions.
 MBT-5 regulates AI descriptions against supplied human reference structure.
+```
 
-MBT-5 is therefore not a fact oracle.
-It is an output regulator.
+Supported public claim:
 
-It tests whether an AI output remains consistent with the reference descriptions, candidate set, semantic manifold, and relation constraints it was given.
+```text
+MBT-5 v11 blocked hallucinated AI outputs against supplied reference manifolds
+and relation constraints. In the frozen EXP20 ledger, it achieved confusion
+[[97, 0], [0, 160]] over 257 labelled candidates across 53 cases.
+```
 
-Current Locked Result
+## Current Locked Result
 
 Frozen ledger:
 
+```text
 MBT5_EXP20_combined_guarded_master_ledger_v11
-
-Result:
 
 Candidates: 257
 Cases:      53
+
 Candidate-level confusion:
 [[TN, FP], [FN, TP]]
 [[97, 0], [0, 160]]
+
 Accuracy:   1.0000
 Precision:  1.0000
 Recall:     1.0000
 F1:         1.0000
+
 Case-level:
 Correct: 53 / 53
 Emitted: 28
 Blocked: 25
+```
 
-In the frozen EXP20 ledger, MBT-5 produced no locked false positives and no locked false negatives.
+The current public claim is limited to the supplied test suites and reference manifolds included in the project.
 
-Supported claim:
-
-MBT-5 v11 blocked hallucinated AI outputs against supplied reference manifolds and relation constraints. In the frozen EXP20 ledger, it achieved confusion [[97, 0], [0, 160]] over 257 labelled candidates across 53 cases.
-
-<img width="1448" height="1086" alt="5fc1387a-ba8a-49a9-aa92-fae7671591b1" src="https://github.com/user-attachments/assets/9ba93521-1dcd-439e-864b-5989c40c2d81" />
-
-
-What MBT-5 Checks
+## What MBT-5 Checks
 
 MBT-5 combines:
 
-* semantic geometry
-* internal consistency scoring
-* token-level shock analysis
-* literal drift guards
-* entity / number / unit protection
-* overclaim detection
-* copular relation checks
-* non-copular relation checks
-* relation polarity checks
-* unsupported negation clamps
-* abstention when every candidate is unsafe
+- semantic geometry
+- internal consistency scoring
+- token-level shock analysis
+- literal drift guards
+- entity, number, and unit protection
+- overclaim detection
+- copular relation checks
+- non-copular relation checks
+- relation polarity checks
+- unsupported negation clamps
+- abstention when every candidate is unsafe
 
-Examples of Blocked Drift
+Examples of blocked drift:
 
-MBT-5 is designed to catch outputs such as:
-
+```text
 The capital of France is London.
 The Sun is a planet.
 Earth is flat.
@@ -83,149 +86,70 @@ Gravity is fully solved by modern physics.
 Scientific descriptions do not use measurements.
 DNA contains the nucleus.
 The Sun orbits Earth.
+```
 
-These are treated as output-regulation failures: the candidate has left the supplied semantic or relational support structure.
+## Core Mechanisms
 
-Core Mechanisms
+### Semantic Shock
 
-1. Semantic Shock
+Candidate outputs are embedded into semantic space. MBT-5 measures distance from the reference manifold:
 
-Candidate outputs are embedded into semantic space.
-
-MBT-5 measures distance from the reference manifold:
-
-shock = Γ · ||candidate_embedding - reference_center||²
+```text
+shock = Gamma * ||candidate_embedding - reference_center||^2
+```
 
 Higher shock means stronger semantic drift.
 
-2. Internal Entropy
+### Literal Drift Guards
 
-Multiple candidate answers can be sampled.
+Geometry alone can miss small but important substitutions. MBT-5 protects numbers, units, named entities, and key content tokens.
 
-MBT-5 measures disagreement between candidates in embedding space.
-
-High internal entropy means the output set is unstable.
-
-3. Token Shock
-
-MBT-5 removes tokens one at a time and measures how much each token contributes to drift.
-
-Example:
-
-The capital of France is London.
-
-Token shock localises to:
-
-London
-
-4. Literal Drift Guards
-
-Geometry alone can miss small but important substitutions.
-
-Example:
-
-Water boils at 90 degrees Celsius at sea level.
-
-This is semantically close to the supported statement, but the number is wrong.
-
-MBT-5 therefore protects:
-
-* numbers
-* units
-* named entities
-* key content tokens
-
-5. Relation Clamps
+### Relation Clamps
 
 MBT-5 checks relation structure, not just semantic similarity.
 
 Copular examples:
 
+```text
 The Sun is a planet.
 A dog is a bird.
 Rome is the capital city of France.
+```
 
 Non-copular examples:
 
+```text
 Earth orbits the Moon.
 The Sun orbits Earth.
 DNA contains the nucleus.
 Heat produces friction.
 Photosynthesis converts oxygen into carbon dioxide and water.
+```
 
-6. Negation Clamp
+### Negation Clamp
 
 MBT-5 blocks unsupported negations of positive reference support.
 
-Examples:
-
+```text
 Water is not liquid at room temperature.
 Sound does not need a material medium to travel.
 Scientific descriptions do not use measurements or predictions.
 General relativity proves gravity has no connection to mass or energy.
+```
 
-<img width="1448" height="1086" alt="a2c6cb64-aff1-4f53-b7ea-ca7beb634eef" src="https://github.com/user-attachments/assets/c7865359-c671-4768-8282-9399fe61ebab" />
-
-7. Abstention
+### Abstention
 
 When every candidate is unsafe, MBT-5 blocks instead of emitting the least-bad candidate.
 
-Experiment Lineage
+## Installation
 
-EXP01  Basic geometry tested against hard negatives.
-EXP02  Added literal guards.
-EXP03  Tested regulated candidate selection.
-EXP04  Tested abstention when no valid candidate exists.
-EXP05  Added unsupported content-token clamp.
-EXP06  Tested naive paraphrase tolerance; it was too permissive.
-EXP06B Added guarded paraphrase tolerance.
-EXP07  Added adversarial generalisation suite.
-EXP08  Stress-tested known false negatives in all-bad pools.
-EXP09  Added relation polarity clamp.
-EXP10  Applied relation clamp back to EXP07.
-EXP10B Fixed relation false positive.
-EXP11  Confirmed EXP10B against EXP08.
-EXP12  Built first master regression ledger.
-EXP13  Tested non-copular verb relations.
-EXP13B Added non-copular relation clamp.
-EXP13C Fixed coordinated verb subject handling.
-EXP14  Stress-tested valid paraphrases.
-EXP14B Added reference-member override.
-EXP15  Tested large all-bad abstention pools.
-EXP15B Added negated positive support clamp.
-EXP16B Built locked master regression ledger.
-EXP17  Unseen holdout exposed relation recall misses.
-EXP18  Added relation recall patch.
-EXP19  Found unguarded EXP18 patch regression.
-EXP19B Guarded EXP18 patch and fixed regression.
-EXP20  Frozen combined guarded v11 ledger.
+```bash
+pip install -e .
+```
 
-EXP20 Output Files
+For semantic-embedding features, install the package dependencies from `pyproject.toml`. Offline literal/relation-only regulation works with `use_embeddings=False`.
 
-mbt5_exp20_master_candidate_ledger.csv
-mbt5_exp20_master_case_ledger.csv
-mbt5_exp20_summary_metrics.csv
-mbt5_exp20_case_summary.csv
-mbt5_exp20_clamp_counts.csv
-mbt5_exp20_failure_table.csv
-mbt5_exp20_patch_lineage.csv
-
-Installation
-
-pip install mbt-ai-tools
-
-Basic Usage
-
-from mbt_ai_tools import confidence_score, hallucination_risk, token_shock_map
-text = "The capital of France is Paris."
-score = confidence_score(text)
-risk = hallucination_risk(text)
-shocks = token_shock_map(text)
-print(score)
-print(risk)
-print(shocks)
-
-Candidate Regulation
+## Python Usage
 
 ```python
 from mbt_ai_tools import regulate_candidates
@@ -239,70 +163,52 @@ candidates = [
     "The capital of France is Paris.",
 ]
 
-result = regulate_candidates(candidates, references)
+result = regulate_candidates(candidates, references, use_embeddings=False)
 print(result.action)        # emit
 print(result.emitted_text)  # The capital of France is Paris.
 ```
 
-For offline literal/relation-only checks, pass `use_embeddings=False`. The regulator still applies literal drift, relation, negation, overclaim, reference-member, and abstention clamps.
+## CLI Usage
 
-CLI
+```bash
+mbt-check \
+  --reference "The capital of France is Paris." \
+  --candidate "The capital of France is London." \
+  --candidate "The capital of France is Paris." \
+  --no-embeddings
+```
 
-mbt-check "The capital of France is Paris."
-
-The CLI reports a confidence / risk label and the numeric internal entropy score.
-
-Project Layout
-
-mbt_ai_tools/
-├── mbt/
-│   ├── embeddings.py      # SentenceTransformer loader
-│   ├── geometry.py        # geometric median, shock, distance
-│   ├── stability.py       # self-consistency / entropy scoring
-│   ├── tokens.py          # leave-one-out token shock
-│   ├── consensus.py       # multi-agent / council logic
-│   └── utils.py
-├── cli.py                 # mbt-check command
-├── pyproject.toml
-├── README.md
-└── LICENSE
-
-
-## Research Status
-
-MBT-5 v11 is the current frozen public ledger.
-
-The current public result is:
+Expected output:
 
 ```text
-COMBINED_LOCKED_V11
-Candidates: 257
-Cases:      53
+EMIT | The capital of France is Paris. | score=0.0000
+[0] blocked | ...
+[1] safe | ...
+```
 
-Candidate-level confusion:
-[[TN, FP], [FN, TP]]
-[[97, 0], [0, 160]]
+## Regression Corpus
 
-Accuracy:   1.0000
-Precision:  1.0000
-Recall:     1.0000
-F1:         1.0000
+The lightweight public regression corpus lives in `examples/regression_corpus.jsonl`. It currently contains 220 offline cases covering entity swaps, multi-word capital handling, all-bad abstention, numeric drift, unit drift, role swaps, shared-subject relation repair, unsupported negation, historical-date drift, supported paraphrase, and overclaim blocking.
 
-Case-level:
-Correct: 53 / 53
-Emitted: 28
-Blocked: 25
-This repository currently reports the v11 inference-time regulator and its frozen regression ledger.
+Regenerate the corpus:
 
-The public claim is limited to the supplied test suites and reference manifolds included in the project:
+```bash
+uv run python examples/build_regression_corpus.py
+```
 
-MBT-5 v11 blocked labelled hallucinated candidates and preserved labelled valid candidates across the frozen EXP20 ledger.
-The project is released for inspection, reproduction, and independent testing.
+Run the tests:
 
-Output Artifacts
+```bash
+uv run --with pytest python -m pytest -q
+```
 
-The frozen v11 ledger is represented by:
+## Experiment Lineage
 
+The full EXP01-EXP20 record is in `MBT5_EXP01_EXP20_TECHNICAL_LEDGER.md`.
+
+Key frozen output artifacts:
+
+```text
 mbt5_exp20_master_candidate_ledger.csv
 mbt5_exp20_master_case_ledger.csv
 mbt5_exp20_summary_metrics.csv
@@ -310,8 +216,30 @@ mbt5_exp20_case_summary.csv
 mbt5_exp20_clamp_counts.csv
 mbt5_exp20_failure_table.csv
 mbt5_exp20_patch_lineage.csv
-License
+```
 
-See LICENSE.
+## Project Layout
 
+```text
+mbt_ai_tools/
+  mbt/
+    embeddings.py      SentenceTransformer loader
+    geometry.py        geometric median, shock, distance
+    stability.py       self-consistency / entropy scoring
+    tokens.py          leave-one-out token shock
+    consensus.py       multi-agent / council logic
+    regulator.py       v11 candidate regulator
+  cli.py               mbt-check command
+examples/
+  regression_corpus.jsonl
+tests/
+  test_regulator.py
+  test_regression_corpus.py
+pyproject.toml
+README.md
+LICENSE
+```
 
+## License
+
+See `LICENSE`.
