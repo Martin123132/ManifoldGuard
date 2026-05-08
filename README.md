@@ -52,7 +52,8 @@ Supported claim:
 
 MBT-5 v11 blocked hallucinated AI outputs against supplied reference manifolds and relation constraints. In the frozen EXP20 ledger, it achieved confusion [[97, 0], [0, 160]] over 257 labelled candidates across 53 cases.
 
-<img width="1448" height="1086" alt="5fc1387a-ba8a-49a9-aa92-fae7671591b1" src="https://github.com/user-attachments/assets/1f61db20-f95b-4d31-b325-9dfd5f37cdfc" />
+<img width="1448" height="1086" alt="5fc1387a-ba8a-49a9-aa92-fae7671591b1" src="https://github.com/user-attachments/assets/9ba93521-1dcd-439e-864b-5989c40c2d81" />
+
 
 What MBT-5 Checks
 
@@ -163,7 +164,7 @@ Sound does not need a material medium to travel.
 Scientific descriptions do not use measurements or predictions.
 General relativity proves gravity has no connection to mass or energy.
 
-<img width="1448" height="1086" alt="a2c6cb64-aff1-4f53-b7ea-ca7beb634eef" src="https://github.com/user-attachments/assets/8e598225-bda0-4ff2-a402-3ea6a5d7a5ae" />
+<img width="1448" height="1086" alt="a2c6cb64-aff1-4f53-b7ea-ca7beb634eef" src="https://github.com/user-attachments/assets/c7865359-c671-4768-8282-9399fe61ebab" />
 
 7. Abstention
 
