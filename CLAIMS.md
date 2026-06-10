@@ -13,3 +13,10 @@ This repository treats claims as scoped engineering statements tied to the publi
 ## Current public scope
 
 The current public scope is deterministic offline regulation with `use_embeddings=False`, plus the documented EXP01-EXP20 lineage. Semantic embedding extensions should be released and replicated separately from the offline clamp baseline.
+
+Install modes:
+
+- Offline baseline (default): `pip install -e .`
+- Optional semantic mode: `pip install -e .[embeddings]`
+
+If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`.

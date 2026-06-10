@@ -102,7 +102,67 @@ _STOPWORDS = {
     "without",
 }
 
-_NEGATORS = {"not", "no", "never", "doesnt", "don't", "doesn't", "cannot", "can't"}
+_NEGATORS = {
+    "not",
+    "no",
+    "never",
+    "doesnt",
+    "dont",
+    "didnt",
+    "isnt",
+    "arent",
+    "wasnt",
+    "werent",
+    "cant",
+    "cannot",
+}
+_NEGATION_NORMALIZATIONS = {
+    "doesn't": "does not",
+    "don't": "do not",
+    "didn't": "did not",
+    "wasn't": "was not",
+    "weren't": "were not",
+    "isn't": "is not",
+    "aren't": "are not",
+    "doesnt": "does not",
+    "dont": "do not",
+    "didnt": "did not",
+    "wasnt": "was not",
+    "werent": "were not",
+    "isnt": "is not",
+    "arent": "are not",
+    "cant": "can not",
+    "can't": "can not",
+    "cannot": "can not",
+    "won't": "will not",
+    "wont": "will not",
+    "wouldn't": "would not",
+    "wouldnt": "would not",
+    "couldn't": "could not",
+    "couldnt": "could not",
+    "shouldn't": "should not",
+    "shouldnt": "should not",
+    "hasn't": "has not",
+    "hasnt": "has not",
+    "haven't": "have not",
+    "havent": "have not",
+    "mustn't": "must not",
+    "mustnt": "must not",
+    "mightn't": "might not",
+    "mightnt": "might not",
+    "ain't": "are not",
+    "aint": "are not",
+}
+_NEGATION_PREFIX = (
+    r"(?:does not|do not|did not|cannot|can not|will not|would not|should not|"
+    r"could not|must not|may not|might not|has not|have not|had not|is not|"
+    r"are not|was not|were not|doesnt|dont|didnt|arent|isnt|wasnt|werent|cant|wont|"
+    r"wouldnt|couldnt|shouldnt|hasnt|havent|mustnt|mightnt|not|never|aint)"
+)
+_CAPITAL_OF_PREFIXES = (
+    "capital of ",
+    "capital city of ",
+)
 _OVERCLAIM_PATTERNS = (
     "fully solved",
     "complete and experimentally verified",
@@ -154,6 +214,7 @@ class CandidateEvaluation:
     relations: Tuple[Relation, ...] = ()
     literal_drift: LiteralDrift = field(default_factory=LiteralDrift)
     exact_reference_member: bool = False
+    negated_relations: Tuple[Relation, ...] = ()
 
 
 @dataclass
@@ -237,25 +298,51 @@ def extract_relations(text: str) -> Set[Relation]:
     """
 
     normalized = normalize_text(text)
+    if not normalized:
+        return set()
+
+    relations: Set[Relation] = set()
+    for segment in _split_relation_segments(normalized):
+        relations.update(_extract_relations_from_segment(segment))
+    return {_normalize_relation(r) for r in relations if r[0] and r[2]}
+
+
+def _extract_negated_relations(text: str) -> Set[Relation]:
+    """Extract explicit negated relation claims with normalized polarity."""
+
+    normalized = _normalize_negation_text(text)
+    if not normalized:
+        return set()
+
+    negated: Set[Relation] = set()
+    for segment in _split_relation_segments(normalized):
+        negated.update(_extract_negated_relations_from_segment(segment))
+    return {_normalize_relation(r) for r in negated if r[0] and r[2]}
+
+
+def _split_relation_segments(text: str) -> List[str]:
+    raw_segments = re.split(r"\b(?: and | but |, )\b", text)
+    return [segment.strip() for segment in raw_segments if segment.strip()]
+
+
+def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations: Set[Relation] = set()
 
-    # Capital relations: "capital of France is Paris", "France's capital is Paris".
-    m = re.search(r"capital of ([a-z][a-z ]+?) is ([a-z][a-z ]+?)(?:\.|$)", normalized)
+    m = re.search(r"\bcapital of ([a-z][a-z ]+?) is ([a-z][a-z ]+?)(?:$| and | but )", segment)
     if m:
         relations.add((_clean_span(m.group(1)), "capital", _clean_span(m.group(2))))
-    m = re.search(r"([a-z][a-z ]+?)s capital (?:city )?is ([a-z][a-z ]+?)(?:\.|$)", normalized)
+    m = re.search(r"\b([a-z][a-z ]+?)s capital (?:city )?is ([a-z][a-z ]+?)(?:$| and | but )", segment)
     if m:
         relations.add((_clean_span(m.group(1)), "capital", _clean_span(m.group(2))))
-    m = re.search(r"([a-z][a-z ]+?) is (?:the )?capital (?:city )?of ([a-z][a-z ]+?)(?:\.|$)", normalized)
+    m = re.search(r"\b([a-z][a-z ]+?) is (?:the )?capital (?:city )?of ([a-z][a-z ]+?)(?:$| and | but )", segment)
     if m:
         relations.add((_clean_span(m.group(2)), "capital", _clean_span(m.group(1))))
 
-    # Copular/classification relations.
     copular_pattern = (
-        r"\b([a-z][a-z ]+?) (?:is|are) (?:a |an |the )?"
-        r"([a-z][a-z ]+?)(?:\.|$| and | but )"
+        r"\b([a-z][a-z ]+?) (?:is|are|was|were) (?:a |an |the )?"
+        r"([a-z0-9][a-z0-9 ]+?)(?:$| and | but )"
     )
-    for m in re.finditer(copular_pattern, normalized):
+    for m in re.finditer(copular_pattern, segment):
         subj, obj = _clean_span(m.group(1)), _clean_span(m.group(2))
         if (
             subj
@@ -263,47 +350,96 @@ def extract_relations(text: str) -> Set[Relation]:
             and "capital of" not in subj
             and not obj.startswith(("capital of", "capital city of"))
             and len(subj.split()) <= 5
-            and len(obj.split()) <= 7
+            and len(obj.split()) <= 8
         ):
             relations.add((subj, "is", obj))
 
-    # Active verb relations, with coordinated shared-subject repair.
     verbs = (
-        "orbits|contains|contain|produces|produce|releases|release|stores|store|"
-        "converts|convert|improves|improve|uses|use|needs|need"
+        "orbits|orbit|contains|contain|contain|produces|produce|"
+        "releases|release|stores|store|converts|convert|improves|improve|"
+        "uses|use|needs|need|has|have|is|are|was|were|needs|improved|produces|produced|"
+        "contains|contained|released|using"
     )
-    pattern = rf"\b([a-z][a-z ]+?) ({verbs}) ([a-z][a-z0-9 ]+?)(?=\.|$| and (?:{verbs}) )"
-    for m in re.finditer(pattern, normalized):
+    pattern = rf"\b([a-z][a-z ]+?) ({verbs}) ([a-z][a-z0-9 ]+?)(?=$| and (?:{verbs}) )"
+    for m in re.finditer(pattern, segment):
         subj = _clean_span(m.group(1))
         pred = _lemma_predicate(m.group(2))
         obj = _clean_span(m.group(3))
-        if subj and obj and subj not in {"and", "or"}:
+        if (
+            subj
+            and obj
+            and subj not in {"and", "or"}
+            and not (pred == "is" and _is_capital_of_predicate(obj))
+        ):
             relations.add((subj, pred, obj))
 
-    coord = rf"\b([a-z][a-z ]+?) ({verbs}) ([a-z][a-z0-9 ]+?) and ({verbs}) ([a-z][a-z0-9 ]+?)(?:\.|$)"
-    for m in re.finditer(coord, normalized):
+    coord = rf"\b([a-z][a-z ]+?) ({verbs}) ([a-z][a-z0-9 ]+?) and ({verbs}) ([a-z][a-z0-9 ]+?)(?:$| and | but )"
+    for m in re.finditer(coord, segment):
         subj = _clean_span(m.group(1))
         relations.add((subj, _lemma_predicate(m.group(2)), _clean_span(m.group(3))))
         relations.add((subj, _lemma_predicate(m.group(4)), _clean_span(m.group(5))))
 
-    # Counts: "Mars has two moons".
     for m in re.finditer(
-        r"\b([a-z][a-z ]+?) has ([a-z0-9]+) ([a-z][a-z ]+?)(?:\.|,|$)",
-        normalized,
+        r"\b([a-z][a-z ]+?) has ([a-z0-9]+) ([a-z][a-z ]+?)(?:$| and | but |,)",
+        segment,
     ):
         relations.add(
             (_clean_span(m.group(1)), f"has_count:{m.group(3).strip()}", _clean_span(m.group(2)))
         )
 
-    # Historical/date relations.
     for m in re.finditer(
         r"\b([a-z][a-z ]+?) "
         r"(was signed|occurred|was adopted|landed [a-z ]*moon) in (\d{3,4})",
-        normalized,
+        segment,
     ):
         relations.add((_clean_span(m.group(1)), _lemma_predicate(m.group(2)), m.group(3)))
 
-    return {_normalize_relation(r) for r in relations if r[0] and r[2]}
+    return relations
+
+
+def _extract_negated_relations_from_segment(segment: str) -> Set[Relation]:
+    """Extract explicit negated relation claims."""
+
+    relations: Set[Relation] = set()
+    copular_pattern = (
+        rf"\b([a-z][a-z ]+?) (?:{_NEGATION_PREFIX}) (?:a |an |the )?"
+        r"([a-z0-9][a-z0-9 ]+?)(?:$| and | but )"
+    )
+    for m in re.finditer(copular_pattern, segment):
+        subj, obj = _clean_span(m.group(1)), _clean_span(m.group(2))
+        if subj and obj and len(subj.split()) <= 5 and len(obj.split()) <= 8:
+            relations.add((subj, "is", obj))
+
+    verbs = (
+        "orbits|orbit|contains|contain|produces|produce|releases|release|stores|store|"
+        "converts|convert|improves|improve|uses|use|needs|need|has|is|are|was|were|"
+        "stored|release|produce|released|included|contains|contained|using|need|needs|"
+        "adopted|signed|occurred|landed|have"
+    )
+    pattern = (
+        r"\b([a-z][a-z ]+?) "
+        rf"(?:{_NEGATION_PREFIX}) "
+        rf"({verbs}) ([a-z][a-z0-9 ]+?)(?=$| and (?:{verbs}) )"
+    )
+    for m in re.finditer(pattern, segment):
+        subj = _clean_span(m.group(1))
+        pred = _lemma_predicate(m.group(2))
+        obj = _clean_span(m.group(3))
+        if (
+            subj
+            and obj
+            and subj not in {"and", "or"}
+            and not (pred == "is" and _is_capital_of_predicate(obj))
+        ):
+            relations.add((subj, pred, obj))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z ]+?) has no ([a-z][a-z0-9 ]+?)(?:$| and | but |,)",
+        segment,
+    ):
+        relations.add((_clean_span(m.group(1)), "has", _clean_span(m.group(2))))
+
+    return relations
 
 
 def evaluate_candidate(
@@ -321,6 +457,7 @@ def evaluate_candidate(
     )
     exact_member = normalize_text(candidate) in manifold.normalized_reference_members
     candidate_relations = extract_relations(candidate)
+    candidate_negations = _extract_negated_relations(candidate)
     literal = literal_drift(candidate, manifold)
 
     mbt5_shock = 0.0
@@ -342,7 +479,7 @@ def evaluate_candidate(
         clamps.append("content_clamp_flag")
     if _has_overclaim(candidate):
         clamps.append("overclaim_flag")
-    if _has_unsupported_negation(candidate, manifold):
+    if _has_unsupported_negation(candidate, manifold, candidate_negations):
         clamps.append("negated_positive_support_clamp")
 
     relation_clamps = _relation_clamps(candidate_relations, manifold.relations)
@@ -375,6 +512,7 @@ def evaluate_candidate(
         relations=tuple(sorted(candidate_relations)),
         literal_drift=literal,
         exact_reference_member=exact_member,
+        negated_relations=tuple(sorted(candidate_negations)),
     )
 
 
@@ -470,12 +608,46 @@ def _has_overclaim(text: str) -> bool:
     return any(pattern in normalized for pattern in _OVERCLAIM_PATTERNS)
 
 
-def _has_unsupported_negation(text: str, manifold: ReferenceManifold) -> bool:
-    tokens = set(normalize_text(text).split())
-    if not (tokens & _NEGATORS):
+def _normalize_negation_text(text: str) -> str:
+    normalized = text.lower()
+    for source, replacement in _NEGATION_NORMALIZATIONS.items():
+        normalized = re.sub(rf"\\b{re.escape(source)}\\b", replacement, normalized)
+    return normalize_text(normalized)
+
+
+def _has_unsupported_negation(
+    text: str,
+    manifold: ReferenceManifold,
+    candidate_negations: Optional[Set[Relation]] = None,
+) -> bool:
+    if not _contains_negation(text):
         return False
-    reference_tokens = set(normalize_text(" ".join(manifold.references)).split())
-    return not (reference_tokens & _NEGATORS)
+    if not manifold.relations:
+        return False
+
+    negations = candidate_negations or _extract_negated_relations(text)
+    if not negations:
+        return False
+
+    ref_relations = manifold.relations
+    ref_subjects = {r[0] for r in ref_relations}
+    ref_objects = {r[2] for r in ref_relations}
+    ref_predicates = {r[1] for r in ref_relations}
+    for negation in negations:
+        subj, pred, obj = negation
+        if (subj, pred, obj) in ref_relations:
+            return True
+        if (obj, pred, subj) in ref_relations:
+            return True
+        if pred in ref_predicates and (subj in ref_subjects or obj in ref_objects):
+            return True
+    return False
+
+
+def _contains_negation(text: str) -> bool:
+    normalized = _normalize_negation_text(text)
+    tokens = set(normalized.split())
+    return bool(tokens & _NEGATORS) or " not " in f" {normalized} "
 
 
 def _has_unsupported_content(candidate: str, manifold: ReferenceManifold, literal: LiteralDrift) -> bool:
@@ -516,15 +688,42 @@ def _clean_span(value: str) -> str:
 def _lemma_predicate(predicate: str) -> str:
     p = predicate.strip().lower()
     mapping: Dict[str, str] = {
+        "is": "is",
+        "are": "is",
+        "was": "is",
+        "were": "is",
         "orbits": "orbit",
+        "orbit": "orbit",
+        "orbiting": "orbit",
         "contains": "contain",
+        "contain": "contain",
+        "contained": "contain",
         "produces": "produce",
+        "produce": "produce",
+        "produced": "produce",
         "releases": "release",
+        "release": "release",
+        "released": "release",
         "stores": "store",
+        "store": "store",
+        "stored": "store",
         "converts": "convert",
+        "convert": "convert",
+        "converted": "convert",
         "improves": "improve",
+        "improve": "improve",
+        "improved": "improve",
         "uses": "use",
+        "use": "use",
+        "used": "use",
         "needs": "need",
+        "need": "need",
+        "needed": "need",
+        "has": "has",
+        "have": "has",
+        "signed": "signed",
+        "occurred": "occurred",
+        "adopted": "adopted",
     }
     return mapping.get(p, p)
 
@@ -532,3 +731,7 @@ def _lemma_predicate(predicate: str) -> str:
 def _normalize_relation(relation: Relation) -> Relation:
     subj, pred, obj = relation
     return (_clean_span(normalize_text(subj)), _lemma_predicate(normalize_text(pred)), _clean_span(normalize_text(obj)))
+
+
+def _is_capital_of_predicate(value: str) -> bool:
+    return value.startswith(_CAPITAL_OF_PREFIXES)

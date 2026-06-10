@@ -49,6 +49,15 @@ Scope note:
 
 This replication validates the offline MBT-5 clamp path over the public regression corpus. It does not validate the optional semantic embedding path.
 
+Install mode note:
+
+The project supports two install modes:
+
+- Offline baseline (default): `pip install -e .`
+- Optional semantic mode: `pip install -e .[embeddings]`
+
+If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`.
+
 ## 2026-05-08 Local Offline Corpus Expansion
 
 Environment:

@@ -12,9 +12,11 @@ license = { file = "LICENSE" }
 authors = [{ name = "MBT-5 Contributors" }]
 dependencies = [
   "numpy",
-  "sentence-transformers",
   "scipy"
 ]
+
+[project.optional-dependencies]
+embeddings = ["sentence-transformers>=2.6.0,<3"]
 
 [project.urls]
 Homepage = "https://example.com/mbt-ai-tools"

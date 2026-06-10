@@ -149,11 +149,29 @@ When every candidate is unsafe, MBT-5 blocks instead of emitting the least-bad c
 
 ## Installation
 
+Core (offline, no embedding dependency):
+
 ```bash
 pip install -e .
 ```
 
-For semantic-embedding features, install the package dependencies from `pyproject.toml`. Offline literal/relation-only regulation works with `use_embeddings=False`.
+Embedding-enabled mode:
+
+```bash
+pip install -e .[embeddings]
+```
+
+The optional extra currently installs `sentence-transformers>=2.6.0,<3` for model-backed operation.
+
+If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`:
+
+```python
+from mbt_ai_tools import evaluate_candidate
+
+evaluate_candidate("Paris is the capital city of France.", ["The capital of France is Paris."], use_embeddings=False)
+```
+
+When embedding-backed operation is requested without `sentence-transformers`, you'll now get a direct error directing to install the dependency or use offline mode.
 
 ## Python Usage
 
@@ -238,6 +256,7 @@ mbt_ai_tools/
   cli.py               mbt-check command
 .github/workflows/
   tests.yml            GitHub Actions offline regression test workflow
+CHANGELOG.md          release notes
 CLAIMS.md             scoped public claims register
 data/csv_exports/     expanded EXP01-EXP20 CSV exports
 examples/
@@ -255,3 +274,4 @@ LICENSE
 ## License
 
 See `LICENSE`.
+

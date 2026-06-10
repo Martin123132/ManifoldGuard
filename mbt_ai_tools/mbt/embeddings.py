@@ -4,6 +4,13 @@ from typing import Iterable, Optional, Any
 import numpy as np
 
 
+_DEPENDENCY_MESSAGE = (
+    "sentence-transformers is required for embedding-backed operations. "
+    "Install with `pip install -e .[embeddings]` (or `pip install sentence-transformers`) "
+    "or call APIs with `use_embeddings=False`."
+)
+
+
 @lru_cache(maxsize=2)
 def load_embedder(model_name: str = "all-MiniLM-L6-v2") -> Any:
     """
@@ -14,7 +21,12 @@ def load_embedder(model_name: str = "all-MiniLM-L6-v2") -> Any:
     dependency only when embeddings are actually requested.
     """
 
-    from sentence_transformers import SentenceTransformer
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ModuleNotFoundError as exc:
+        if exc.name == "sentence_transformers":
+            raise ModuleNotFoundError(_DEPENDENCY_MESSAGE) from exc
+        raise
 
     return SentenceTransformer(model_name)
 
