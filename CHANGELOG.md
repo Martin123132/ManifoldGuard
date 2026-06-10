@@ -5,7 +5,7 @@
 - Added CLI JSON regulation reports with emitted candidate index, per-candidate scores, clamp summaries, relations, and negated relations.
 - Added optional CLI token-shock reporting controls for regulation reports.
 - Added a CLI JSON report demo under `examples/`.
-- Opted GitHub Actions into the Node 24 JavaScript action runtime.
+- Updated GitHub Actions dependencies to Node 24-compatible major versions.
 
 ## 0.1.0 Release Candidate - 2026-06-10
 
