@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Added CLI JSON regulation reports with emitted candidate index, per-candidate scores, clamp summaries, relations, and negated relations.
+- Added optional CLI token-shock reporting controls for regulation reports.
+
 ## 0.1.0 Release Candidate - 2026-06-10
 
 - Kept the default package install offline-first by moving `sentence-transformers` behind the optional `.[embeddings]` extra.

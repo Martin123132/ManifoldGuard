@@ -210,6 +210,28 @@ EMIT | The capital of France is Paris. | score=0.0000
 [1] safe | ...
 ```
 
+JSON report output:
+
+```bash
+mbt-check \
+  --reference "The capital of France is Paris." \
+  --candidate "The capital of France is London." \
+  --candidate "The capital of France is Paris." \
+  --no-embeddings \
+  --format json
+```
+
+Optional token-level shock details can be included in regulation reports when embedding dependencies are installed:
+
+```bash
+mbt-check \
+  --reference "The capital of France is Paris." \
+  --candidate "The capital of France is London." \
+  --format json \
+  --token-shock \
+  --token-shock-top-k 5
+```
+
 ## Regression Corpus
 
 The lightweight public regression corpus lives in `examples/regression_corpus.jsonl`. It currently contains 220 offline cases covering entity swaps, multi-word capital handling, all-bad abstention, numeric drift, unit drift, role swaps, shared-subject relation repair, unsupported negation, historical-date drift, supported paraphrase, and overclaim blocking.
