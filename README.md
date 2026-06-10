@@ -221,6 +221,8 @@ mbt-check \
   --format json
 ```
 
+See `examples/cli_json_report.md` for a complete offline JSON report demo.
+
 Optional token-level shock details can be included in regulation reports when embedding dependencies are installed:
 
 ```bash
@@ -283,6 +285,7 @@ CLAIMS.md             scoped public claims register
 data/csv_exports/     expanded EXP01-EXP20 CSV exports
 examples/
   build_regression_corpus.py
+  cli_json_report.md
   regression_corpus.jsonl
 tests/
   test_regulator.py
