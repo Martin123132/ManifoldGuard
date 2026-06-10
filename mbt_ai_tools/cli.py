@@ -1,6 +1,8 @@
 import argparse
 import json
-from typing import Any, Dict, Optional
+from json import JSONDecodeError
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional
 
 from .mbt.regulator import regulate_candidates
 from .mbt.stability import classify_entropy, confidence_score
@@ -29,6 +31,17 @@ def main() -> None:
         action="append",
         default=[],
         help="Candidate output to regulate. Repeat for candidate selection; emits best safe candidate or BLOCK.",
+    )
+    parser.add_argument(
+        "--input-jsonl",
+        type=Path,
+        help="Batch regulation input JSONL. Each line needs references and candidates fields.",
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        type=Path,
+        help="Write command output to a file instead of stdout.",
     )
     parser.add_argument(
         "--no-embeddings",
@@ -66,6 +79,26 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    if args.input_jsonl:
+        if args.reference or args.candidate or args.text:
+            parser.error("--input-jsonl cannot be combined with positional text, --reference, or --candidate")
+        try:
+            reports = list(
+                build_batch_reports(
+                    args.input_jsonl,
+                    use_embeddings=not args.no_embeddings,
+                    include_token_shock=args.token_shock,
+                    token_shock_max_samples=args.token_shock_max_samples,
+                    token_shock_top_k=args.token_shock_top_k,
+                    token_shock_order=args.token_shock_order,
+                )
+            )
+        except (OSError, ValueError) as exc:
+            parser.error(str(exc))
+        content = "".join(f"{json.dumps(report, sort_keys=True)}\n" for report in reports)
+        _emit_output(content, args.output)
+        return
+
     if args.reference or args.candidate:
         candidates = args.candidate or ([args.text] if args.text else [])
         if not args.reference:
@@ -86,14 +119,10 @@ def main() -> None:
             token_shock_order=args.token_shock_order,
         )
         if args.format == "json":
-            print(json.dumps(report, indent=2, sort_keys=True))
-        elif result.action == "block":
-            print("BLOCK | no safe candidate")
-            _print_evaluation_lines(report)
+            content = f"{json.dumps(report, indent=2, sort_keys=True)}\n"
         else:
-            assert result.emitted is not None
-            print(f"EMIT | {result.emitted_text} | score={result.emitted.regulator_score:.4f}")
-            _print_evaluation_lines(report)
+            content = format_regulation_text(report)
+        _emit_output(content, args.output)
         return
 
     if args.text is None:
@@ -102,7 +131,7 @@ def main() -> None:
     score = confidence_score(args.text)
     label, _ = classify_entropy(score)
 
-    print(f"{label} | Internal Entropy: {score:.4f}")
+    _emit_output(f"{label} | Internal Entropy: {score:.4f}\n", args.output)
 
 
 def build_regulation_report(
@@ -157,19 +186,103 @@ def build_regulation_report(
         "action": result.action,
         "emitted_text": result.emitted_text,
         "emitted_index": emitted_index,
+        "emitted_score": None
+        if emitted_index is None
+        else evaluations[emitted_index]["regulator_score"],
         "evaluations": evaluations,
     }
 
 
-def _print_evaluation_lines(report: Dict[str, Any]) -> None:
+def build_batch_reports(
+    input_jsonl: Path,
+    *,
+    use_embeddings: bool = True,
+    include_token_shock: bool = False,
+    token_shock_max_samples: Optional[int] = None,
+    token_shock_top_k: Optional[int] = None,
+    token_shock_order: str = "score",
+) -> Iterable[Dict[str, Any]]:
+    with input_jsonl.open("r", encoding="utf-8") as handle:
+        for line_number, raw_line in enumerate(handle, start=1):
+            raw_line = raw_line.strip()
+            if not raw_line:
+                continue
+            try:
+                item = json.loads(raw_line)
+            except JSONDecodeError as exc:
+                raise ValueError(
+                    f"{input_jsonl}:{line_number}: invalid JSON: {exc.msg}"
+                ) from exc
+            if not isinstance(item, dict):
+                raise ValueError(f"{input_jsonl}:{line_number}: expected a JSON object")
+
+            references = _text_list(item, "references", "reference", input_jsonl, line_number)
+            candidates = _text_list(item, "candidates", "candidate", input_jsonl, line_number)
+            result = regulate_candidates(
+                candidates,
+                references,
+                use_embeddings=use_embeddings,
+            )
+            report = build_regulation_report(
+                result,
+                include_token_shock=include_token_shock,
+                token_shock_max_samples=token_shock_max_samples,
+                token_shock_top_k=token_shock_top_k,
+                token_shock_order=token_shock_order,
+            )
+            report["line"] = line_number
+            report["references"] = references
+            if "id" in item:
+                report["id"] = item["id"]
+            yield report
+
+
+def format_regulation_text(report: Dict[str, Any]) -> str:
+    if report["action"] == "block":
+        lines = ["BLOCK | no safe candidate"]
+    else:
+        lines = [
+            f"EMIT | {report['emitted_text']} | score={report['emitted_score']:.4f}"
+        ]
+
     for evaluation in report["evaluations"]:
         clamps = "|".join(evaluation["clamps"])
-        print(
+        lines.append(
             f"[{evaluation['index']}] {evaluation['status']} | "
             f"score={evaluation['regulator_score']:.4f} | clamps={clamps}"
         )
         for token in evaluation.get("token_shock", []):
-            print(f"    token_shock | {token['token']} | shock={token['shock']:.4f}")
+            lines.append(f"    token_shock | {token['token']} | shock={token['shock']:.4f}")
+    return "\n".join(lines) + "\n"
+
+
+def _text_list(
+    item: Dict[str, Any],
+    plural_key: str,
+    singular_key: str,
+    input_jsonl: Path,
+    line_number: int,
+) -> List[str]:
+    value = item.get(plural_key, item.get(singular_key))
+    if isinstance(value, str):
+        values = [value]
+    elif isinstance(value, list) and all(isinstance(entry, str) for entry in value):
+        values = value
+    else:
+        raise ValueError(
+            f"{input_jsonl}:{line_number}: {plural_key} must be a string or list of strings"
+        )
+    if not values:
+        raise ValueError(f"{input_jsonl}:{line_number}: {plural_key} cannot be empty")
+    return values
+
+
+def _emit_output(content: str, output_path: Optional[Path]) -> None:
+    if output_path is None:
+        print(content, end="")
+        return
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(content, encoding="utf-8")
 
 
 if __name__ == "__main__":

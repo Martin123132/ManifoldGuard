@@ -4,6 +4,9 @@
 
 - Added CLI JSON regulation reports with emitted candidate index, per-candidate scores, clamp summaries, relations, and negated relations.
 - Added optional CLI token-shock reporting controls for regulation reports.
+- Added `--output` for writing CLI output to files.
+- Added `--input-jsonl` for batch regulation reports.
+- Documented the JSON report schema under `docs/`.
 - Added a CLI JSON report demo under `examples/`.
 - Updated GitHub Actions dependencies to Node 24-compatible major versions.
 

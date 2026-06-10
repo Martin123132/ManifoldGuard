@@ -234,6 +234,14 @@ mbt-check \
   --token-shock-top-k 5
 ```
 
+Batch JSONL evaluation:
+
+```bash
+mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --output batch-report.jsonl
+```
+
+The JSON report schema is documented in `docs/report_schema.md`.
+
 ## Regression Corpus
 
 The lightweight public regression corpus lives in `examples/regression_corpus.jsonl`. It currently contains 220 offline cases covering entity swaps, multi-word capital handling, all-bad abstention, numeric drift, unit drift, role swaps, shared-subject relation repair, unsupported negation, historical-date drift, supported paraphrase, and overclaim blocking.
@@ -283,7 +291,10 @@ mbt_ai_tools/
 CHANGELOG.md          release notes
 CLAIMS.md             scoped public claims register
 data/csv_exports/     expanded EXP01-EXP20 CSV exports
+docs/
+  report_schema.md
 examples/
+  batch_input.jsonl
   build_regression_corpus.py
   cli_json_report.md
   regression_corpus.jsonl

@@ -1,0 +1,2 @@
+{"id":"france-capital","references":["The capital of France is Paris."],"candidates":["The capital of France is London.","The capital of France is Paris."]}
+{"id":"unsupported-negation","reference":"Water is liquid at room temperature.","candidate":"Water is not liquid at room temperature."}
