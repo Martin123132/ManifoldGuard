@@ -254,6 +254,8 @@ Markdown audit report:
 mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format markdown --output audit.md
 ```
 
+See `examples/markdown_audit_report.md` for a complete Markdown audit demo.
+
 The JSON report schema is documented in `docs/report_schema.md`.
 
 ## Regression Corpus
@@ -311,6 +313,7 @@ examples/
   batch_input.jsonl
   build_regression_corpus.py
   cli_json_report.md
+  markdown_audit_report.md
   regression_corpus.jsonl
 tests/
   test_regulator.py

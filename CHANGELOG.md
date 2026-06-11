@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- No changes yet.
+
+## 0.1.0 Release Candidate 2 - 2026-06-11
+
 - Added CLI JSON regulation reports with emitted candidate index, per-candidate scores, clamp summaries, relations, and negated relations.
 - Added optional CLI token-shock reporting controls for regulation reports.
 - Added `--output` for writing CLI output to files.
@@ -10,9 +14,10 @@
 - Added Markdown regulation and batch audit reports with `--format markdown`.
 - Documented the JSON report schema under `docs/`.
 - Added a CLI JSON report demo under `examples/`.
+- Added a Markdown audit report demo under `examples/`.
 - Updated GitHub Actions dependencies to Node 24-compatible major versions.
 
-## 0.1.0 Release Candidate - 2026-06-10
+## 0.1.0 Release Candidate 1 - 2026-06-10
 
 - Kept the default package install offline-first by moving `sentence-transformers` behind the optional `.[embeddings]` extra.
 - Added CI coverage for both dependency modes: full offline core tests and deterministic embeddings-mode smoke tests.
