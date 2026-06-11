@@ -7,6 +7,7 @@
 - Added `--output` for writing CLI output to files.
 - Added `--input-jsonl` for batch regulation reports.
 - Added `--summary` and `--fail-on-block` for CI-friendly batch guard usage.
+- Added Markdown regulation and batch audit reports with `--format markdown`.
 - Documented the JSON report schema under `docs/`.
 - Added a CLI JSON report demo under `examples/`.
 - Updated GitHub Actions dependencies to Node 24-compatible major versions.

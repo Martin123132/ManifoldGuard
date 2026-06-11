@@ -5,6 +5,8 @@ from mbt_ai_tools import regulate_candidates
 from mbt_ai_tools.cli import (
     build_batch_summary,
     build_regulation_report,
+    format_markdown_audit,
+    format_markdown_report,
     format_regulation_text,
     main,
 )
@@ -162,6 +164,56 @@ def test_cli_batch_summary_and_fail_on_block(monkeypatch, capsys, tmp_path):
     }
 
 
+def test_cli_batch_markdown_audit(monkeypatch, capsys, tmp_path):
+    input_path = tmp_path / "batch.jsonl"
+    input_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "id": "france-capital",
+                        "references": ["The capital of France is Paris."],
+                        "candidates": [
+                            "The capital of France is London.",
+                            "The capital of France is Paris.",
+                        ],
+                    }
+                ),
+                json.dumps(
+                    {
+                        "id": "negation",
+                        "reference": "Water is liquid at room temperature.",
+                        "candidate": "Water is not liquid at room temperature.",
+                    }
+                ),
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mbt-check",
+            "--input-jsonl",
+            str(input_path),
+            "--no-embeddings",
+            "--format",
+            "markdown",
+            "--fail-on-block",
+        ],
+    )
+
+    assert main() == 2
+    output = capsys.readouterr().out
+    assert output.startswith("# MBT-5 Audit Report\n")
+    assert "- Total cases: 2" in output
+    assert "- Blocked: 1" in output
+    assert "## Case: france-capital" in output
+    assert "## Case: negation" in output
+    assert "negated_positive_support_clamp" in output
+
+
 def test_cli_single_regulation_fail_on_block(monkeypatch, capsys):
     monkeypatch.setattr(
         sys,
@@ -179,6 +231,32 @@ def test_cli_single_regulation_fail_on_block(monkeypatch, capsys):
 
     assert main() == 2
     assert capsys.readouterr().out.startswith("BLOCK | no safe candidate")
+
+
+def test_cli_single_markdown_report(monkeypatch, capsys):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mbt-check",
+            "--reference",
+            "The capital of France is Paris.",
+            "--candidate",
+            "The capital of France is London.",
+            "--candidate",
+            "The capital of France is Paris.",
+            "--no-embeddings",
+            "--format",
+            "markdown",
+        ],
+    )
+
+    assert main() == 0
+    output = capsys.readouterr().out
+    assert output.startswith("# MBT-5 Regulation Report\n")
+    assert "- Action: emit" in output
+    assert "#### Candidate 0 - blocked" in output
+    assert "#### Candidate 1 - safe" in output
 
 
 def test_build_regulation_report_can_include_token_shock(monkeypatch):
@@ -240,6 +318,26 @@ def test_build_batch_summary_counts_reports_and_candidates():
         "safe_candidates": 1,
         "total": 2,
     }
+
+
+def test_format_markdown_helpers_render_expected_sections():
+    result = regulate_candidates(
+        [
+            "The capital of France is London.",
+            "The capital of France is Paris.",
+        ],
+        ["The capital of France is Paris."],
+        use_embeddings=False,
+    )
+    report = build_regulation_report(result)
+
+    single = format_markdown_report(report)
+    audit = format_markdown_audit([{**report, "id": "france-capital", "line": 1}])
+
+    assert "# MBT-5 Regulation Report" in single
+    assert "known_participant_unsupported_relation_clamp" in single
+    assert "# MBT-5 Audit Report" in audit
+    assert "## Case: france-capital" in audit
 
 
 def test_format_regulation_text_matches_existing_cli_shape():

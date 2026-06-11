@@ -248,6 +248,12 @@ mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --f
 
 `--fail-on-block` exits with status `2` when a single regulation run blocks or any batch row blocks. `--summary` appends a final batch summary JSON object.
 
+Markdown audit report:
+
+```bash
+mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format markdown --output audit.md
+```
+
 The JSON report schema is documented in `docs/report_schema.md`.
 
 ## Regression Corpus

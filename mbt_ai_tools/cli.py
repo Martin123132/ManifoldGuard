@@ -60,9 +60,9 @@ def main() -> int:
     )
     parser.add_argument(
         "--format",
-        choices=("text", "json"),
+        choices=("text", "json", "markdown"),
         default="text",
-        help="Output format for regulation reports.",
+        help="Output format for regulation reports. Batch mode defaults to JSONL unless markdown is selected.",
     )
     parser.add_argument(
         "--token-shock",
@@ -105,10 +105,13 @@ def main() -> int:
             )
         except (OSError, ValueError) as exc:
             parser.error(str(exc))
-        output_items = reports[:]
-        if args.summary:
-            output_items.append(build_batch_summary(reports))
-        content = "".join(f"{json.dumps(report, sort_keys=True)}\n" for report in output_items)
+        if args.format == "markdown":
+            content = format_markdown_audit(reports)
+        else:
+            output_items = reports[:]
+            if args.summary:
+                output_items.append(build_batch_summary(reports))
+            content = "".join(f"{json.dumps(report, sort_keys=True)}\n" for report in output_items)
         _emit_output(content, args.output)
         return 2 if args.fail_on_block and any(report["action"] == "block" for report in reports) else 0
 
@@ -133,6 +136,8 @@ def main() -> int:
         )
         if args.format == "json":
             content = f"{json.dumps(report, indent=2, sort_keys=True)}\n"
+        elif args.format == "markdown":
+            content = format_markdown_report(report)
         else:
             content = format_regulation_text(report)
         _emit_output(content, args.output)
@@ -274,6 +279,81 @@ def build_batch_summary(reports: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+def format_markdown_audit(reports: List[Dict[str, Any]]) -> str:
+    summary = build_batch_summary(reports)
+    lines = [
+        "# MBT-5 Audit Report",
+        "",
+        "## Summary",
+        "",
+        f"- Total cases: {summary['total']}",
+        f"- Emitted: {summary['emitted']}",
+        f"- Blocked: {summary['blocked']}",
+        f"- Safe candidate evaluations: {summary['safe_candidates']}",
+        f"- Blocked candidate evaluations: {summary['blocked_candidates']}",
+        "",
+    ]
+
+    for report in reports:
+        label = report.get("id") or f"line {report.get('line', '?')}"
+        lines.extend(
+            [
+                f"## Case: {label}",
+                "",
+                f"- Action: {report['action']}",
+                f"- Emitted index: {_markdown_value(report['emitted_index'])}",
+                f"- Emitted text: {_markdown_value(report['emitted_text'])}",
+            ]
+        )
+        if "line" in report:
+            lines.append(f"- Input line: {report['line']}")
+        lines.extend(["", *_markdown_evaluations(report), ""])
+
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def format_markdown_report(report: Dict[str, Any]) -> str:
+    lines = [
+        "# MBT-5 Regulation Report",
+        "",
+        f"- Action: {report['action']}",
+        f"- Emitted index: {_markdown_value(report['emitted_index'])}",
+        f"- Emitted text: {_markdown_value(report['emitted_text'])}",
+        "",
+        *_markdown_evaluations(report),
+        "",
+    ]
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _markdown_evaluations(report: Dict[str, Any]) -> List[str]:
+    lines = ["### Candidate Evaluations", ""]
+    for evaluation in report["evaluations"]:
+        lines.extend(
+            [
+                f"#### Candidate {evaluation['index']} - {evaluation['status']}",
+                "",
+                f"- Text: {_markdown_value(evaluation['text'])}",
+                f"- Score: {evaluation['regulator_score']:.4f}",
+                f"- Shock: {evaluation['mbt5_shock']:.4f}",
+                f"- Literal score: {evaluation['literal_score']:.4f}",
+                f"- Clamps: {', '.join(evaluation['clamps'])}",
+                f"- Relations: {_markdown_relations(evaluation['relations'])}",
+                f"- Negated relations: {_markdown_relations(evaluation['negated_relations'])}",
+                "",
+            ]
+        )
+        token_shock = evaluation.get("token_shock", [])
+        if token_shock:
+            lines.extend(["Token shock:", ""])
+            lines.extend(
+                f"- `{entry['token']}`: {entry['shock']:.4f}"
+                for entry in token_shock
+            )
+            lines.append("")
+    return lines
+
+
 def format_regulation_text(report: Dict[str, Any]) -> str:
     if report["action"] == "block":
         lines = ["BLOCK | no safe candidate"]
@@ -291,6 +371,18 @@ def format_regulation_text(report: Dict[str, Any]) -> str:
         for token in evaluation.get("token_shock", []):
             lines.append(f"    token_shock | {token['token']} | shock={token['shock']:.4f}")
     return "\n".join(lines) + "\n"
+
+
+def _markdown_relations(relations: List[List[str]]) -> str:
+    if not relations:
+        return "none"
+    return "; ".join(" / ".join(str(part) for part in relation) for relation in relations)
+
+
+def _markdown_value(value: Any) -> str:
+    if value is None:
+        return "`null`"
+    return str(value)
 
 
 def _text_list(

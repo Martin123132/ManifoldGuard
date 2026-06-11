@@ -2,7 +2,8 @@
 
 `mbt-check --format json` emits one JSON object for a single regulation run.
 `mbt-check --input-jsonl ...` emits one JSON object per input line.
-`--summary` appends a final summary object in batch mode.
+`--summary` appends a final summary object in batch JSONL mode.
+`--format markdown` emits a human-readable single report or batch audit report.
 
 ## Single Report
 
@@ -64,3 +65,20 @@ When `--summary` is used with `--input-jsonl`, the final JSONL record is:
 
 - `0`: command completed normally.
 - `2`: `--fail-on-block` was used and a single run blocked, or at least one batch row blocked.
+
+## Markdown Output
+
+`--format markdown` is available for single regulation reports and batch JSONL audit reports.
+
+Single regulation Markdown includes:
+
+- report title.
+- action, emitted index, and emitted text.
+- per-candidate status, score, shock, literal score, clamps, relations, and negated relations.
+
+Batch Markdown includes:
+
+- audit title.
+- summary totals.
+- one case section per input line.
+- the same per-candidate details as single Markdown reports.
