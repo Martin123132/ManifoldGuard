@@ -9,7 +9,7 @@ from .mbt.stability import classify_entropy, confidence_score
 from .mbt.tokens import token_shock_map
 
 
-def main() -> None:
+def main() -> int:
     parser = argparse.ArgumentParser(
         description="MBT-5 geometry-only confidence probe and v11 candidate regulator."
     )
@@ -42,6 +42,16 @@ def main() -> None:
         "-o",
         type=Path,
         help="Write command output to a file instead of stdout.",
+    )
+    parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="Append a batch summary JSON object when using --input-jsonl.",
+    )
+    parser.add_argument(
+        "--fail-on-block",
+        action="store_true",
+        help="Exit with status 2 when a regulation run blocks.",
     )
     parser.add_argument(
         "--no-embeddings",
@@ -95,9 +105,12 @@ def main() -> None:
             )
         except (OSError, ValueError) as exc:
             parser.error(str(exc))
-        content = "".join(f"{json.dumps(report, sort_keys=True)}\n" for report in reports)
+        output_items = reports[:]
+        if args.summary:
+            output_items.append(build_batch_summary(reports))
+        content = "".join(f"{json.dumps(report, sort_keys=True)}\n" for report in output_items)
         _emit_output(content, args.output)
-        return
+        return 2 if args.fail_on_block and any(report["action"] == "block" for report in reports) else 0
 
     if args.reference or args.candidate:
         candidates = args.candidate or ([args.text] if args.text else [])
@@ -123,7 +136,7 @@ def main() -> None:
         else:
             content = format_regulation_text(report)
         _emit_output(content, args.output)
-        return
+        return 2 if args.fail_on_block and report["action"] == "block" else 0
 
     if args.text is None:
         parser.error("text is required unless --candidate is supplied")
@@ -132,6 +145,7 @@ def main() -> None:
     label, _ = classify_entropy(score)
 
     _emit_output(f"{label} | Internal Entropy: {score:.4f}\n", args.output)
+    return 0
 
 
 def build_regulation_report(
@@ -237,6 +251,29 @@ def build_batch_reports(
             yield report
 
 
+def build_batch_summary(reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    safe_candidates = sum(
+        1
+        for report in reports
+        for evaluation in report["evaluations"]
+        if evaluation["safe_to_emit"]
+    )
+    blocked_candidates = sum(
+        1
+        for report in reports
+        for evaluation in report["evaluations"]
+        if not evaluation["safe_to_emit"]
+    )
+    return {
+        "record_type": "summary",
+        "total": len(reports),
+        "emitted": sum(1 for report in reports if report["action"] == "emit"),
+        "blocked": sum(1 for report in reports if report["action"] == "block"),
+        "safe_candidates": safe_candidates,
+        "blocked_candidates": blocked_candidates,
+    }
+
+
 def format_regulation_text(report: Dict[str, Any]) -> str:
     if report["action"] == "block":
         lines = ["BLOCK | no safe candidate"]
@@ -286,4 +323,4 @@ def _emit_output(content: str, output_path: Optional[Path]) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

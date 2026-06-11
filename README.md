@@ -240,6 +240,14 @@ Batch JSONL evaluation:
 mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --output batch-report.jsonl
 ```
 
+CI guard mode:
+
+```bash
+mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --fail-on-block
+```
+
+`--fail-on-block` exits with status `2` when a single regulation run blocks or any batch row blocks. `--summary` appends a final batch summary JSON object.
+
 The JSON report schema is documented in `docs/report_schema.md`.
 
 ## Regression Corpus

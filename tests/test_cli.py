@@ -2,7 +2,12 @@ import json
 import sys
 
 from mbt_ai_tools import regulate_candidates
-from mbt_ai_tools.cli import build_regulation_report, format_regulation_text, main
+from mbt_ai_tools.cli import (
+    build_batch_summary,
+    build_regulation_report,
+    format_regulation_text,
+    main,
+)
 
 
 def test_cli_regulation_json_report_without_embeddings(monkeypatch, capsys):
@@ -23,7 +28,7 @@ def test_cli_regulation_json_report_without_embeddings(monkeypatch, capsys):
         ],
     )
 
-    main()
+    assert main() == 0
 
     report = json.loads(capsys.readouterr().out)
     assert report["action"] == "emit"
@@ -53,7 +58,7 @@ def test_cli_regulation_json_report_can_write_output(monkeypatch, capsys, tmp_pa
         ],
     )
 
-    main()
+    assert main() == 0
 
     assert capsys.readouterr().out == ""
     report = json.loads(output_path.read_text(encoding="utf-8"))
@@ -101,7 +106,7 @@ def test_cli_batch_jsonl_report(monkeypatch, capsys, tmp_path):
         ],
     )
 
-    main()
+    assert main() == 0
 
     assert capsys.readouterr().out == ""
     reports = [
@@ -113,6 +118,67 @@ def test_cli_batch_jsonl_report(monkeypatch, capsys, tmp_path):
     assert reports[0]["emitted_index"] == 1
     assert reports[1]["action"] == "block"
     assert "negated_positive_support_clamp" in reports[1]["evaluations"][0]["clamps"]
+
+
+def test_cli_batch_summary_and_fail_on_block(monkeypatch, capsys, tmp_path):
+    input_path = tmp_path / "batch.jsonl"
+    input_path.write_text(
+        json.dumps(
+            {
+                "id": "negation",
+                "reference": "Water is liquid at room temperature.",
+                "candidate": "Water is not liquid at room temperature.",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mbt-check",
+            "--input-jsonl",
+            str(input_path),
+            "--no-embeddings",
+            "--summary",
+            "--fail-on-block",
+        ],
+    )
+
+    assert main() == 2
+
+    reports = [
+        json.loads(line)
+        for line in capsys.readouterr().out.splitlines()
+    ]
+    assert reports[0]["action"] == "block"
+    assert reports[1] == {
+        "blocked": 1,
+        "blocked_candidates": 1,
+        "emitted": 0,
+        "record_type": "summary",
+        "safe_candidates": 0,
+        "total": 1,
+    }
+
+
+def test_cli_single_regulation_fail_on_block(monkeypatch, capsys):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mbt-check",
+            "--reference",
+            "Water is liquid at room temperature.",
+            "--candidate",
+            "Water is not liquid at room temperature.",
+            "--no-embeddings",
+            "--fail-on-block",
+        ],
+    )
+
+    assert main() == 2
+    assert capsys.readouterr().out.startswith("BLOCK | no safe candidate")
 
 
 def test_build_regulation_report_can_include_token_shock(monkeypatch):
@@ -147,6 +213,33 @@ def test_build_regulation_report_can_include_token_shock(monkeypatch):
     assert report["evaluations"][0]["token_shock"] == [
         {"token": "London", "shock": 12.5}
     ]
+
+
+def test_build_batch_summary_counts_reports_and_candidates():
+    reports = [
+        {
+            "action": "emit",
+            "evaluations": [
+                {"safe_to_emit": False},
+                {"safe_to_emit": True},
+            ],
+        },
+        {
+            "action": "block",
+            "evaluations": [
+                {"safe_to_emit": False},
+            ],
+        },
+    ]
+
+    assert build_batch_summary(reports) == {
+        "blocked": 1,
+        "blocked_candidates": 2,
+        "emitted": 1,
+        "record_type": "summary",
+        "safe_candidates": 1,
+        "total": 2,
+    }
 
 
 def test_format_regulation_text_matches_existing_cli_shape():

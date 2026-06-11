@@ -2,6 +2,7 @@
 
 `mbt-check --format json` emits one JSON object for a single regulation run.
 `mbt-check --input-jsonl ...` emits one JSON object per input line.
+`--summary` appends a final summary object in batch mode.
 
 ## Single Report
 
@@ -47,3 +48,19 @@ Batch output uses the same report fields as single JSON output and adds:
 - `line`: one-based input line number.
 - `id`: copied from the input when present.
 - `references`: normalized list of reference strings used for that line.
+
+## Batch Summary
+
+When `--summary` is used with `--input-jsonl`, the final JSONL record is:
+
+- `record_type`: always `summary`.
+- `total`: number of processed input rows.
+- `emitted`: number of rows that emitted a safe candidate.
+- `blocked`: number of rows that blocked.
+- `safe_candidates`: total safe candidate evaluations across all rows.
+- `blocked_candidates`: total blocked candidate evaluations across all rows.
+
+## Exit Codes
+
+- `0`: command completed normally.
+- `2`: `--fail-on-block` was used and a single run blocked, or at least one batch row blocked.
