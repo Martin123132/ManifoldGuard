@@ -23,7 +23,6 @@ on:
 
 jobs:
   docs-quality:
-    if: ${{ github.event_name != 'workflow_dispatch' || (matrix.mode == 'core' && inputs.run_core_mode == true) || (matrix.mode == 'embeddings' && inputs.run_embeddings_mode == true) }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
