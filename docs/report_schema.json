@@ -1,0 +1,265 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MBT-5 Report Bundle",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "#/definitions/report_object"
+    },
+    {
+      "$ref": "#/definitions/batch_report_object"
+    },
+    {
+      "$ref": "#/definitions/summary_object"
+    }
+  ],
+  "definitions": {
+    "evaluation_object": {
+      "type": "object",
+      "required": [
+        "index",
+        "text",
+        "status",
+        "safe_to_emit",
+        "pred_hallucinated",
+        "regulator_score",
+        "mbt5_shock",
+        "threshold",
+        "literal_score",
+        "clamps",
+        "relations",
+        "negated_relations",
+        "exact_reference_member"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "text": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "safe",
+            "blocked"
+          ]
+        },
+        "safe_to_emit": {
+          "type": "boolean"
+        },
+        "pred_hallucinated": {
+          "type": "boolean"
+        },
+        "regulator_score": {
+          "type": "number"
+        },
+        "mbt5_shock": {
+          "type": "number"
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "literal_score": {
+          "type": "number"
+        },
+        "clamps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "negated_relations": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "exact_reference_member": {
+          "type": "boolean"
+        },
+        "token_shock": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "token",
+              "shock"
+            ],
+            "properties": {
+              "token": {
+                "type": "string"
+              },
+              "shock": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "report_object": {
+      "type": "object",
+      "required": [
+        "action",
+        "emitted_text",
+        "emitted_index",
+        "emitted_score",
+        "evaluations"
+      ],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "emit",
+            "block"
+          ]
+        },
+        "emitted_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "emitted_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "emitted_score": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "evaluations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/evaluation_object"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "batch_report_object": {
+      "type": "object",
+      "required": [
+        "action",
+        "emitted_text",
+        "emitted_index",
+        "emitted_score",
+        "evaluations",
+        "line",
+        "references"
+      ],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "emit",
+            "block"
+          ]
+        },
+        "emitted_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "emitted_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "emitted_score": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "evaluations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/evaluation_object"
+          }
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "id": {
+          "type": "string"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "summary_object": {
+      "type": "object",
+      "required": [
+        "record_type",
+        "total",
+        "emitted",
+        "blocked",
+        "safe_candidates",
+        "blocked_candidates"
+      ],
+      "properties": {
+        "record_type": {
+          "type": "string",
+          "enum": [
+            "summary"
+          ]
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "emitted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "safe_candidates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_candidates": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

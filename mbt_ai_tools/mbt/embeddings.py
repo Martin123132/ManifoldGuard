@@ -7,7 +7,7 @@ import numpy as np
 _DEPENDENCY_MESSAGE = (
     "sentence-transformers is required for embedding-backed operations. "
     "Install with `pip install -e .[embeddings]` (or `pip install sentence-transformers`) "
-    "or call APIs with `use_embeddings=False`."
+    "or call APIs with `--no-embeddings` / `use_embeddings=False`."
 )
 
 

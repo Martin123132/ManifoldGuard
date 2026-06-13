@@ -149,26 +149,25 @@ When every candidate is unsafe, MBT-5 blocks instead of emitting the least-bad c
 
 ## Installation
 
-Core (offline, no embedding dependency):
+Install modes:
 
-```bash
-pip install -e .
-```
+- Offline baseline (default): `python -m pip install -e . --no-deps`
+- Optional semantic mode: `python -m pip install -e .[embeddings]`
 
-Embedding-enabled mode:
-
-```bash
-pip install -e .[embeddings]
-```
+If you need a plain editable install for local experimentation, use `pip install -e .` or `python -m pip install -e .`; both remain supported for compatibility.
 
 The optional extra currently installs `sentence-transformers>=2.6.0,<3` for model-backed operation.
 
-If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`:
+If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`.
 
 ```python
 from mbt_ai_tools import evaluate_candidate
 
-evaluate_candidate("Paris is the capital city of France.", ["The capital of France is Paris."], use_embeddings=False)
+evaluate_candidate(
+    "Paris is the capital city of France.",
+    ["The capital of France is Paris."],
+    use_embeddings=False,
+)
 ```
 
 When embedding-backed operation is requested without `sentence-transformers`, you'll now get a direct error directing to install the dependency or use offline mode.
@@ -193,6 +192,12 @@ print(result.emitted_text)  # The capital of France is Paris.
 ```
 
 ## CLI Usage
+
+Check the installed CLI version:
+
+```bash
+mbt-check --version
+```
 
 ```bash
 mbt-check \
@@ -234,6 +239,8 @@ mbt-check \
   --token-shock-top-k 5
 ```
 
+Token-level shock is embedding-backed, so keep `--no-embeddings` off when using `--token-shock`.
+
 Batch JSONL evaluation:
 
 ```bash
@@ -256,7 +263,93 @@ mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format mark
 
 See `examples/markdown_audit_report.md` for a complete Markdown audit demo.
 
-The JSON report schema is documented in `docs/report_schema.md`.
+CSV audit export:
+
+```bash
+mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format csv --output audit.csv
+```
+
+See `examples/csv_audit_report.csv` for a spreadsheet-friendly batch audit demo.
+
+The JSON/Markdown/CSV report schema is documented in `docs/report_schema.md`.
+The release support contract is captured in `docs/product_readiness_manifest.json`.
+Release quality expectations are captured in `docs/quality_gates.md` and `docs/release_checklist.md`.
+The maintainer release flow is documented in `RELEASE_PROCESS.md`.
+
+## Local Validation
+
+For schema-driven sanity checks before publishing docs or changing report contracts:
+
+```bash
+python -m pip install jsonschema
+python scripts/validate_reports.py \
+  --schema docs/report_schema.json \
+  examples/single_report_example.json \
+  examples/batch_report_example.jsonl
+```
+
+Run the full local docs-quality check (includes manifest and example consistency):
+
+```bash
+python scripts/docs_quality.py
+```
+
+Run the full preflight (docs-quality + pytest) before review:
+
+```bash
+python scripts/preflight.py
+```
+
+Run only docs checks:
+
+```bash
+python scripts/preflight.py --docs-only
+```
+
+Run only tests:
+
+```bash
+python scripts/preflight.py --tests-only
+```
+
+Run the frozen offline regression corpus evaluation:
+
+```bash
+mbt-eval
+mbt-eval --output regulator-evaluation.json
+python scripts/evaluate_regulator.py
+python scripts/evaluate_regulator.py --output regulator-evaluation.json
+```
+
+`mbt-eval` uses the packaged regression corpus by default and accepts `--corpus path/to/corpus.jsonl` for custom offline checks.
+
+Run the canonical release check sequence:
+
+```bash
+python scripts/release_check.py --output release-evidence.json
+```
+
+## Release Evidence Snapshot
+
+Use this command block before release candidates or public claims:
+
+```bash
+python -m pytest -q
+python scripts/docs_quality.py
+python scripts/evaluate_regulator.py
+python scripts/preflight.py
+python scripts/preflight.py --docs-only
+python scripts/release_check.py --output release-evidence.json
+python -m pytest -q tests/test_docs_quality.py
+```
+
+Expected evidence in a healthy release path:
+
+- A full `pytest` success summary (all tests passed, no failures).
+- docs-quality validator exits successfully.
+- regulator evaluation reports all frozen corpus cases passing, with taxonomy metrics in JSON output.
+- preflight prints `Preflight completed successfully.` for both full and docs-only modes.
+- no schema or URL drift errors.
 
 ## Regression Corpus
 
@@ -290,12 +383,15 @@ data/csv_exports/mbt5_exp20_failure_table.csv
 data/csv_exports/mbt5_exp20_patch_lineage.csv
 ```
 
+A `docs-quality` workflow also validates manifest JSON and referenced docs/examples so support artifacts stay consistent.
+
 ## Project Layout
 
 ```text
 mbt_ai_tools/
   mbt/
     embeddings.py      SentenceTransformer loader
+    eval.py            offline frozen corpus evaluator
     geometry.py        geometric median, shock, distance
     stability.py       self-consistency / entropy scoring
     tokens.py          leave-one-out token shock
@@ -306,14 +402,30 @@ mbt_ai_tools/
   tests.yml            GitHub Actions offline regression test workflow
 CHANGELOG.md          release notes
 CLAIMS.md             scoped public claims register
-data/csv_exports/     expanded EXP01-EXP20 CSV exports
-docs/
+RELEASE_PROCESS.md    maintainer release flow
+  data/csv_exports/     expanded EXP01-EXP20 CSV exports
+  scripts/
+    docs_quality.py
+    evaluate_regulator.py
+    release_evidence.py
+    release_readiness.py
+    release_check.py
+    preflight.py
+    validate_reports.py
+  docs/
+  product_readiness_manifest.json
+  report_schema.json
+  quality_gates.md
+  release_checklist.md
   report_schema.md
-examples/
+  examples/
   batch_input.jsonl
   build_regression_corpus.py
   cli_json_report.md
+  csv_audit_report.csv
   markdown_audit_report.md
+  batch_report_example.jsonl
+  single_report_example.json
   regression_corpus.jsonl
 tests/
   test_regulator.py

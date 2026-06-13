@@ -22,7 +22,7 @@ mbt-check \
 
 The guard command exits with status `2` when any input row blocks.
 
-Expected report shape:
+Expected output:
 
 ```markdown
 # MBT-5 Audit Report
@@ -40,16 +40,47 @@ Expected report shape:
 - Action: emit
 - Emitted index: 1
 - Emitted text: The capital of France is Paris.
+- Input line: 1
 
 ### Candidate Evaluations
 
 #### Candidate 0 - blocked
 
+- Text: The capital of France is London.
+- Score: 0.2250
+- Shock: 0.0000
+- Literal score: 1.5000
 - Clamps: protected_entity, protected_literal_drift, final_literal_block, content_clamp_flag, known_participant_unsupported_relation_clamp, guarded_known_participant_unsupported_relation_clamp, exp19b_guarded_patch_clamp
+- Relations: capital of france / is / london; france / capital / london
+- Negated relations: none
+
+#### Candidate 1 - safe
+
+- Text: The capital of France is Paris.
+- Score: 0.0000
+- Shock: 0.0000
+- Literal score: 0.0000
+- Clamps: exact_reference_member
+- Relations: capital of france / is / paris; france / capital / paris
+- Negated relations: none
+
 
 ## Case: unsupported-negation
 
 - Action: block
 - Emitted index: `null`
 - Emitted text: `null`
+- Input line: 2
+
+### Candidate Evaluations
+
+#### Candidate 0 - blocked
+
+- Text: Water is not liquid at room temperature.
+- Score: 0.0000
+- Shock: 0.0000
+- Literal score: 0.0000
+- Clamps: negated_positive_support_clamp, known_participant_unsupported_relation_clamp, guarded_known_participant_unsupported_relation_clamp, exp19b_guarded_patch_clamp
+- Relations: water / is / not liquid at room temperature
+- Negated relations: water / is / liquid at room temperature
 ```
