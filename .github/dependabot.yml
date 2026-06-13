@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:15"
+      timezone: "Europe/London"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps"
+      include: "scope"

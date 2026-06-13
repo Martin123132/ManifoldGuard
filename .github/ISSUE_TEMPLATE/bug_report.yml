@@ -1,0 +1,95 @@
+name: Bug report
+description: Report reproducible MBT-5 behavior that looks incorrect or unstable.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping harden MBT-5. Please include a minimal reference/candidate example so the behavior can be reproduced offline.
+  - type: input
+    id: version
+    attributes:
+      label: mbt-check version
+      description: Run `mbt-check --version`.
+      placeholder: "mbt-check 0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: install_mode
+    attributes:
+      label: Install mode
+      options:
+        - Core offline install
+        - Embeddings extra
+        - Editable source checkout
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: embedding_mode
+    attributes:
+      label: Embedding mode
+      options:
+        - "--no-embeddings / use_embeddings=False"
+        - "Embedding-backed path"
+        - "Both"
+        - "Not sure"
+    validations:
+      required: true
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Interface
+      options:
+        - CLI text
+        - CLI JSON
+        - CLI Markdown
+        - CLI CSV
+        - Python API
+        - CI workflow
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Reproduction command or code
+      description: Include the smallest command or Python snippet that reproduces the issue.
+      render: bash
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: Reference text
+      description: Paste the minimal reference manifold used for the repro.
+    validations:
+      required: true
+  - type: textarea
+    id: candidates
+    attributes:
+      label: Candidate text
+      description: Paste the candidate or candidates that behaved unexpectedly.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What did MBT-5 emit, block, score, or report?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened against the supplied reference structure?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Include OS, Python version, CI link, optional dependency details, or report output if useful. Do not paste secrets or proprietary corpora.

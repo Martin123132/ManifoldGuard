@@ -1,15 +1,31 @@
+import csv
 import json
 import sys
+from io import StringIO
 
+import pytest
+
+from mbt_ai_tools import __version__
 from mbt_ai_tools import regulate_candidates
 from mbt_ai_tools.cli import (
     build_batch_summary,
     build_regulation_report,
+    format_csv_audit,
     format_markdown_audit,
     format_markdown_report,
     format_regulation_text,
     main,
 )
+
+
+def test_cli_version_reports_package_version(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["mbt-check", "--version"])
+
+    with pytest.raises(SystemExit) as exc:
+        main()
+
+    assert exc.value.code == 0
+    assert capsys.readouterr().out.strip() == f"mbt-check {__version__}"
 
 
 def test_cli_regulation_json_report_without_embeddings(monkeypatch, capsys):
@@ -214,6 +230,83 @@ def test_cli_batch_markdown_audit(monkeypatch, capsys, tmp_path):
     assert "negated_positive_support_clamp" in output
 
 
+def test_cli_batch_csv_audit(monkeypatch, capsys, tmp_path):
+    input_path = tmp_path / "batch.jsonl"
+    input_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "id": "france-capital",
+                        "references": ["The capital of France is Paris."],
+                        "candidates": [
+                            "The capital of France is London.",
+                            "The capital of France is Paris.",
+                        ],
+                    }
+                ),
+                json.dumps(
+                    {
+                        "id": "negation",
+                        "reference": "Water is liquid at room temperature.",
+                        "candidate": "Water is not liquid at room temperature.",
+                    }
+                ),
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mbt-check",
+            "--input-jsonl",
+            str(input_path),
+            "--no-embeddings",
+            "--format",
+            "csv",
+            "--fail-on-block",
+        ],
+    )
+
+    assert main() == 2
+    rows = list(csv.DictReader(StringIO(capsys.readouterr().out)))
+    assert len(rows) == 3
+    assert rows[0]["case_id"] == "france-capital"
+    assert rows[0]["candidate_index"] == "0"
+    assert rows[0]["status"] == "blocked"
+    assert rows[1]["emitted_index"] == "1"
+    assert rows[1]["status"] == "safe"
+    assert rows[2]["case_id"] == "negation"
+    assert rows[2]["action"] == "block"
+    assert "negated_positive_support_clamp" in rows[2]["clamps"]
+
+
+def test_cli_disallows_token_shock_with_no_embeddings_in_single_mode(monkeypatch, capsys):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mbt-check",
+            "--reference",
+            "The capital of France is Paris.",
+            "--candidate",
+            "The capital of France is Paris.",
+            "--no-embeddings",
+            "--token-shock",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        main()
+    assert exc.value.code == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "--token-shock requires sentence-transformers" in captured.err
+    assert "Remove --no-embeddings or install with .[embeddings]." in captured.err
+
+
 def test_cli_single_regulation_fail_on_block(monkeypatch, capsys):
     monkeypatch.setattr(
         sys,
@@ -257,6 +350,42 @@ def test_cli_single_markdown_report(monkeypatch, capsys):
     assert "- Action: emit" in output
     assert "#### Candidate 0 - blocked" in output
     assert "#### Candidate 1 - safe" in output
+
+
+def test_cli_disallows_token_shock_with_no_embeddings_in_batch_mode(monkeypatch, capsys, tmp_path):
+    input_path = tmp_path / "batch.jsonl"
+    input_path.write_text(
+        json.dumps(
+            {
+                "id": "france-capital",
+                "references": ["The capital of France is Paris."],
+                "candidates": [
+                    "The capital of France is London.",
+                    "The capital of France is Paris.",
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mbt-check",
+            "--input-jsonl",
+            str(input_path),
+            "--no-embeddings",
+            "--token-shock",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc:
+        main()
+    assert exc.value.code == 2
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "--token-shock requires sentence-transformers" in captured.err
+    assert "Remove --no-embeddings or install with .[embeddings]." in captured.err
 
 
 def test_build_regulation_report_can_include_token_shock(monkeypatch):
@@ -338,6 +467,37 @@ def test_format_markdown_helpers_render_expected_sections():
     assert "known_participant_unsupported_relation_clamp" in single
     assert "# MBT-5 Audit Report" in audit
     assert "## Case: france-capital" in audit
+
+
+def test_format_csv_audit_renders_candidate_rows():
+    result = regulate_candidates(
+        [
+            "The capital of France is London.",
+            "The capital of France is Paris.",
+        ],
+        ["The capital of France is Paris."],
+        use_embeddings=False,
+    )
+    report = build_regulation_report(result)
+
+    output = format_csv_audit(
+        [
+            {
+                **report,
+                "id": "france-capital",
+                "line": 1,
+                "references": ["The capital of France is Paris."],
+            }
+        ]
+    )
+
+    rows = list(csv.DictReader(StringIO(output)))
+    assert rows[0]["case_id"] == "france-capital"
+    assert rows[0]["references"] == "The capital of France is Paris."
+    assert rows[0]["candidate_text"] == "The capital of France is London."
+    assert rows[0]["safe_to_emit"] == "false"
+    assert rows[1]["candidate_text"] == "The capital of France is Paris."
+    assert rows[1]["safe_to_emit"] == "true"
 
 
 def test_format_regulation_text_matches_existing_cli_shape():

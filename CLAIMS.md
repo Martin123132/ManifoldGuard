@@ -16,7 +16,9 @@ The current public scope is deterministic offline regulation with `use_embedding
 
 Install modes:
 
-- Offline baseline (default): `pip install -e .`
-- Optional semantic mode: `pip install -e .[embeddings]`
+- Offline baseline (default): `python -m pip install -e . --no-deps`
+- Optional semantic mode: `python -m pip install -e .[embeddings]`
+
+For local reproducibility checks, `pip install -e .` or `python -m pip install -e .` is still supported when compatible with your environment.
 
 If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`.

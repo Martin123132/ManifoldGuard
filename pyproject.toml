@@ -19,11 +19,19 @@ dependencies = [
 embeddings = ["sentence-transformers>=2.6.0,<3"]
 
 [project.urls]
-Homepage = "https://example.com/mbt-ai-tools"
-Repository = "https://example.com/mbt-ai-tools"
+Homepage = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
+Repository = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
+Documentation = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md"
+Source = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
+Issues = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues"
+Changelog = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md"
 
 [project.scripts]
 mbt-check = "mbt_ai_tools.cli:main"
+mbt-eval = "mbt_ai_tools.eval:main"
 
 [tool.setuptools]
 packages = ["mbt_ai_tools", "mbt_ai_tools.mbt"]
+
+[tool.setuptools.package-data]
+mbt_ai_tools = ["data/*.jsonl"]

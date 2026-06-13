@@ -2,7 +2,45 @@
 
 ## Unreleased
 
-- No changes yet.
+- Added CSV audit export with `--format csv` for spreadsheet-friendly candidate review.
+- Added `mbt-check --version` and package `__version__` for reproducible audit logs.
+- Added a machine-readable product readiness manifest covering supported install modes, CLI formats, examples, CI gates, and support boundaries.
+- Added contributor, security, support, and conduct documentation for product-grade project governance.
+- Added structured GitHub issue forms and a pull request template for reproducible bug reports and claim-safe review.
+- Added release checklist and quality gates docs for repeatable product-standard release decisions.
+- Added Dependabot configuration for weekly GitHub Actions and Python packaging maintenance.
+- Added docs-quality GitHub workflow to validate manifest JSON and referenced support/guide files.
+- Added JSON schema + sample fixtures for report payloads, with CI validation in docs-quality workflow.
+- Added local report fixture validator script to run JSON schema checks in CI and by developers.
+- Added unified docs-quality checker script and switched CI workflow to the shared entrypoint.
+- Added `scripts/preflight.py` as a one-command release preflight for docs checks and tests.
+- Replaced placeholder package URLs with the public GitHub repository URL.
+- Added project package URL metadata and propagated canonical project links into `docs/product_readiness_manifest.json`.
+- Hardened `docs-quality` by enforcing parity between `pyproject.toml` package URLs and manifest `project.package_urls`.
+- Added docs-quality regression coverage for package URL parity mismatches and drift.
+- Added CI installability smoke coverage for `pip install -e .` and `pip install -e .[embeddings]` in `.github/workflows/tests.yml` with public entrypoint import checks.
+- Hardened manifest validation with install-mode/CI-policy contract checks to prevent missing/duplicate dependency mode definitions.
+- Extended `.github/workflows/docs-quality.yml` to run installability matrix checks for both `pip install -e . --no-deps` and `pip install -e .[embeddings]` with import and optional dependency availability assertions.
+- Made docs-quality core installability smoke explicitly install runtime deps (`numpy`, `scipy`) before package entrypoint import checks.
+- Tightened manifest CI-policy checks to enforce expected `core`/`embeddings` install command contracts and added matching regression tests.
+- Enforced exact mode-name parity between `install_modes` and `ci_policy` in the manifest, with regression coverage for mismatches.
+- Added docs-quality version contract validation so manifest, `pyproject.toml`, and `mbt_ai_tools/__init__.py` stay synchronized.
+- Added changelog alignment enforcement so release notes must contain a section matching the declared package version in `pyproject.toml` / manifest.
+- Added distribution metadata parity validation (`importlib.metadata.version`) to docs-quality with regression coverage for installed version match/mismatch behavior.
+- Stabilized CLI version regression coverage by reading `mbt_ai_tools.__version__` from package metadata instead of hardcoding a fixed string.
+- Added docs-quality workflow manual controls (`workflow_dispatch` inputs), scope-summary consistency checks for both release CI workflows, and a documented release evidence snapshot checklist for operator handoffs.
+- Rejected `--token-shock` with `--no-embeddings` at CLI parse time and documented token-shock reporting as embedding-only.
+- Added `scripts/release_evidence.py` to generate machine-readable release gate evidence in dry-run or execution mode.
+- Added `scripts/validate_examples.py` and refreshed committed CLI JSONL, Markdown, and CSV examples to current offline output.
+- Added `scripts/release_readiness.py` for an operator-facing readiness summary with explicit release blockers.
+- Added `RELEASE_PROCESS.md` as the canonical maintainer release sequence from install modes through evidence, readiness, CI parity, and tagging.
+- Added `scripts/release_check.py` as a one-command release evidence and readiness runner.
+- Added `scripts/evaluate_regulator.py` for frozen offline corpus metrics and expected-behavior checks.
+- Added a golden offline behavior regression test for key emit/block paths.
+- Added CI upload of `release-evidence.json` as a workflow artifact in the core preflight path.
+- Added taxonomy summaries and JSON artifact output for frozen offline regulator evaluation.
+- Added `mbt-eval` as an installed console command for the offline frozen corpus evaluator.
+- Added packaged regression corpus data so `mbt-eval` has a default corpus after installation.
 
 ## 0.1.0 Release Candidate 2 - 2026-06-11
 

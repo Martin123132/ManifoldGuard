@@ -1,9 +1,12 @@
 import argparse
+import csv
 import json
+from io import StringIO
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+from . import __version__
 from .mbt.regulator import regulate_candidates
 from .mbt.stability import classify_entropy, confidence_score
 from .mbt.tokens import token_shock_map
@@ -12,6 +15,11 @@ from .mbt.tokens import token_shock_map
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="MBT-5 geometry-only confidence probe and v11 candidate regulator."
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
         "text",
@@ -60,9 +68,9 @@ def main() -> int:
     )
     parser.add_argument(
         "--format",
-        choices=("text", "json", "markdown"),
+        choices=("text", "json", "markdown", "csv"),
         default="text",
-        help="Output format for regulation reports. Batch mode defaults to JSONL unless markdown is selected.",
+        help="Output format for regulation reports. Batch mode defaults to JSONL unless markdown or csv is selected.",
     )
     parser.add_argument(
         "--token-shock",
@@ -89,6 +97,12 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if args.token_shock and args.no_embeddings:
+        parser.error(
+            "--token-shock requires sentence-transformers. "
+            "Remove --no-embeddings or install with .[embeddings]."
+        )
+
     if args.input_jsonl:
         if args.reference or args.candidate or args.text:
             parser.error("--input-jsonl cannot be combined with positional text, --reference, or --candidate")
@@ -107,6 +121,8 @@ def main() -> int:
             parser.error(str(exc))
         if args.format == "markdown":
             content = format_markdown_audit(reports)
+        elif args.format == "csv":
+            content = format_csv_audit(reports)
         else:
             output_items = reports[:]
             if args.summary:
@@ -138,6 +154,8 @@ def main() -> int:
             content = f"{json.dumps(report, indent=2, sort_keys=True)}\n"
         elif args.format == "markdown":
             content = format_markdown_report(report)
+        elif args.format == "csv":
+            content = format_csv_report(report)
         else:
             content = format_regulation_text(report)
         _emit_output(content, args.output)
@@ -279,6 +297,71 @@ def build_batch_summary(reports: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+CSV_FIELDNAMES = [
+    "case_id",
+    "line",
+    "references",
+    "action",
+    "emitted_index",
+    "emitted_text",
+    "candidate_index",
+    "candidate_text",
+    "status",
+    "safe_to_emit",
+    "pred_hallucinated",
+    "regulator_score",
+    "mbt5_shock",
+    "threshold",
+    "literal_score",
+    "clamps",
+    "relations",
+    "negated_relations",
+    "exact_reference_member",
+    "token_shock",
+]
+
+
+def format_csv_report(report: Dict[str, Any]) -> str:
+    return format_csv_audit([report])
+
+
+def format_csv_audit(reports: List[Dict[str, Any]]) -> str:
+    buffer = StringIO()
+    writer = csv.DictWriter(
+        buffer,
+        fieldnames=CSV_FIELDNAMES,
+        lineterminator="\n",
+    )
+    writer.writeheader()
+    for report in reports:
+        for evaluation in report["evaluations"]:
+            writer.writerow(
+                {
+                    "case_id": _csv_value(report.get("id")),
+                    "line": _csv_value(report.get("line")),
+                    "references": " || ".join(report.get("references", [])),
+                    "action": report["action"],
+                    "emitted_index": _csv_value(report["emitted_index"]),
+                    "emitted_text": _csv_value(report["emitted_text"]),
+                    "candidate_index": evaluation["index"],
+                    "candidate_text": evaluation["text"],
+                    "status": evaluation["status"],
+                    "safe_to_emit": _csv_bool(evaluation["safe_to_emit"]),
+                    "pred_hallucinated": _csv_bool(evaluation["pred_hallucinated"]),
+                    "regulator_score": _csv_float(evaluation["regulator_score"]),
+                    "mbt5_shock": _csv_float(evaluation["mbt5_shock"]),
+                    "threshold": _csv_float(evaluation["threshold"]),
+                    "literal_score": _csv_float(evaluation["literal_score"]),
+                    "clamps": "; ".join(evaluation["clamps"]),
+                    "relations": _csv_relations(evaluation["relations"]),
+                    "negated_relations": _csv_relations(evaluation["negated_relations"]),
+                    "exact_reference_member": _csv_bool(evaluation["exact_reference_member"]),
+                    "token_shock": _csv_token_shock(evaluation.get("token_shock", [])),
+                }
+            )
+    return buffer.getvalue()
+
+
 def format_markdown_audit(reports: List[Dict[str, Any]]) -> str:
     summary = build_batch_summary(reports)
     lines = [
@@ -377,6 +460,32 @@ def _markdown_relations(relations: List[List[str]]) -> str:
     if not relations:
         return "none"
     return "; ".join(" / ".join(str(part) for part in relation) for relation in relations)
+
+
+def _csv_relations(relations: List[List[str]]) -> str:
+    return "; ".join(" / ".join(str(part) for part in relation) for relation in relations)
+
+
+def _csv_token_shock(token_shock: List[Dict[str, Any]]) -> str:
+    return "; ".join(
+        f"{entry['token']}:{_csv_float(entry['shock'])}" for entry in token_shock
+    )
+
+
+def _csv_bool(value: bool) -> str:
+    return "true" if value else "false"
+
+
+def _csv_float(value: Optional[float]) -> str:
+    if value is None:
+        return ""
+    return f"{value:.6f}"
+
+
+def _csv_value(value: Any) -> Any:
+    if value is None:
+        return ""
+    return value
 
 
 def _markdown_value(value: Any) -> str:

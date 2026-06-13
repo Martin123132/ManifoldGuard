@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security report
+    url: https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/security/advisories/new
+    about: Please report security-sensitive issues privately when possible.
+  - name: Support guide
+    url: https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/SUPPORT.md
+    about: Read the support guide before opening a general issue.

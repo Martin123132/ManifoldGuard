@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "name": "mbt-ai-tools",
+    "public_name": "MBT-5 Geometry-Only Output Regulator",
+    "package_version": "0.1.0",
+    "repository": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
+    "package_urls": {
+      "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
+      "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
+      "documentation": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md",
+      "issues": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues",
+      "changelog": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md"
+    }
+  },
+  "runtime_guarantees": [
+    {
+      "name": "offline_first_core",
+      "statement": "Core regulation works without sentence-transformers when use_embeddings=false or --no-embeddings is selected."
+    },
+    {
+      "name": "explicit_embeddings_extra",
+      "statement": "Embedding-backed operation is opt-in through pip install -e .[embeddings]."
+    },
+    {
+      "name": "clear_missing_dependency_error",
+      "statement": "Embedding paths fail with an actionable message when sentence-transformers is unavailable."
+    },
+    {
+      "name": "token_shock_embedding_only",
+      "statement": "CLI token-shock reporting is embedding-backed and is rejected when --no-embeddings is selected."
+    },
+    {
+      "name": "no_api_surface_change",
+      "statement": "Current hardening work preserves existing regulation and token-shock API signatures."
+    }
+  ],
+  "install_modes": [
+    {
+      "name": "core",
+      "command": "python -m pip install -e . --no-deps",
+      "expected_capabilities": [
+        "literal guards",
+        "relation clamps",
+        "negation clamps",
+        "batch JSONL reports",
+        "Markdown reports",
+        "CSV reports"
+      ]
+    },
+    {
+      "name": "embeddings",
+      "command": "python -m pip install -e .[embeddings]",
+      "expected_capabilities": [
+        "core capabilities",
+        "semantic embedding-backed regulation",
+        "token-shock analysis"
+      ]
+    }
+  ],
+  "cli": {
+    "entrypoint": "mbt-check",
+    "version_flag": "--version",
+    "formats": [
+      {
+        "name": "text",
+        "mode": "single regulation",
+        "stable": true
+      },
+      {
+        "name": "json",
+        "mode": "single regulation and batch JSONL records",
+        "stable": true
+      },
+      {
+        "name": "markdown",
+        "mode": "single regulation and batch audit reports",
+        "stable": true
+      },
+      {
+        "name": "csv",
+        "mode": "single regulation and batch audit reports",
+        "stable": true
+      }
+    ],
+    "batch_input": {
+      "format": "JSONL",
+      "required_fields": [
+        "references",
+        "candidates"
+      ],
+      "optional_fields": [
+        "id"
+      ],
+      "aliases": {
+        "reference": "references",
+        "candidate": "candidates"
+      }
+    },
+    "exit_codes": [
+      {
+        "code": 0,
+        "meaning": "Command completed normally."
+      },
+      {
+        "code": 2,
+        "meaning": "--fail-on-block was used and a single run blocked, or at least one batch row blocked."
+      }
+    ]
+  },
+  "examples": [
+    "examples/batch_input.jsonl",
+    "examples/cli_json_report.md",
+    "examples/markdown_audit_report.md",
+    "examples/csv_audit_report.csv",
+    "examples/regression_corpus.jsonl"
+  ],
+  "documentation": [
+    "README.md",
+    "CLAIMS.md",
+    "REPLICATION.md",
+    "RELEASE_PROCESS.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "SUPPORT.md",
+    "CODE_OF_CONDUCT.md",
+    "docs/report_schema.md",
+    "docs/report_schema.json",
+    "docs/quality_gates.md",
+    "docs/release_checklist.md"
+  ],
+  "json_schema_examples": [
+    "examples/single_report_example.json",
+    "examples/batch_report_example.jsonl"
+  ],
+  "github_project_intake": [
+    ".github/ISSUE_TEMPLATE/bug_report.yml",
+    ".github/ISSUE_TEMPLATE/feature_request.yml",
+    ".github/ISSUE_TEMPLATE/config.yml",
+    ".github/pull_request_template.md"
+  ],
+  "maintenance_automation": [
+    {
+      "name": "dependabot_github_actions",
+      "path": ".github/dependabot.yml",
+      "schedule": "weekly",
+      "scope": "GitHub Actions workflow dependencies"
+    },
+    {
+      "name": "dependabot_pip",
+      "path": ".github/dependabot.yml",
+      "schedule": "weekly",
+      "scope": "Python packaging dependencies"
+    }
+  ],
+  "ci_policy": [
+    {
+      "name": "core",
+      "install": "python -m pip install -e . --no-deps",
+      "test_scope": "full offline suite"
+    },
+    {
+      "name": "embeddings",
+      "install": "python -m pip install -e .[embeddings]",
+      "test_scope": "deterministic smoke checks that avoid model downloads"
+    }
+  ],
+  "validation_scripts": [
+    {
+      "name": "report_schema_validator",
+      "path": "scripts/validate_reports.py",
+      "scope": "local and CI validation of JSON/JSONL report fixtures"
+    },
+    {
+      "name": "docs_quality",
+      "path": "scripts/docs_quality.py",
+      "scope": "docs manifest consistency, required file checks, and schema validation for examples"
+    },
+    {
+      "name": "validate_examples",
+      "path": "scripts/validate_examples.py",
+      "scope": "drift validation for committed CLI JSONL, Markdown, and CSV examples"
+    },
+    {
+      "name": "evaluate_regulator",
+      "path": "scripts/evaluate_regulator.py",
+      "scope": "offline frozen regression corpus evaluation with expected action, candidate-safety, taxonomy, JSON artifact checks, and the mbt-eval package command"
+    },
+    {
+      "name": "preflight",
+      "path": "scripts/preflight.py",
+      "scope": "combined docs checks and pytest execution for release-quality local validation"
+    },
+    {
+      "name": "release_evidence",
+      "path": "scripts/release_evidence.py",
+      "scope": "machine-readable evidence report for release gate execution"
+    },
+    {
+      "name": "release_readiness",
+      "path": "scripts/release_readiness.py",
+      "scope": "operator-facing release readiness summary and blocker report"
+    },
+    {
+      "name": "release_check",
+      "path": "scripts/release_check.py",
+      "scope": "one-command release evidence generation and readiness summary"
+    }
+  ],
+  "support_boundaries": [
+    "MBT-5 regulates candidate outputs against supplied reference structure.",
+    "MBT-5 is not a universal fact checker.",
+    "Public performance claims are limited to the frozen supplied corpus and reference manifolds.",
+    "Embedding-backed behavior depends on the optional sentence-transformers extra.",
+    "Token-shock reporting is available only in embedding-enabled mode."
+  ]
+}

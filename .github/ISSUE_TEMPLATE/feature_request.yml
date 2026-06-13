@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest a product, regulator, report, corpus, or documentation improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        MBT-5 is scoped as a reference-bound regulator, not a universal fact checker. Please frame requested behavior around supplied references, deterministic evidence, or clearer product ergonomics.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Offline regulator behavior
+        - Optional embeddings behavior
+        - CLI/reporting
+        - Regression corpus
+        - Documentation
+        - Packaging/release
+        - CI/developer workflow
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What product or research workflow is blocked or awkward today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like MBT-5 to do?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or examples
+      description: Include references/candidates, commands, report snippets, or corpus examples that make the request concrete.
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Scope checks
+      options:
+        - label: This request preserves offline-first core behavior.
+        - label: This request does not require MBT-5 to act as a universal fact checker.
+        - label: This request can be documented with reproducible examples or tests.

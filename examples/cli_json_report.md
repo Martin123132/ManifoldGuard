@@ -11,19 +11,16 @@ mbt-check \
   --format json
 ```
 
-Expected shape:
+Expected output:
 
 ```json
 {
   "action": "emit",
   "emitted_index": 1,
+  "emitted_score": 0.0,
   "emitted_text": "The capital of France is Paris.",
   "evaluations": [
     {
-      "index": 0,
-      "status": "blocked",
-      "safe_to_emit": false,
-      "text": "The capital of France is London.",
       "clamps": [
         "protected_entity",
         "protected_literal_drift",
@@ -32,19 +29,59 @@ Expected shape:
         "known_participant_unsupported_relation_clamp",
         "guarded_known_participant_unsupported_relation_clamp",
         "exp19b_guarded_patch_clamp"
-      ]
+      ],
+      "exact_reference_member": false,
+      "index": 0,
+      "literal_score": 1.5,
+      "mbt5_shock": 0.0,
+      "negated_relations": [],
+      "pred_hallucinated": true,
+      "regulator_score": 0.22499999999999998,
+      "relations": [
+        [
+          "capital of france",
+          "is",
+          "london"
+        ],
+        [
+          "france",
+          "capital",
+          "london"
+        ]
+      ],
+      "safe_to_emit": false,
+      "status": "blocked",
+      "text": "The capital of France is London.",
+      "threshold": 0.02
     },
     {
-      "index": 1,
-      "status": "safe",
-      "safe_to_emit": true,
-      "text": "The capital of France is Paris.",
       "clamps": [
         "exact_reference_member"
-      ]
+      ],
+      "exact_reference_member": true,
+      "index": 1,
+      "literal_score": 0.0,
+      "mbt5_shock": 0.0,
+      "negated_relations": [],
+      "pred_hallucinated": false,
+      "regulator_score": 0.0,
+      "relations": [
+        [
+          "capital of france",
+          "is",
+          "paris"
+        ],
+        [
+          "france",
+          "capital",
+          "paris"
+        ]
+      ],
+      "safe_to_emit": true,
+      "status": "safe",
+      "text": "The capital of France is Paris.",
+      "threshold": 0.02
     }
   ]
 }
 ```
-
-The actual report also includes numeric scores, extracted relations, negated relations, threshold values, and exact-reference flags.

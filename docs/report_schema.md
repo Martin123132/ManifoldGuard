@@ -1,9 +1,16 @@
 # MBT-5 Report Schema
 
+The release support contract for CLI modes, install modes, examples, and CI gates is captured in `docs/product_readiness_manifest.json`.
+
+Machine-readable schema file:
+
+- `docs/report_schema.json`
+
 `mbt-check --format json` emits one JSON object for a single regulation run.
 `mbt-check --input-jsonl ...` emits one JSON object per input line.
 `--summary` appends a final summary object in batch JSONL mode.
 `--format markdown` emits a human-readable single report or batch audit report.
+`--format csv` emits one spreadsheet-friendly row per candidate evaluation.
 
 ## Single Report
 
@@ -30,7 +37,7 @@ Each evaluation contains:
 - `relations`: extracted candidate relation tuples.
 - `negated_relations`: extracted negated relation tuples.
 - `exact_reference_member`: whether candidate exactly matches a reference after normalization.
-- `token_shock`: optional token shock entries when `--token-shock` is used.
+- `token_shock`: optional embedding-backed token shock entries when `--token-shock` is used.
 
 ## Batch Input JSONL
 
@@ -61,6 +68,8 @@ When `--summary` is used with `--input-jsonl`, the final JSONL record is:
 - `safe_candidates`: total safe candidate evaluations across all rows.
 - `blocked_candidates`: total blocked candidate evaluations across all rows.
 
+The machine-readable schema in `docs/report_schema.json` validates these objects for tooling integrations.
+
 ## Exit Codes
 
 - `0`: command completed normally.
@@ -82,3 +91,35 @@ Batch Markdown includes:
 - summary totals.
 - one case section per input line.
 - the same per-candidate details as single Markdown reports.
+
+## CSV Output
+
+`--format csv` is available for single regulation reports and batch JSONL audit reports.
+
+CSV output contains one row per candidate evaluation with these columns:
+
+- `case_id`: copied input `id` when present.
+- `line`: one-based input line number in batch mode.
+- `references`: batch references joined with ` || `.
+- `action`: case-level `emit` or `block`.
+- `emitted_index`: case-level emitted candidate index, blank when blocked.
+- `emitted_text`: case-level emitted candidate text, blank when blocked.
+- `candidate_index`: zero-based candidate index.
+- `candidate_text`: candidate text.
+- `status`: `safe` or `blocked`.
+- `safe_to_emit`: lowercase boolean.
+- `pred_hallucinated`: lowercase boolean.
+- `regulator_score`: final ranking score.
+- `mbt5_shock`: semantic geometry shock score.
+- `threshold`: active geometry threshold.
+- `literal_score`: literal drift score.
+- `clamps`: clamp names joined with `; `.
+- `relations`: relation tuples joined with `; `.
+- `negated_relations`: negated relation tuples joined with `; `.
+- `exact_reference_member`: lowercase boolean.
+- `token_shock`: optional embedding-backed token shock entries joined as `token:score`.
+
+Example machine-validated payloads:
+
+- `examples/single_report_example.json`
+- `examples/batch_report_example.jsonl`
