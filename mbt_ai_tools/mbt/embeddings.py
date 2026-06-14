@@ -14,7 +14,7 @@ _DEPENDENCY_MESSAGE = (
 @lru_cache(maxsize=2)
 def load_embedder(model_name: str = "all-MiniLM-L6-v2") -> Any:
     """
-    Load and cache the default sentence-transformer used across MBT-5 helpers.
+    Load and cache the default sentence-transformer used across ManifoldGuard helpers.
 
     The original scripts relied on ``all-MiniLM-L6-v2`` for geometric
     measurements; this keeps the same model while loading the optional heavy

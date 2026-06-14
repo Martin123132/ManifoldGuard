@@ -1,12 +1,12 @@
 
 
-# MBT-5 EXP01–EXP20 Technical Ledger
+# ManifoldGuard EXP01–EXP20 Technical Ledger
 Geometry-only inference-time hallucination regulation for AI outputs.
-This document records the MBT-5 experiment trail from EXP01 through EXP20. It is a technical ledger of completed work: mechanisms tested, failures found, patches added, regressions checked, and the frozen v11 result.
+This document records the ManifoldGuard experiment trail from EXP01 through EXP20. It is a technical ledger of completed work: mechanisms tested, failures found, patches added, regressions checked, and the frozen v11 result.
 It is not a roadmap.
 ---
 ## 1. Project Definition
-MBT-5 is an inference-time regulator for AI outputs.
+ManifoldGuard is an inference-time regulator for AI outputs.
 It tests whether candidate AI outputs remain inside a supplied semantic and relational reference structure.
 The regulator does not train the model.
 The regulator does not fine-tune the model.
@@ -40,15 +40,15 @@ Universe does facts.
 Humans describe the universe.
 AI describes human descriptions.
 
-MBT-5 does not claim direct access to physical truth.
+ManifoldGuard does not claim direct access to physical truth.
 
-MBT-5 regulates AI text against supplied human reference descriptions, candidate sets, semantic manifolds, and relation maps.
+ManifoldGuard regulates AI text against supplied human reference descriptions, candidate sets, semantic manifolds, and relation maps.
 
 The tested claim is not “AI fact checking”.
 
 The tested claim is:
 
-MBT-5 detects and blocks hallucinated AI outputs as semantic or relational drift from supplied reference structure.
+ManifoldGuard detects and blocks hallucinated AI outputs as semantic or relational drift from supplied reference structure.
 
 ⸻
 
@@ -76,13 +76,13 @@ Case-level:
 
 There were no locked false positives and no locked false negatives in the EXP20 frozen ledger.
 
-Across the locked MBT-5 v11 regression and unseen-holdout suites, every labelled hallucinated candidate was blocked and every labelled valid candidate was preserved.
+Across the locked ManifoldGuard v11 regression and unseen-holdout suites, every labelled hallucinated candidate was blocked and every labelled valid candidate was preserved.
 
 ⸻
 
 4. Current Supported Claim
 
-MBT-5 v11 blocks hallucinated AI outputs against supplied reference manifolds and relation constraints.
+ManifoldGuard v11 blocks hallucinated AI outputs against supplied reference manifolds and relation constraints.
 In the frozen EXP20 ledger, it achieved confusion [[97, 0], [0, 160]] over 257 labelled candidates across 53 cases.
 
 That is the claim supported by the recorded experiments.
@@ -95,7 +95,7 @@ That is the claim supported by the recorded experiments.
 
 Candidate outputs are embedded into semantic space.
 
-MBT-5 measures distance from a reference center.
+ManifoldGuard measures distance from a reference center.
 
 shock = Γ · ||candidate_embedding - reference_center||²
 
@@ -109,7 +109,7 @@ The reference center can be built from stable reference answers or from a refere
 
 5.2 Geometric Median
 
-For robust reference-centering, MBT-5 uses a geometric median rather than only an arithmetic mean.
+For robust reference-centering, ManifoldGuard uses a geometric median rather than only an arithmetic mean.
 
 This reduces sensitivity to outlier candidates.
 
@@ -121,7 +121,7 @@ The geometric median was computed with iterative Weiszfeld-style updates.
 
 Multiple model outputs can be sampled for the same prompt.
 
-MBT-5 embeds the outputs and measures the spread between them.
+ManifoldGuard embeds the outputs and measures the spread between them.
 
 High internal entropy means unstable candidate generation.
 
@@ -131,7 +131,7 @@ Low internal entropy means candidate outputs are semantically consistent.
 
 5.4 Token Shock
 
-MBT-5 performs leave-one-out token analysis.
+ManifoldGuard performs leave-one-out token analysis.
 
 For each token, it removes the token, re-embeds the sentence, and measures whether removing that token reduces shock.
 
@@ -182,7 +182,7 @@ where the output was not distant enough geometrically but contained unsupported 
 
 5.7 Overclaim Detection
 
-MBT-5 blocks outputs that exceed the reference support.
+ManifoldGuard blocks outputs that exceed the reference support.
 
 Examples:
 
@@ -266,7 +266,7 @@ If the reference positively supports a relation, an unsupported negation of that
 
 5.13 Abstention
 
-When every candidate is unsafe, MBT-5 blocks instead of choosing the least-bad candidate.
+When every candidate is unsafe, ManifoldGuard blocks instead of choosing the least-bad candidate.
 
 This is essential because the least-bad hallucination is still a hallucination.
 
@@ -321,7 +321,7 @@ Tested candidate selection.
 Result:
 
 Baseline first-output hallucination rate: 0.8000
-MBT-5 regulated-output rate:           0.0000
+ManifoldGuard regulated-output rate:           0.0000
 Absolute reduction:                    0.8000
 
 Finding:
@@ -478,7 +478,7 @@ Confusion: [[2, 0], [12, 9]]
 
 Finding:
 
-Without relation structure, MBT-5 could emit close but wrong category substitutions.
+Without relation structure, ManifoldGuard could emit close but wrong category substitutions.
 
 ⸻
 
@@ -1083,7 +1083,7 @@ The README should stay short.
 
 It should state:
 
-MBT-5 is a geometry-only inference-time hallucination regulator for AI outputs.
+ManifoldGuard is a geometry-only inference-time hallucination regulator for AI outputs.
 
 It should include the frozen EXP20 headline result.
 
@@ -1133,7 +1133,7 @@ print(shocks)
 
 CLI usage:
 
-mbt-check "The capital of France is Paris."
+manifold-check "The capital of France is Paris."
 
 The CLI reports a confidence/risk label and a numeric internal entropy score.
 
@@ -1160,7 +1160,7 @@ Candidates:
   The capital of France is London.
   The capital of France is Paris.
   The capital of France is Lyon.
-MBT-5 action:
+ManifoldGuard action:
   emit "The capital of France is Paris."
 
 Example all-bad candidate pool:
@@ -1171,7 +1171,7 @@ Candidates:
   The capital of France is London.
   The capital of France is Lyon.
   The capital of France is Berlin.
-MBT-5 action:
+ManifoldGuard action:
   block
 
 ⸻
@@ -1180,7 +1180,7 @@ MBT-5 action:
 
 Current status:
 
-Locked version: MBT-5 v11
+Locked version: ManifoldGuard v11
 Frozen ledger: MBT5_EXP20_combined_guarded_master_ledger_v11
 Candidates:    257
 Cases:         53

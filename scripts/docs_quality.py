@@ -614,14 +614,25 @@ def validate_distribution_version(manifest_path: Path, pyproject_path: Path) -> 
             "Cannot validate installed distribution until manifest and pyproject versions match."
         )
 
-    try:
-        distribution_version = get_distribution_version("mbt-ai-tools")
-    except PackageNotFoundError:
+    project_name = pyproject_data.get("project", {}).get("name")
+    distribution_names = [name for name in (project_name, "mbt-ai-tools") if name]
+
+    distribution_version = None
+    distribution_name = None
+    for candidate_name in dict.fromkeys(distribution_names):
+        try:
+            distribution_version = get_distribution_version(candidate_name)
+            distribution_name = candidate_name
+            break
+        except PackageNotFoundError:
+            continue
+
+    if distribution_version is None:
         return
 
     if distribution_version != manifest_version:
         raise RuntimeError(
-            "Installed mbt-ai-tools distribution version "
+            f"Installed {distribution_name} distribution version "
             f"({distribution_version}) does not match manifest package_version "
             f"({manifest_version})."
         )

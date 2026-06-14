@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "project": {
-    "name": "mbt-ai-tools",
-    "public_name": "MBT-5 Geometry-Only Output Regulator",
+    "name": "manifold-guard",
+    "public_name": "ManifoldGuard",
     "package_version": "0.1.0",
     "repository": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
     "package_urls": {
@@ -59,7 +59,7 @@
     }
   ],
   "cli": {
-    "entrypoint": "mbt-check",
+    "entrypoint": "manifold-check",
     "version_flag": "--version",
     "formats": [
       {
@@ -188,7 +188,7 @@
     {
       "name": "evaluate_regulator",
       "path": "scripts/evaluate_regulator.py",
-      "scope": "offline frozen regression corpus evaluation with expected action, candidate-safety, taxonomy, JSON artifact checks, and the mbt-eval package command"
+      "scope": "offline frozen regression corpus evaluation with expected action, candidate-safety, taxonomy, JSON artifact checks, and the manifold-eval package command"
     },
     {
       "name": "build_eval_report",
@@ -217,8 +217,8 @@
     }
   ],
   "support_boundaries": [
-    "MBT-5 regulates candidate outputs against supplied reference structure.",
-    "MBT-5 is not a universal fact checker.",
+    "ManifoldGuard regulates candidate outputs against supplied reference structure.",
+    "ManifoldGuard is not a universal fact checker.",
     "Public performance claims are limited to the frozen supplied corpus and reference manifolds.",
     "Embedding-backed behavior depends on the optional sentence-transformers extra.",
     "Token-shock reporting is available only in embedding-enabled mode."

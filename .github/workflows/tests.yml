@@ -1,4 +1,4 @@
-name: MBT-5 offline regression tests
+name: ManifoldGuard offline regression tests
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Summarize execution scope
         run: |
-          echo "MBT-5 CI scope (installability job)"
+          echo "ManifoldGuard CI scope (installability job)"
           echo "event=${{ github.event_name }}"
           echo "mode=${{ matrix.mode }}"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -66,7 +66,7 @@ jobs:
         run: |
           python -c "import mbt_ai_tools; from mbt_ai_tools.cli import main"
           python -c "from mbt_ai_tools import extract_relations, evaluate_candidate, regulate_candidates, token_shock_map"
-          python -c "from importlib.metadata import version; print(version('mbt-ai-tools'))"
+          python -c "from importlib.metadata import version; print(version('manifold-guard'))"
           python -c "import mbt_ai_tools; print(mbt_ai_tools.__version__)"
 
       - name: Verify embedding extra is available
@@ -88,7 +88,7 @@ jobs:
 
       - name: Summarize execution scope
         run: |
-          echo "MBT-5 CI scope (preflight job)"
+          echo "ManifoldGuard CI scope (preflight job)"
           echo "event=${{ github.event_name }}"
           echo "mode=${{ matrix.mode }}"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -157,7 +157,7 @@ jobs:
 
       - name: Summarize execution scope
         run: |
-          echo "MBT-5 CI scope (test job)"
+          echo "ManifoldGuard CI scope (test job)"
           echo "event=${{ github.event_name }}"
           echo "mode=${{ matrix.mode }}"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -184,7 +184,7 @@ jobs:
         run: |
           python -c "from mbt_ai_tools import extract_relations, evaluate_candidate, regulate_candidates, token_shock_map"
           python -c "from mbt_ai_tools.cli import main"
-          python -c "from importlib.metadata import version; print(version('mbt-ai-tools'))"
+          python -c "from importlib.metadata import version; print(version('manifold-guard'))"
           python -c "import mbt_ai_tools; print(mbt_ai_tools.__version__)"
 
       - name: Regenerate public corpus

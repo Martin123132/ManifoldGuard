@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run the canonical MBT-5 release check sequence."""
+"""Run the canonical ManifoldGuard release check sequence."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ CommandRunner = Callable[..., CommandResult]
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run MBT-5 release evidence generation and readiness checks."
+        description="Run ManifoldGuard release evidence generation and readiness checks."
     )
     parser.add_argument(
         "--output",

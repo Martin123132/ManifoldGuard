@@ -1,6 +1,6 @@
-# Contributing to MBT-5
+# Contributing to ManifoldGuard
 
-Thanks for helping improve MBT-5. This project is moving toward a product-grade inference-time regulator, so contributions should preserve the core design principle: regulate candidate outputs against supplied reference structure without claiming universal truth access.
+Thanks for helping improve ManifoldGuard. This project is moving toward a product-grade inference-time regulator, so contributions should preserve the core design principle: regulate candidate outputs against supplied reference structure without claiming universal truth access.
 
 ## Contribution Priorities
 
@@ -15,7 +15,7 @@ Good contributions usually improve one of these areas:
 
 Avoid contributions that:
 
-- Treat MBT-5 as a universal fact checker.
+- Treat ManifoldGuard as a universal fact checker.
 - Add network-required behavior to the default path.
 - Hide optional dependency failures.
 - Change public API signatures without a migration plan.
@@ -51,7 +51,7 @@ For CI or smoke checks, prefer deterministic offline paths. Do not require real 
 
 ## CLI and Report Changes
 
-When changing `mbt-check`, update all relevant surfaces:
+When changing `manifold-check`, update all relevant surfaces:
 
 - CLI behavior.
 - Tests in `tests/test_cli.py`.
@@ -62,9 +62,9 @@ When changing `mbt-check`, update all relevant surfaces:
 
 ## Claim Discipline
 
-MBT-5 claims must stay scoped to supplied reference manifolds and the frozen public corpus. If a change improves empirical results, include the dataset, command, and exact evidence needed to reproduce it.
+ManifoldGuard claims must stay scoped to supplied reference manifolds and the frozen public corpus. If a change improves empirical results, include the dataset, command, and exact evidence needed to reproduce it.
 
-Do not add marketing language that implies MBT-5 has direct access to external truth.
+Do not add marketing language that implies ManifoldGuard has direct access to external truth.
 
 ## Pull Request Checklist
 

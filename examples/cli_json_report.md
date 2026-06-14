@@ -3,7 +3,7 @@
 This example runs the offline regulation path and emits a structured JSON report.
 
 ```bash
-mbt-check \
+manifold-check \
   --reference "The capital of France is Paris." \
   --candidate "The capital of France is London." \
   --candidate "The capital of France is Paris." \

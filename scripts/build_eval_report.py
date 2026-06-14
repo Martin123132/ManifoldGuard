@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Build a Markdown evaluation report from MBT-5 offline corpus metrics."""
+"""Build a Markdown evaluation report from ManifoldGuard offline corpus metrics."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ DEFAULT_OUTPUT = PROJECT_ROOT / "docs" / "evaluation_report.md"
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build a Markdown report from MBT-5 offline evaluator JSON."
+        description="Build a Markdown report from ManifoldGuard offline evaluator JSON."
     )
     parser.add_argument(
         "--input",
@@ -72,7 +72,7 @@ def build_markdown(report: dict[str, Any], *, generated_at: str | None = None) -
     ]
 
     lines = [
-        "# MBT-5 Offline Evaluation Report",
+        "# ManifoldGuard Offline Evaluation Report",
         "",
         f"Generated at: `{timestamp}`",
         "",

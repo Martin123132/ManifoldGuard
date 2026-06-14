@@ -19,8 +19,8 @@ def load_release_readiness_module():
 def write_release_files(tmp_path: Path, *, evidence_status: str = "passed") -> Path:
     manifest = {
         "project": {
-            "name": "mbt-ai-tools",
-            "public_name": "MBT-5 Geometry-Only Output Regulator",
+            "name": "manifold-guard",
+            "public_name": "ManifoldGuard",
             "package_version": "0.1.0",
             "repository": "https://example.test/repo",
         },
@@ -35,13 +35,13 @@ def write_release_files(tmp_path: Path, *, evidence_status: str = "passed") -> P
             },
         ],
         "support_boundaries": [
-            "MBT-5 regulates candidate outputs against supplied reference structure.",
-            "MBT-5 is not a universal fact checker.",
+            "ManifoldGuard regulates candidate outputs against supplied reference structure.",
+            "ManifoldGuard is not a universal fact checker.",
         ],
     }
     (tmp_path / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname = "mbt-ai-tools"\nversion = "0.1.0"\n',
+        '[project]\nname = "manifold-guard"\nversion = "0.1.0"\n',
         encoding="utf-8",
     )
     (tmp_path / "CHANGELOG.md").write_text(
@@ -104,7 +104,7 @@ def test_release_readiness_blocks_failed_evidence_and_version_drift(tmp_path: Pa
     release_readiness = load_release_readiness_module()
     evidence_path = write_release_files(tmp_path, evidence_status="failed")
     (tmp_path / "pyproject.toml").write_text(
-        '[project]\nname = "mbt-ai-tools"\nversion = "0.2.0"\n',
+        '[project]\nname = "manifold-guard"\nversion = "0.2.0"\n',
         encoding="utf-8",
     )
 

@@ -10,7 +10,7 @@ from .utils import UniversalAIClient, build_variation_prompt
 
 class ManifoldRegulator:
     """
-    Minimal manifold regulator mirroring the MBT-5 core loop.
+    Minimal manifold regulator mirroring the ManifoldGuard core loop.
 
     It preserves the Weiszfeld median calculation and squared-distance shock
     measurement from the Colab demos.

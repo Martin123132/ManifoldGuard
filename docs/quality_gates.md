@@ -1,10 +1,10 @@
 # Quality Gates
 
-These gates define what "product standard" means for MBT-5 work. A change does not need every gate for every commit, but release candidates should satisfy all applicable gates.
+These gates define what "product standard" means for ManifoldGuard work. A change does not need every gate for every commit, but release candidates should satisfy all applicable gates.
 
 ## Gate 1: Offline-First Reliability
 
-MBT-5 must remain useful without optional embedding dependencies.
+ManifoldGuard must remain useful without optional embedding dependencies.
 
 Evidence:
 
@@ -23,8 +23,8 @@ Evidence:
 - Regression corpus examples are deterministic.
 - Committed CLI output examples are checked with `python scripts/validate_examples.py`.
 - Frozen corpus expectations are evaluated with `python scripts/evaluate_regulator.py`.
-- Installed evaluator command `mbt-eval` exposes the same offline corpus check.
-- Package data includes the default corpus used by `mbt-eval`.
+- Installed evaluator command `manifold-eval` exposes the same offline corpus check.
+- Package data includes the default corpus used by `manifold-eval`.
 - Frozen corpus metrics include taxonomy summaries by case family for release triage.
 - `docs/evaluation_report.md` can be regenerated from `regulator-evaluation.json`.
 - Expected blocks and emits are explained by reference structure.
@@ -58,7 +58,7 @@ Evidence:
 
 ## Gate 5: Claim Discipline
 
-MBT-5 regulates against supplied references. It does not know external truth.
+ManifoldGuard regulates against supplied references. It does not know external truth.
 
 Evidence:
 
@@ -74,7 +74,7 @@ Users should be able to install, run, inspect, and report issues without guessin
 Evidence:
 
 - CLI help exposes supported flags.
-- `mbt-check --version` works.
+- `manifold-check --version` works.
 - README includes common commands.
 - Examples exist for batch input and report output.
 - GitHub issue templates request enough reproduction detail.

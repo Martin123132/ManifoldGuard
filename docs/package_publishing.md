@@ -1,6 +1,6 @@
 # Package Publishing Setup
 
-This document records the package publishing setup for `mbt-ai-tools`.
+This document records the package publishing setup for `manifold-guard`.
 
 Publishing is intentionally manual-only. The package workflow builds distributions on tags and manual runs, but it publishes only when a maintainer runs the workflow with `publish=true`.
 
@@ -23,7 +23,7 @@ Both environments are required by `.github/workflows/package-publish.yml`.
 
 Configure these values on TestPyPI first:
 
-- Project name: `mbt-ai-tools`
+- Project name: `manifold-guard`
 - Owner: `Martin123132`
 - Repository name: `Geometry-Only-Control-of-LLM-Output-at-Inference-Time`
 - Workflow filename: `package-publish.yml`
@@ -31,7 +31,7 @@ Configure these values on TestPyPI first:
 
 Configure these values on PyPI after TestPyPI succeeds:
 
-- Project name: `mbt-ai-tools`
+- Project name: `manifold-guard`
 - Owner: `Martin123132`
 - Repository name: `Geometry-Only-Control-of-LLM-Output-at-Inference-Time`
 - Workflow filename: `package-publish.yml`
@@ -42,7 +42,7 @@ PyPI requires the owner, repository name, and workflow filename for GitHub Actio
 ## If the project already exists on TestPyPI or PyPI
 
 1. Sign in to the package index.
-2. Open the `mbt-ai-tools` project.
+2. Open the `manifold-guard` project.
 3. Go to the project publishing settings.
 4. Add a GitHub Actions trusted publisher with the values above.
 5. Confirm the publisher appears in the project's publishing settings.
@@ -54,7 +54,7 @@ Use a pending publisher:
 1. Sign in to the package index.
 2. Open account publishing settings.
 3. Add a pending GitHub Actions trusted publisher.
-4. Use project name `mbt-ai-tools`.
+4. Use project name `manifold-guard`.
 5. Use the owner, repository name, workflow filename, and environment name listed above.
 6. Run the publish workflow when ready.
 
@@ -79,11 +79,11 @@ Expected result:
 
 1. Confirm tag CI is green.
 2. Confirm release evidence reports `Status: ready`.
-3. Confirm `mbt-eval` reports `Status: passed`.
+3. Confirm `manifold-eval` reports `Status: passed`.
 4. Run build-only package workflow with `publish=false`.
 5. Configure TestPyPI trusted publisher.
 6. Run package workflow with `target=testpypi` and `publish=true`.
-7. Install from TestPyPI in a clean environment and run `mbt-check --version` plus `mbt-eval`.
+7. Install from TestPyPI in a clean environment and run `manifold-check --version` plus `manifold-eval`.
 8. Configure PyPI trusted publisher.
 9. Run package workflow with `target=pypi` and `publish=true`.
 

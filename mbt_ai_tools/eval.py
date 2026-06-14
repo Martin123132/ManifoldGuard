@@ -1,4 +1,4 @@
-"""Offline regression evaluation for MBT-5."""
+"""Offline regression evaluation for ManifoldGuard."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+from mbt_ai_tools import __version__
 from mbt_ai_tools.mbt.regulator import regulate_candidates
 
 
@@ -33,7 +34,12 @@ CASE_FAMILY_PREFIXES = (
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run deterministic offline MBT-5 regulator evaluation."
+        description="Run deterministic offline ManifoldGuard regulator evaluation."
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
         "--corpus",
@@ -259,7 +265,7 @@ def evaluate_corpus(path: Path = DEFAULT_CORPUS) -> dict[str, Any]:
 def format_text(report: dict[str, Any], *, max_failures: int = 10) -> str:
     summary = report["summary"]
     lines = [
-        "MBT-5 Offline Regression Evaluation",
+        "ManifoldGuard Offline Regression Evaluation",
         "",
         f"Status: {report['status']}",
         f"Corpus: {report['corpus']}",

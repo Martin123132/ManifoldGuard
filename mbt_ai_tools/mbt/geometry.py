@@ -5,7 +5,7 @@ import numpy as np
 
 def geometric_median(vectors: Iterable[np.ndarray], iterations: int = 30) -> np.ndarray:
     """
-    Robust geometric median used across the original MBT-5 scripts.
+    Robust geometric median used across the original ManifoldGuard scripts.
 
     This mirrors the Weiszfeld-style update loop from the Colab demos without
     modifying thresholds or behavior.

@@ -1,4 +1,4 @@
-"""Build the lightweight public MBT-5 offline regression corpus."""
+"""Build the lightweight public ManifoldGuard offline regression corpus."""
 
 from __future__ import annotations
 

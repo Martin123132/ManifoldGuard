@@ -39,7 +39,7 @@ def write_changelog(path: Path, content: str) -> None:
 def build_manifest(tmp_path: Path) -> Path:
     manifest = {
         "project": {
-            "name": "mbt-ai-tools",
+            "name": "manifold-guard",
             "package_urls": {
                 "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
                 "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
@@ -155,7 +155,7 @@ def base_manifest_dict() -> dict:
     return {
         "project": {
             "package_version": "0.1.0",
-            "name": "mbt-ai-tools",
+            "name": "manifold-guard",
             "package_urls": {
                 "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
                 "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
@@ -207,8 +207,8 @@ def base_manifest_dict() -> dict:
             },
         ],
         "support_boundaries": [
-            "MBT-5 regulates candidate outputs against supplied reference structure.",
-            "MBT-5 is not a universal fact checker.",
+            "ManifoldGuard regulates candidate outputs against supplied reference structure.",
+            "ManifoldGuard is not a universal fact checker.",
             "Token-shock reporting is available only in embedding-enabled mode.",
         ],
     }
@@ -237,7 +237,7 @@ def test_validate_package_urls_passes_when_aligned(docs_quality, tmp_path: Path)
 def test_validate_package_urls_flags_missing_manifest_keys(docs_quality, tmp_path: Path):
     manifest = {
         "project": {
-            "name": "mbt-ai-tools",
+            "name": "manifold-guard",
             "package_urls": {
                 "homepage": "https://example.com",
             },
@@ -275,7 +275,7 @@ def test_validate_package_urls_flags_drift(docs_quality, tmp_path: Path):
     )
     manifest = {
         "project": {
-            "name": "mbt-ai-tools",
+            "name": "manifold-guard",
             "package_urls": {
                 "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
                 "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
@@ -300,7 +300,7 @@ def test_validate_version_contract_ensures_versions_are_in_sync(docs_quality, tm
         tmp_path / "pyproject.toml",
         """
         [project]
-        name = "mbt-ai-tools"
+        name = "manifold-guard"
         version = "0.1.0"
         """
     )
@@ -317,7 +317,7 @@ def test_validate_version_contract_rejects_drift(docs_quality, tmp_path: Path):
         tmp_path / "pyproject.toml",
         """
         [project]
-        name = "mbt-ai-tools"
+        name = "manifold-guard"
         version = "0.2.0"
         """
     )
@@ -502,12 +502,12 @@ def test_validate_distribution_version_skips_when_distribution_not_installed(
         tmp_path / "pyproject.toml",
         """
         [project]
-        name = "mbt-ai-tools"
+        name = "manifold-guard"
         version = "0.1.0"
         """,
     )
-    def _missing_package(_: str = "mbt-ai-tools") -> str:
-        raise docs_quality.PackageNotFoundError("mbt-ai-tools")
+    def _missing_package(_: str = "manifold-guard") -> str:
+        raise docs_quality.PackageNotFoundError("manifold-guard")
 
     monkeypatch.setattr(
         docs_quality,
@@ -532,14 +532,14 @@ def test_validate_distribution_version_detects_mismatch_when_installed(docs_qual
         tmp_path / "pyproject.toml",
         """
         [project]
-        name = "mbt-ai-tools"
+        name = "manifold-guard"
         version = "0.1.0"
         """,
     )
     monkeypatch.setattr(
         docs_quality,
         "get_distribution_version",
-        lambda name="mbt-ai-tools": "0.2.0",
+        lambda name="manifold-guard": "0.2.0",
     )
 
     with pytest.raises(RuntimeError, match="does not match manifest package_version"):
@@ -561,14 +561,14 @@ def test_validate_distribution_version_passes_for_matching_installed_version(
         tmp_path / "pyproject.toml",
         """
         [project]
-        name = "mbt-ai-tools"
+        name = "manifold-guard"
         version = "0.1.0"
         """,
     )
     monkeypatch.setattr(
         docs_quality,
         "get_distribution_version",
-        lambda name="mbt-ai-tools": "0.1.0",
+        lambda name="manifold-guard": "0.1.0",
     )
 
     assert (
@@ -941,7 +941,7 @@ def test_validate_ci_workflow_contracts_rejects_missing_required_jobs(tmp_path: 
     workflow_root.mkdir(parents=True, exist_ok=True)
     (workflow_root / "tests.yml").write_text(
         """
-        name: MBT-5 minimal
+        name: ManifoldGuard minimal
         on: [push]
         jobs:
           test:
@@ -953,7 +953,7 @@ def test_validate_ci_workflow_contracts_rejects_missing_required_jobs(tmp_path: 
     )
     (workflow_root / "docs-quality.yml").write_text(
         """
-        name: MBT-5 docs quality minimal
+        name: ManifoldGuard docs quality minimal
         on: [push]
         jobs:
           docs-quality:
@@ -973,7 +973,7 @@ def test_validate_ci_workflow_contracts_rejects_malformed_matrix_mode_declaratio
     workflow_root.mkdir(parents=True, exist_ok=True)
     (workflow_root / "tests.yml").write_text(
         """
-        name: MBT-5 malformed modes
+        name: ManifoldGuard malformed modes
         on: [push]
         jobs:
           installability:
@@ -999,7 +999,7 @@ def test_validate_ci_workflow_contracts_rejects_malformed_matrix_mode_declaratio
     )
     (workflow_root / "docs-quality.yml").write_text(
         """
-        name: MBT-5 docs quality malformed modes
+        name: ManifoldGuard docs quality malformed modes
         on: [push]
         jobs:
           docs-quality:
@@ -1021,7 +1021,7 @@ def test_validate_ci_workflow_contracts_rejects_required_job_without_matrix_bloc
     workflow_root.mkdir(parents=True, exist_ok=True)
     (workflow_root / "tests.yml").write_text(
         """
-        name: MBT-5 missing matrix in one job
+        name: ManifoldGuard missing matrix in one job
         on: [push]
         jobs:
           installability:
@@ -1045,7 +1045,7 @@ def test_validate_ci_workflow_contracts_rejects_required_job_without_matrix_bloc
     )
     (workflow_root / "docs-quality.yml").write_text(
         """
-        name: MBT-5 missing matrix doc
+        name: ManifoldGuard missing matrix doc
         on: [push]
         jobs:
           docs-quality:
@@ -1067,7 +1067,7 @@ def test_validate_ci_workflow_contracts_accepts_matrix_mode_declaration_with_quo
     workflow_root.mkdir(parents=True, exist_ok=True)
     (workflow_root / "tests.yml").write_text(
         """
-        name: MBT-5 quoted modes
+        name: ManifoldGuard quoted modes
         on: [push]
         jobs:
           installability:
@@ -1096,7 +1096,7 @@ def test_validate_ci_workflow_contracts_accepts_matrix_mode_declaration_with_quo
     )
     (workflow_root / "docs-quality.yml").write_text(
         """
-        name: MBT-5 quoted modes docs quality
+        name: ManifoldGuard quoted modes docs quality
         on: [push]
         jobs:
           docs-quality:
@@ -1118,7 +1118,7 @@ def test_validate_ci_workflow_contracts_accepts_multiline_matrix_mode_declaratio
     workflow_root.mkdir(parents=True, exist_ok=True)
     (workflow_root / "tests.yml").write_text(
         """
-        name: MBT-5 multiline modes
+        name: ManifoldGuard multiline modes
         on: [push]
         jobs:
           installability:
@@ -1150,7 +1150,7 @@ def test_validate_ci_workflow_contracts_accepts_multiline_matrix_mode_declaratio
     )
     (workflow_root / "docs-quality.yml").write_text(
         """
-        name: MBT-5 multiline modes docs quality
+        name: ManifoldGuard multiline modes docs quality
         on: [push]
         jobs:
           docs-quality:
@@ -1173,7 +1173,7 @@ def test_validate_ci_workflow_contracts_accepts_multiline_matrix_mode_with_comme
     workflow_root.mkdir(parents=True, exist_ok=True)
     (workflow_root / "tests.yml").write_text(
         """
-        name: MBT-5 multiline modes with comments
+        name: ManifoldGuard multiline modes with comments
         on: [push]
         jobs:
           installability:
@@ -1208,7 +1208,7 @@ def test_validate_ci_workflow_contracts_accepts_multiline_matrix_mode_with_comme
     )
     (workflow_root / "docs-quality.yml").write_text(
         """
-        name: MBT-5 multiline modes with comments docs quality
+        name: ManifoldGuard multiline modes with comments docs quality
         on: [push]
         jobs:
           docs-quality:
@@ -1232,7 +1232,7 @@ def test_validate_ci_workflow_contracts_rejects_partial_multiline_matrix_mode(tm
     workflow_root.mkdir(parents=True, exist_ok=True)
     (workflow_root / "tests.yml").write_text(
         """
-        name: MBT-5 multiline partial mode
+        name: ManifoldGuard multiline partial mode
         on: [push]
         jobs:
           installability:
@@ -1261,7 +1261,7 @@ def test_validate_ci_workflow_contracts_rejects_partial_multiline_matrix_mode(tm
     )
     (workflow_root / "docs-quality.yml").write_text(
         """
-        name: MBT-5 multiline partial mode docs quality
+        name: ManifoldGuard multiline partial mode docs quality
         on: [push]
         jobs:
           docs-quality:

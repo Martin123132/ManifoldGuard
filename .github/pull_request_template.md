@@ -2,7 +2,7 @@
 
 ## Summary
 
-Describe the change and why it moves MBT-5 toward a better reference-bound regulator or product surface.
+Describe the change and why it moves ManifoldGuard toward a better reference-bound regulator or product surface.
 
 ## Type of Change
 
@@ -28,7 +28,7 @@ Describe the change and why it moves MBT-5 toward a better reference-bound regul
 
 ## Claim Discipline
 
-- [ ] This PR does not claim MBT-5 is a universal fact checker.
+- [ ] This PR does not claim ManifoldGuard is a universal fact checker.
 - [ ] Any performance or safety claim is tied to reproducible commands, corpora, or frozen ledgers.
 - [ ] Claim wording remains aligned with `CLAIMS.md`.
 

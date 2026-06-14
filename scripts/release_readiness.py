@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Summarize MBT-5 release readiness from manifest and evidence files."""
+"""Summarize ManifoldGuard release readiness from manifest and evidence files."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Print an operator-friendly MBT-5 release readiness summary."
+        description="Print an operator-friendly ManifoldGuard release readiness summary."
     )
     parser.add_argument(
         "--manifest",
@@ -170,7 +170,7 @@ def build_readiness_report(
 
     support_boundaries = manifest.get("support_boundaries", [])
     if not any("not a universal fact checker" in str(item).lower() for item in support_boundaries):
-        blockers.append("support boundaries must state MBT-5 is not a universal fact checker")
+        blockers.append("support boundaries must state ManifoldGuard is not a universal fact checker")
 
     if evidence["status"] == "not_provided":
         blockers.append("release evidence file was not provided")
@@ -203,7 +203,7 @@ def build_readiness_report(
 def format_text(report: dict[str, Any]) -> str:
     project = report["project"]
     lines = [
-        "MBT-5 Release Readiness",
+        "ManifoldGuard Release Readiness",
         "",
         f"Status: {report['status']}",
         f"Project: {project.get('public_name') or project.get('name')}",

@@ -1,5 +1,5 @@
 name: Bug report
-description: Report reproducible MBT-5 behavior that looks incorrect or unstable.
+description: Report reproducible ManifoldGuard behavior that looks incorrect or unstable.
 title: "[Bug]: "
 labels:
   - bug
@@ -7,13 +7,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping harden MBT-5. Please include a minimal reference/candidate example so the behavior can be reproduced offline.
+        Thanks for helping harden ManifoldGuard. Please include a minimal reference/candidate example so the behavior can be reproduced offline.
   - type: input
     id: version
     attributes:
-      label: mbt-check version
-      description: Run `mbt-check --version`.
-      placeholder: "mbt-check 0.1.0"
+      label: manifold-check version
+      description: Run `manifold-check --version`.
+      placeholder: "manifold-check 0.1.0"
     validations:
       required: true
   - type: dropdown
@@ -78,7 +78,7 @@ body:
     id: actual
     attributes:
       label: Actual behavior
-      description: What did MBT-5 emit, block, score, or report?
+      description: What did ManifoldGuard emit, block, score, or report?
     validations:
       required: true
   - type: textarea

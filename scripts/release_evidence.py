@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate release evidence for MBT-5 quality gates."""
+"""Generate release evidence for ManifoldGuard quality gates."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ DEFAULT_GATES = [
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build a JSON evidence report for MBT-5 release gates."
+        description="Build a JSON evidence report for ManifoldGuard release gates."
     )
     parser.add_argument(
         "--run",
