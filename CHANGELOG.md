@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- No unreleased changes.
+
+## 0.1.0 Release Candidate 3 - 2026-06-14
+
 - Added CSV audit export with `--format csv` for spreadsheet-friendly candidate review.
 - Added `mbt-check --version` and package `__version__` for reproducible audit logs.
 - Added a machine-readable product readiness manifest covering supported install modes, CLI formats, examples, CI gates, and support boundaries.
