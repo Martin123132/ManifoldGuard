@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- No unreleased changes.
+- Added a safe manual package build/publish workflow for TestPyPI and PyPI Trusted Publishing.
+- Added Markdown evaluation report generation from regulator evaluation JSON artifacts.
 
 ## 0.1.0 Release Candidate 3 - 2026-06-14
 

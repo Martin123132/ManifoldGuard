@@ -128,7 +128,8 @@
     "docs/report_schema.md",
     "docs/report_schema.json",
     "docs/quality_gates.md",
-    "docs/release_checklist.md"
+    "docs/release_checklist.md",
+    "docs/evaluation_report.md"
   ],
   "json_schema_examples": [
     "examples/single_report_example.json",
@@ -186,6 +187,11 @@
       "name": "evaluate_regulator",
       "path": "scripts/evaluate_regulator.py",
       "scope": "offline frozen regression corpus evaluation with expected action, candidate-safety, taxonomy, JSON artifact checks, and the mbt-eval package command"
+    },
+    {
+      "name": "build_eval_report",
+      "path": "scripts/build_eval_report.py",
+      "scope": "Markdown benchmark report generation from regulator evaluation JSON artifacts"
     },
     {
       "name": "preflight",

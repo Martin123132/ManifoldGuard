@@ -26,6 +26,7 @@ Evidence:
 - Installed evaluator command `mbt-eval` exposes the same offline corpus check.
 - Package data includes the default corpus used by `mbt-eval`.
 - Frozen corpus metrics include taxonomy summaries by case family for release triage.
+- `docs/evaluation_report.md` can be regenerated from `regulator-evaluation.json`.
 - Expected blocks and emits are explained by reference structure.
 - Edge cases include at least one safe candidate and one all-bad abstention path when relevant.
 
@@ -102,3 +103,16 @@ Evidence:
 - Core CI uploads the generated release evidence JSON and regulator evaluation JSON as workflow artifacts.
 - Support boundaries are clear in docs and issue templates.
 - `scripts/preflight.py` is run before release for combined checks and should reproduce locally.
+
+## Gate 8: Package Publishing Safety
+
+Publishing packages must be explicit and reversible during release-candidate validation.
+
+Evidence:
+
+- Distribution artifacts build on release tags.
+- `twine check` passes before any publish step.
+- PyPI publishing requires manual workflow dispatch with `publish=true`.
+- TestPyPI is used before PyPI.
+- Trusted Publishing environments are named `testpypi` and `pypi`.
+- No package publish happens from a blocked release readiness report.
