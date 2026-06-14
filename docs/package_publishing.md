@@ -88,3 +88,5 @@ Expected result:
 9. Run package workflow with `target=pypi` and `publish=true`.
 
 Do not publish when release readiness is blocked.
+
+Package-index install commands are documented in `docs/package_installation.md`.

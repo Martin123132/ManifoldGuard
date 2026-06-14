@@ -130,7 +130,8 @@
     "docs/quality_gates.md",
     "docs/release_checklist.md",
     "docs/evaluation_report.md",
-    "docs/package_publishing.md"
+    "docs/package_publishing.md",
+    "docs/package_installation.md"
   ],
   "json_schema_examples": [
     "examples/single_report_example.json",
