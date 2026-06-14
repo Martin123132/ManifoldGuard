@@ -112,6 +112,7 @@ Evidence:
 
 - Distribution artifacts build on release tags.
 - `twine check` passes before any publish step.
+- Trusted Publishing setup values are documented in `docs/package_publishing.md`.
 - PyPI publishing requires manual workflow dispatch with `publish=true`.
 - TestPyPI is used before PyPI.
 - Trusted Publishing environments are named `testpypi` and `pypi`.

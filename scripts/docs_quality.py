@@ -303,6 +303,8 @@ def parse_args():
             "docs/report_schema.json",
             "docs/quality_gates.md",
             "docs/release_checklist.md",
+            "docs/evaluation_report.md",
+            "docs/package_publishing.md",
         ],
         help="Markdown or JSON schema docs required for read checks.",
     )
