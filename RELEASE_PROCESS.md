@@ -1,14 +1,14 @@
 # Release Process
 
-This is the canonical maintainer flow for MBT-5 release candidates, final releases, and public performance claims. It turns the release checklist, quality gates, install modes, and generated evidence into one repeatable handoff.
+This is the canonical maintainer flow for ManifoldGuard release candidates, final releases, and public performance claims. It turns the release checklist, quality gates, install modes, and generated evidence into one repeatable handoff.
 
 ## 1. Confirm release identity
 
 Before running release gates, confirm the release target is internally consistent:
 
 - `pyproject.toml` contains the intended version.
-- `mbt-check --version` reports the intended version after install.
-- Installed `mbt-ai-tools` distribution metadata reports the same version.
+- `manifold-check --version` reports the intended version after install.
+- Installed `manifold-guard` distribution metadata reports the same version.
 - `docs/product_readiness_manifest.json` `project.package_version` matches the package version.
 - `CHANGELOG.md` contains a dated section for the release before tagging.
 - Package URLs point to the public GitHub repository.
@@ -18,7 +18,7 @@ Do not tag a release while version, manifest, metadata, or changelog identity is
 
 ## 2. Confirm install modes
 
-MBT-5 is offline-first by default. The core path must remain usable without embedding dependencies:
+ManifoldGuard is offline-first by default. The core path must remain usable without embedding dependencies:
 
 ```bash
 python -m pip install -e .
@@ -42,8 +42,8 @@ Run the deterministic checks from a clean working environment before release rev
 ```bash
 python scripts/validate_examples.py
 python scripts/docs_quality.py
-mbt-eval
-mbt-eval --output regulator-evaluation.json
+manifold-eval
+manifold-eval --output regulator-evaluation.json
 python scripts/evaluate_regulator.py
 python scripts/evaluate_regulator.py --output regulator-evaluation.json
 python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
@@ -58,8 +58,8 @@ Required evidence:
 - Docs-quality exits successfully.
 - Frozen regression corpus evaluation reports `Status: passed`.
 - Frozen regression corpus JSON output includes taxonomy metrics by case family.
-- Installed `mbt-eval` and script-based evaluator paths are equivalent.
-- The packaged default corpus for `mbt-eval` is included in package data.
+- Installed `manifold-eval` and script-based evaluator paths are equivalent.
+- The packaged default corpus for `manifold-eval` is included in package data.
 - `docs/evaluation_report.md` is regenerated from `regulator-evaluation.json`.
 - Full pytest suite passes.
 - Full preflight prints `Preflight completed successfully.`.
@@ -120,7 +120,7 @@ Release-bound commits should have green workflow results before tagging.
 
 ## 7. Enforce claim discipline
 
-MBT-5 regulates output against supplied references. It does not know external truth.
+ManifoldGuard regulates output against supplied references. It does not know external truth.
 
 Before adding or repeating a public claim:
 

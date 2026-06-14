@@ -5,9 +5,9 @@ Use this checklist before publishing a release candidate, final release, or publ
 ## Release Identity
 
 - Confirm the intended version in `pyproject.toml`.
-- Confirm `mbt-check --version` reports the intended version after install.
+- Confirm `manifold-check --version` reports the intended version after install.
 - Confirm `docs/product_readiness_manifest.json` `project.package_version` matches `pyproject.toml` version.
-- Confirm installed distribution version from `mbt-ai-tools` metadata matches both manifest and `pyproject.toml` version.
+- Confirm installed distribution version from `manifold-guard` metadata matches both manifest and `pyproject.toml` version.
 - Confirm `CHANGELOG.md` has a dated section for the release.
 - Confirm package URLs point to the public repository.
 - Confirm the release tag name matches the changelog section.
@@ -65,8 +65,8 @@ python scripts/preflight.py --docs-only
 
 ```bash
 python scripts/validate_examples.py
-mbt-eval
-mbt-eval --output regulator-evaluation.json
+manifold-eval
+manifold-eval --output regulator-evaluation.json
 python scripts/evaluate_regulator.py
 python scripts/evaluate_regulator.py --output regulator-evaluation.json
 python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
@@ -85,8 +85,8 @@ Required evidence:
 - Example fixture validation exits successfully.
 - Frozen regression corpus evaluation reports `Status: passed`.
 - Frozen regression corpus JSON output includes taxonomy metrics by case family.
-- Installed `mbt-eval` and `python scripts/evaluate_regulator.py` remain equivalent.
-- The packaged default corpus for `mbt-eval` is included in package data.
+- Installed `manifold-eval` and `python scripts/evaluate_regulator.py` remain equivalent.
+- The packaged default corpus for `manifold-eval` is included in package data.
 - `docs/evaluation_report.md` is regenerated from the regulator evaluation artifact.
 - `summary.status` is `passed`.
 - Every required gate has status `passed`.
@@ -151,9 +151,9 @@ on:
 Run a deterministic batch fixture:
 
 ```bash
-mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --fail-on-block
-mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format markdown --output audit.md
-mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format csv --output audit.csv
+manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --fail-on-block
+manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format markdown --output audit.md
+manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format csv --output audit.csv
 ```
 
 Required evidence:
@@ -186,7 +186,7 @@ Required evidence:
 
 - Install guidance shows both core and `.[embeddings]` modes.
 - Report docs cover JSON, Markdown, and CSV.
-- Support boundaries still say MBT-5 is not a universal fact checker.
+- Support boundaries still say ManifoldGuard is not a universal fact checker.
 - Public claims are limited to supplied references and frozen corpus evidence.
 
 ## Claim Gate

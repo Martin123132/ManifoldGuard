@@ -1,6 +1,6 @@
 # Security Policy
 
-MBT-5 is an inference-time regulator library and CLI. Security reports should focus on behavior that could cause unsafe execution, misleading audit output, dependency confusion, packaging risk, or accidental exposure of private input data.
+ManifoldGuard is an inference-time regulator library and CLI. Security reports should focus on behavior that could cause unsafe execution, misleading audit output, dependency confusion, packaging risk, or accidental exposure of private input data.
 
 ## Supported Versions
 
@@ -23,7 +23,7 @@ If no private contact is available, open a GitHub issue with limited detail and 
 
 ## Security Boundaries
 
-MBT-5 does not execute candidate text as code. Candidate and reference text should still be treated as untrusted input when integrating the CLI into larger automation.
+ManifoldGuard does not execute candidate text as code. Candidate and reference text should still be treated as untrusted input when integrating the CLI into larger automation.
 
 Recommended integration practices:
 

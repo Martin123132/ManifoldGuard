@@ -3,7 +3,7 @@
 This example turns a batch JSONL evaluation into a human-readable audit report.
 
 ```bash
-mbt-check \
+manifold-check \
   --input-jsonl examples/batch_input.jsonl \
   --no-embeddings \
   --format markdown \
@@ -13,7 +13,7 @@ mbt-check \
 Guard-mode audit command:
 
 ```bash
-mbt-check \
+manifold-check \
   --input-jsonl examples/batch_input.jsonl \
   --no-embeddings \
   --format markdown \
@@ -25,7 +25,7 @@ The guard command exits with status `2` when any input row blocks.
 Expected output:
 
 ```markdown
-# MBT-5 Audit Report
+# ManifoldGuard Audit Report
 
 ## Summary
 

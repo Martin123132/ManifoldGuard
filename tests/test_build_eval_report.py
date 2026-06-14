@@ -68,7 +68,7 @@ def test_build_markdown_includes_summary_and_taxonomy():
         generated_at="2026-06-14T00:00:00+00:00",
     )
 
-    assert "# MBT-5 Offline Evaluation Report" in content
+    assert "# ManifoldGuard Offline Evaluation Report" in content
     assert "Status: `passed`" in content
     assert "| capital_entity_swap | 1 | 1 | 0 | 1 | 0 |" in content
     assert "| unsupported_negation | 1 | 1 | 0 | 0 | 1 |" in content

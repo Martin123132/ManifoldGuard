@@ -1,4 +1,4 @@
-name: MBT-5 docs and manifest quality checks
+name: ManifoldGuard docs and manifest quality checks
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Summarize execution scope
         run: |
-          echo "MBT-5 docs-quality scope"
+          echo "ManifoldGuard docs-quality scope"
           echo "event=${{ github.event_name }}"
           echo "mode=${{ matrix.mode }}"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run combined MBT-5 preflight checks."""
+"""Run combined ManifoldGuard preflight checks."""
 
 from __future__ import annotations
 

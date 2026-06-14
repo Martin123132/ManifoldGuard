@@ -1,8 +1,9 @@
 """
-Public entrypoint for MBT-5 geometry-only tools.
+Public entrypoint for ManifoldGuard reference-bounded output regulation tools.
 
-The functions exposed here include the original stability helpers plus the
-reference-bound MBT-5 v11 candidate-regulation API.
+The package keeps the historical ``mbt_ai_tools`` import path for compatibility
+while exposing the ManifoldGuard product name through packaging and CLI entry
+points.
 """
 
 from importlib.metadata import PackageNotFoundError, version
@@ -23,10 +24,12 @@ from .mbt import (  # noqa: F401
 )
 
 __version__ = "0.1.0"
-try:
-    __version__ = version("mbt-ai-tools")
-except PackageNotFoundError:
-    pass
+for _distribution_name in ("manifold-guard", "mbt-ai-tools"):
+    try:
+        __version__ = version(_distribution_name)
+        break
+    except PackageNotFoundError:
+        pass
 
 __all__ = [
     "__version__",

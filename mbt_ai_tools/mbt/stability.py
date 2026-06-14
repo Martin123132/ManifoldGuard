@@ -58,7 +58,7 @@ def _extract_responses(prompt: str) -> List[str]:
 
 def confidence_score(prompt: str) -> float:
     """
-    Public helper: compute the MBT-5 internal entropy score for a prompt.
+    Public helper: compute the ManifoldGuard internal entropy score for a prompt.
 
     If the prompt contains multiple blank-line separated responses, each block
     is treated as a distinct sample exactly as the Zero-Box pilot expects.

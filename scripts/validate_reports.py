@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Validate MBT-5 report JSON artifacts against the JSON schema."""
+"""Validate ManifoldGuard report JSON artifacts against the JSON schema."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from pathlib import Path
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Validate MBT-5 report JSON and JSONL artifacts against a JSON schema."
+        description="Validate ManifoldGuard report JSON and JSONL artifacts against a JSON schema."
     )
     parser.add_argument(
         "--schema",

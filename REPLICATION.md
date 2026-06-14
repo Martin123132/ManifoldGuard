@@ -1,6 +1,6 @@
-# MBT-5 Replication Log
+# ManifoldGuard Replication Log
 
-This log records independent or fresh-environment checks of the public MBT-5 package and regression corpus.
+This log records independent or fresh-environment checks of the public ManifoldGuard package and regression corpus.
 
 ## 2026-05-08 Colab Offline Corpus Replication
 
@@ -47,7 +47,7 @@ PASS
 
 Scope note:
 
-This replication validates the offline MBT-5 clamp path over the public regression corpus. It does not validate the optional semantic embedding path.
+This replication validates the offline ManifoldGuard clamp path over the public regression corpus. It does not validate the optional semantic embedding path.
 
 Install modes:
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Compatibility wrapper for the MBT-5 offline evaluator."""
+"""Compatibility wrapper for the ManifoldGuard offline evaluator."""
 
 from __future__ import annotations
 

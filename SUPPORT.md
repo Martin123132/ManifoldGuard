@@ -1,6 +1,6 @@
 # Support
 
-This project supports MBT-5 as a reference-bound output regulator. It is not support for general fact checking, arbitrary model evaluation, or external truth verification.
+This project supports ManifoldGuard as a reference-bound output regulator. It is not support for general fact checking, arbitrary model evaluation, or external truth verification.
 
 ## Best Places to Start
 
@@ -16,7 +16,7 @@ Include:
 
 - The exact command or Python snippet.
 - The install mode: core or `.[embeddings]`.
-- The value of `mbt-check --version`.
+- The value of `manifold-check --version`.
 - Whether `--no-embeddings` or `use_embeddings=False` was used.
 - Minimal references and candidates that reproduce the behavior.
 - The actual output and expected output.
@@ -35,7 +35,7 @@ Good issue topics:
 
 Out-of-scope topics:
 
-- Asking MBT-5 to determine external truth without references.
+- Asking ManifoldGuard to determine external truth without references.
 - Claims about untested private datasets without reproducible evidence.
 - Network/model download failures outside the optional embedding path.
 - Requests to hide or bypass regulator clamps.

@@ -1,12 +1,14 @@
-<img width="1920" height="640" alt="MBT-5 banner" src="https://github.com/user-attachments/assets/57aa4d12-7d14-4726-a8f1-bd921692d94e" />
+<img width="1920" height="640" alt="ManifoldGuard banner" src="https://github.com/user-attachments/assets/57aa4d12-7d14-4726-a8f1-bd921692d94e" />
 
-# MBT-5 Geometry-Only Output Regulator
+> Rebrand note: ManifoldGuard is the public package/product name for the project previously published as `mbt-ai-tools`. The `mbt_ai_tools` import path and `mbt-check` / `mbt-eval` CLI aliases remain available for compatibility.
+
+# ManifoldGuard
 
 [![Offline regression tests](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/tests.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/tests.yml)
 [![Docs and manifest quality](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/docs-quality.yml)
 [![Package build](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/package-publish.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/package-publish.yml)
 
-MBT-5 tests whether AI candidate outputs remain inside a supplied semantic and relational reference manifold.
+ManifoldGuard tests whether AI candidate outputs remain inside a supplied semantic and relational reference manifold.
 
 It runs at inference time:
 
@@ -19,26 +21,26 @@ The regulator checks candidate outputs and either emits the safest supported can
 
 ## Core Claim
 
-MBT-5 treats hallucination as semantic or relational drift from supplied reference structure. It is not a fact oracle and does not claim direct access to external truth.
+ManifoldGuard treats hallucination as semantic or relational drift from supplied reference structure. It is not a fact oracle and does not claim direct access to external truth.
 
 ```text
 Universe does facts.
 Humans describe the universe.
 AI describes human descriptions.
-MBT-5 regulates AI descriptions against supplied human reference structure.
+ManifoldGuard regulates AI descriptions against supplied human reference structure.
 ```
 
 Supported public claim:
 
 ```text
-MBT-5 v11 blocked hallucinated AI outputs against supplied reference manifolds
+ManifoldGuard v11 blocked hallucinated AI outputs against supplied reference manifolds
 and relation constraints. In the frozen EXP20 ledger, it achieved confusion
 [[97, 0], [0, 160]] over 257 labelled candidates across 53 cases.
 ```
 
 ## Claims and Scope
 
-See [`CLAIMS.md`](CLAIMS.md) for the claim register. The short version: MBT-5 regulates outputs against supplied references and the public offline corpus; it is not claimed to be a universal fact checker.
+See [`CLAIMS.md`](CLAIMS.md) for the claim register. The short version: ManifoldGuard regulates outputs against supplied references and the public offline corpus; it is not claimed to be a universal fact checker.
 
 Continuous integration for the offline corpus lives in [`.github/workflows/tests.yml`](.github/workflows/tests.yml).
 
@@ -69,9 +71,9 @@ Blocked: 25
 
 The current public claim is limited to the supplied test suites and reference manifolds included in the project.
 
-## What MBT-5 Checks
+## What ManifoldGuard Checks
 
-MBT-5 combines:
+ManifoldGuard combines:
 
 - semantic geometry
 - internal consistency scoring
@@ -102,7 +104,7 @@ The Sun orbits Earth.
 
 ### Semantic Shock
 
-Candidate outputs are embedded into semantic space. MBT-5 measures distance from the reference manifold:
+Candidate outputs are embedded into semantic space. ManifoldGuard measures distance from the reference manifold:
 
 ```text
 shock = Gamma * ||candidate_embedding - reference_center||^2
@@ -112,11 +114,11 @@ Higher shock means stronger semantic drift.
 
 ### Literal Drift Guards
 
-Geometry alone can miss small but important substitutions. MBT-5 protects numbers, units, named entities, and key content tokens.
+Geometry alone can miss small but important substitutions. ManifoldGuard protects numbers, units, named entities, and key content tokens.
 
 ### Relation Clamps
 
-MBT-5 checks relation structure, not just semantic similarity.
+ManifoldGuard checks relation structure, not just semantic similarity.
 
 Copular examples:
 
@@ -138,7 +140,7 @@ Photosynthesis converts oxygen into carbon dioxide and water.
 
 ### Negation Clamp
 
-MBT-5 blocks unsupported negations of positive reference support.
+ManifoldGuard blocks unsupported negations of positive reference support.
 
 ```text
 Water is not liquid at room temperature.
@@ -149,7 +151,7 @@ General relativity proves gravity has no connection to mass or energy.
 
 ### Abstention
 
-When every candidate is unsafe, MBT-5 blocks instead of emitting the least-bad candidate.
+When every candidate is unsafe, ManifoldGuard blocks instead of emitting the least-bad candidate.
 
 ## Installation
 
@@ -200,11 +202,11 @@ print(result.emitted_text)  # The capital of France is Paris.
 Check the installed CLI version:
 
 ```bash
-mbt-check --version
+manifold-check --version
 ```
 
 ```bash
-mbt-check \
+manifold-check \
   --reference "The capital of France is Paris." \
   --candidate "The capital of France is London." \
   --candidate "The capital of France is Paris." \
@@ -222,7 +224,7 @@ EMIT | The capital of France is Paris. | score=0.0000
 JSON report output:
 
 ```bash
-mbt-check \
+manifold-check \
   --reference "The capital of France is Paris." \
   --candidate "The capital of France is London." \
   --candidate "The capital of France is Paris." \
@@ -235,7 +237,7 @@ See `examples/cli_json_report.md` for a complete offline JSON report demo.
 Optional token-level shock details can be included in regulation reports when embedding dependencies are installed:
 
 ```bash
-mbt-check \
+manifold-check \
   --reference "The capital of France is Paris." \
   --candidate "The capital of France is London." \
   --format json \
@@ -248,13 +250,13 @@ Token-level shock is embedding-backed, so keep `--no-embeddings` off when using 
 Batch JSONL evaluation:
 
 ```bash
-mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --output batch-report.jsonl
+manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --output batch-report.jsonl
 ```
 
 CI guard mode:
 
 ```bash
-mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --fail-on-block
+manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --fail-on-block
 ```
 
 `--fail-on-block` exits with status `2` when a single regulation run blocks or any batch row blocks. `--summary` appends a final batch summary JSON object.
@@ -262,7 +264,7 @@ mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --f
 Markdown audit report:
 
 ```bash
-mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format markdown --output audit.md
+manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format markdown --output audit.md
 ```
 
 See `examples/markdown_audit_report.md` for a complete Markdown audit demo.
@@ -270,7 +272,7 @@ See `examples/markdown_audit_report.md` for a complete Markdown audit demo.
 CSV audit export:
 
 ```bash
-mbt-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format csv --output audit.csv
+manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format csv --output audit.csv
 ```
 
 See `examples/csv_audit_report.csv` for a spreadsheet-friendly batch audit demo.
@@ -319,14 +321,14 @@ python scripts/preflight.py --tests-only
 Run the frozen offline regression corpus evaluation:
 
 ```bash
-mbt-eval
-mbt-eval --output regulator-evaluation.json
+manifold-eval
+manifold-eval --output regulator-evaluation.json
 python scripts/evaluate_regulator.py
 python scripts/evaluate_regulator.py --output regulator-evaluation.json
 python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
 ```
 
-`mbt-eval` uses the packaged regression corpus by default and accepts `--corpus path/to/corpus.jsonl` for custom offline checks.
+`manifold-eval` uses the packaged regression corpus by default and accepts `--corpus path/to/corpus.jsonl` for custom offline checks.
 The generated benchmark report lives at `docs/evaluation_report.md`.
 
 ## Package Build and Publish
@@ -419,7 +421,7 @@ mbt_ai_tools/
     tokens.py          leave-one-out token shock
     consensus.py       multi-agent / council logic
     regulator.py       v11 candidate regulator
-  cli.py               mbt-check command
+  cli.py               manifold-check command
 .github/workflows/
   tests.yml            GitHub Actions offline regression test workflow
 CHANGELOG.md          release notes

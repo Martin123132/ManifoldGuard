@@ -101,7 +101,7 @@ def test_evaluate_regulator_main_writes_json_output(tmp_path: Path, capsys):
     assert result == 0
     assert saved["status"] == "passed"
     assert saved["summary"]["total_cases"] == 2
-    assert "MBT-5 Offline Regression Evaluation" in captured.out
+    assert "ManifoldGuard Offline Regression Evaluation" in captured.out
 
 
 def test_package_evaluator_matches_script_interface(tmp_path: Path, capsys):
@@ -138,6 +138,9 @@ def test_package_evaluator_default_corpus_is_bundled():
 def test_mbt_eval_console_script_is_registered():
     pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
 
+    assert 'manifold-eval = "mbt_ai_tools.eval:main"' in pyproject.read_text(
+        encoding="utf-8"
+    )
     assert 'mbt-eval = "mbt_ai_tools.eval:main"' in pyproject.read_text(
         encoding="utf-8"
     )

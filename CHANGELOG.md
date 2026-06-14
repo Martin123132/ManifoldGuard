@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+
+- Rebrand the public package and CLI surface to ManifoldGuard (`manifold-guard`, `manifold-check`, `manifold-eval`) while keeping `mbt_ai_tools`, `mbt-check`, and `mbt-eval` as compatibility paths.
 - Added a safe manual package build/publish workflow for TestPyPI and PyPI Trusted Publishing.
 - Added Markdown evaluation report generation from regulator evaluation JSON artifacts.
 - Added package publishing setup documentation for GitHub Actions Trusted Publishing.
@@ -10,7 +12,7 @@
 ## 0.1.0 Release Candidate 3 - 2026-06-14
 
 - Added CSV audit export with `--format csv` for spreadsheet-friendly candidate review.
-- Added `mbt-check --version` and package `__version__` for reproducible audit logs.
+- Added `manifold-check --version` and package `__version__` for reproducible audit logs.
 - Added a machine-readable product readiness manifest covering supported install modes, CLI formats, examples, CI gates, and support boundaries.
 - Added contributor, security, support, and conduct documentation for product-grade project governance.
 - Added structured GitHub issue forms and a pull request template for reproducible bug reports and claim-safe review.
@@ -46,8 +48,8 @@
 - Added a golden offline behavior regression test for key emit/block paths.
 - Added CI upload of `release-evidence.json` as a workflow artifact in the core preflight path.
 - Added taxonomy summaries and JSON artifact output for frozen offline regulator evaluation.
-- Added `mbt-eval` as an installed console command for the offline frozen corpus evaluator.
-- Added packaged regression corpus data so `mbt-eval` has a default corpus after installation.
+- Added `manifold-eval` as an installed console command for the offline frozen corpus evaluator.
+- Added packaged regression corpus data so `manifold-eval` has a default corpus after installation.
 
 ## 0.1.0 Release Candidate 2 - 2026-06-11
 

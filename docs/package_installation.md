@@ -1,5 +1,7 @@
 # Package Installation
 
+> Compatibility note: `manifold-check` and `manifold-eval` are the preferred CLI commands. Existing automation can continue using `mbt-check` and `mbt-eval` during the transition.
+
 This document records install and smoke-test commands for package-index releases.
 
 The package is not required for local development. Source checkout installs remain supported:
@@ -14,20 +16,20 @@ python -m pip install numpy scipy
 After publishing to PyPI:
 
 ```bash
-python -m pip install mbt-ai-tools
+python -m pip install manifold-guard
 ```
 
 Optional embedding-backed mode:
 
 ```bash
-python -m pip install "mbt-ai-tools[embeddings]"
+python -m pip install "manifold-guard[embeddings]"
 ```
 
 Smoke check:
 
 ```bash
-mbt-check --version
-mbt-eval
+manifold-check --version
+manifold-eval
 ```
 
 ## TestPyPI install
@@ -38,7 +40,7 @@ After publishing to TestPyPI, install with PyPI as an extra dependency source be
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple \
-  mbt-ai-tools
+  manifold-guard
 ```
 
 Optional embedding-backed mode:
@@ -47,14 +49,14 @@ Optional embedding-backed mode:
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple \
-  "mbt-ai-tools[embeddings]"
+  "manifold-guard[embeddings]"
 ```
 
 Smoke check:
 
 ```bash
-mbt-check --version
-mbt-eval
+manifold-check --version
+manifold-eval
 ```
 
 Expected evaluator result:
@@ -68,6 +70,6 @@ Failed: 0
 
 ## Offline-first guarantee
 
-The default package install keeps core regulation offline-first. Use `mbt-check --no-embeddings` or Python API calls with `use_embeddings=False` when embedding dependencies are unavailable or intentionally disabled.
+The default package install keeps core regulation offline-first. Use `manifold-check --no-embeddings` or Python API calls with `use_embeddings=False` when embedding dependencies are unavailable or intentionally disabled.
 
-Embedding-backed behavior remains explicit through `mbt-ai-tools[embeddings]`.
+Embedding-backed behavior remains explicit through `manifold-guard[embeddings]`.

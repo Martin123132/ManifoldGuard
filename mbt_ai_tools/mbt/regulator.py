@@ -1,4 +1,4 @@
-"""MBT-5 v11 guarded candidate-selection tools.
+"""ManifoldGuard v11 guarded candidate-selection tools.
 
 This module implements the public, package-level version of the mechanisms
 recorded in the EXP01-EXP20 technical ledger: semantic shock, literal drift
@@ -201,7 +201,7 @@ class LiteralDrift:
 
 @dataclass
 class CandidateEvaluation:
-    """Full MBT-5 v11 decision record for one candidate."""
+    """Full ManifoldGuard v11 decision record for one candidate."""
 
     text: str
     pred_hallucinated: bool

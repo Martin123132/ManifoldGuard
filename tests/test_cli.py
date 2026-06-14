@@ -19,6 +19,16 @@ from mbt_ai_tools.cli import (
 
 
 def test_cli_version_reports_package_version(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["manifold-check", "--version"])
+
+    with pytest.raises(SystemExit) as exc:
+        main()
+
+    assert exc.value.code == 0
+    assert capsys.readouterr().out.strip() == f"manifold-check {__version__}"
+
+
+def test_legacy_cli_version_alias_reports_package_version(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["mbt-check", "--version"])
 
     with pytest.raises(SystemExit) as exc:
@@ -33,7 +43,7 @@ def test_cli_regulation_json_report_without_embeddings(monkeypatch, capsys):
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--reference",
             "The capital of France is Paris.",
             "--candidate",
@@ -63,7 +73,7 @@ def test_cli_regulation_json_report_can_write_output(monkeypatch, capsys, tmp_pa
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--reference",
             "The capital of France is Paris.",
             "--candidate",
@@ -115,7 +125,7 @@ def test_cli_batch_jsonl_report(monkeypatch, capsys, tmp_path):
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--input-jsonl",
             str(input_path),
             "--no-embeddings",
@@ -154,7 +164,7 @@ def test_cli_batch_summary_and_fail_on_block(monkeypatch, capsys, tmp_path):
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--input-jsonl",
             str(input_path),
             "--no-embeddings",
@@ -210,7 +220,7 @@ def test_cli_batch_markdown_audit(monkeypatch, capsys, tmp_path):
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--input-jsonl",
             str(input_path),
             "--no-embeddings",
@@ -222,7 +232,7 @@ def test_cli_batch_markdown_audit(monkeypatch, capsys, tmp_path):
 
     assert main() == 2
     output = capsys.readouterr().out
-    assert output.startswith("# MBT-5 Audit Report\n")
+    assert output.startswith("# ManifoldGuard Audit Report\n")
     assert "- Total cases: 2" in output
     assert "- Blocked: 1" in output
     assert "## Case: france-capital" in output
@@ -260,7 +270,7 @@ def test_cli_batch_csv_audit(monkeypatch, capsys, tmp_path):
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--input-jsonl",
             str(input_path),
             "--no-embeddings",
@@ -288,7 +298,7 @@ def test_cli_disallows_token_shock_with_no_embeddings_in_single_mode(monkeypatch
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--reference",
             "The capital of France is Paris.",
             "--candidate",
@@ -312,7 +322,7 @@ def test_cli_single_regulation_fail_on_block(monkeypatch, capsys):
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--reference",
             "Water is liquid at room temperature.",
             "--candidate",
@@ -331,7 +341,7 @@ def test_cli_single_markdown_report(monkeypatch, capsys):
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--reference",
             "The capital of France is Paris.",
             "--candidate",
@@ -346,7 +356,7 @@ def test_cli_single_markdown_report(monkeypatch, capsys):
 
     assert main() == 0
     output = capsys.readouterr().out
-    assert output.startswith("# MBT-5 Regulation Report\n")
+    assert output.startswith("# ManifoldGuard Regulation Report\n")
     assert "- Action: emit" in output
     assert "#### Candidate 0 - blocked" in output
     assert "#### Candidate 1 - safe" in output
@@ -371,7 +381,7 @@ def test_cli_disallows_token_shock_with_no_embeddings_in_batch_mode(monkeypatch,
         sys,
         "argv",
         [
-            "mbt-check",
+            "manifold-check",
             "--input-jsonl",
             str(input_path),
             "--no-embeddings",
@@ -463,9 +473,9 @@ def test_format_markdown_helpers_render_expected_sections():
     single = format_markdown_report(report)
     audit = format_markdown_audit([{**report, "id": "france-capital", "line": 1}])
 
-    assert "# MBT-5 Regulation Report" in single
+    assert "# ManifoldGuard Regulation Report" in single
     assert "known_participant_unsupported_relation_clamp" in single
-    assert "# MBT-5 Audit Report" in audit
+    assert "# ManifoldGuard Audit Report" in audit
     assert "## Case: france-capital" in audit
 
 

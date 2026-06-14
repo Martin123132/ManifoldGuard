@@ -6,7 +6,7 @@ This project follows a simple contribution standard: be precise, kind, evidence-
 
 - Assume good intent while asking for reproducible evidence.
 - Keep criticism focused on code, claims, docs, tests, and behavior.
-- Respect scope boundaries around MBT-5's claims.
+- Respect scope boundaries around ManifoldGuard's claims.
 - Help make issues easier to reproduce and fix.
 - Use inclusive language.
 
@@ -14,7 +14,7 @@ This project follows a simple contribution standard: be precise, kind, evidence-
 
 - Harassment, threats, or personal attacks.
 - Publishing private data, credentials, proprietary corpora, or exploit details.
-- Deliberately misrepresenting MBT-5's capabilities.
+- Deliberately misrepresenting ManifoldGuard's capabilities.
 - Pressuring maintainers to make unsupported public claims.
 - Repeatedly derailing technical discussions.
 

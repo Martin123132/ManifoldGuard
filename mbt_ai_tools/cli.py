@@ -14,7 +14,7 @@ from .mbt.tokens import token_shock_map
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="MBT-5 geometry-only confidence probe and v11 candidate regulator."
+        description="ManifoldGuard geometry-only confidence probe and v11 candidate regulator."
     )
     parser.add_argument(
         "--version",
@@ -24,7 +24,7 @@ def main() -> int:
     parser.add_argument(
         "text",
         nargs="?",
-        help='Text or blank-line separated responses to score, e.g. `mbt-check "answer a\n\nanswer b"`',
+        help='Text or blank-line separated responses to score, e.g. `manifold-check "answer a\n\nanswer b"`',
     )
     parser.add_argument(
         "--reference",
@@ -365,7 +365,7 @@ def format_csv_audit(reports: List[Dict[str, Any]]) -> str:
 def format_markdown_audit(reports: List[Dict[str, Any]]) -> str:
     summary = build_batch_summary(reports)
     lines = [
-        "# MBT-5 Audit Report",
+        "# ManifoldGuard Audit Report",
         "",
         "## Summary",
         "",
@@ -397,7 +397,7 @@ def format_markdown_audit(reports: List[Dict[str, Any]]) -> str:
 
 def format_markdown_report(report: Dict[str, Any]) -> str:
     lines = [
-        "# MBT-5 Regulation Report",
+        "# ManifoldGuard Regulation Report",
         "",
         f"- Action: {report['action']}",
         f"- Emitted index: {_markdown_value(report['emitted_index'])}",

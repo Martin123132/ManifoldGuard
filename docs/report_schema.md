@@ -1,4 +1,4 @@
-# MBT-5 Report Schema
+# ManifoldGuard Report Schema
 
 The release support contract for CLI modes, install modes, examples, and CI gates is captured in `docs/product_readiness_manifest.json`.
 
@@ -6,8 +6,8 @@ Machine-readable schema file:
 
 - `docs/report_schema.json`
 
-`mbt-check --format json` emits one JSON object for a single regulation run.
-`mbt-check --input-jsonl ...` emits one JSON object per input line.
+`manifold-check --format json` emits one JSON object for a single regulation run.
+`manifold-check --input-jsonl ...` emits one JSON object per input line.
 `--summary` appends a final summary object in batch JSONL mode.
 `--format markdown` emits a human-readable single report or batch audit report.
 `--format csv` emits one spreadsheet-friendly row per candidate evaluation.

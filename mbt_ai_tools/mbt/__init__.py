@@ -1,8 +1,8 @@
 """
-MBT-5 geometry-only inference-time regulator public API.
+ManifoldGuard geometry-only inference-time regulator public API.
 
 This package exposes light-weight helpers for semantic stability, geometric
-shock, and reference-bound MBT-5 v11 candidate regulation.
+shock, and reference-bound ManifoldGuard v11 candidate regulation.
 """
 
 from .embeddings import load_embedder, embed_texts
