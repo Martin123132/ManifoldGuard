@@ -149,6 +149,7 @@ Package artifacts are built by `.github/workflows/package-publish.yml` on versio
 Publishing policy:
 
 - Tag pushes build distributions and run `twine check`.
+- Trusted Publishing setup values are documented in `docs/package_publishing.md`.
 - Publishing is manual-only through `workflow_dispatch`.
 - Use `target=testpypi` and `publish=true` before attempting `target=pypi`.
 - Configure PyPI Trusted Publishing environments named `testpypi` and `pypi` before publishing.

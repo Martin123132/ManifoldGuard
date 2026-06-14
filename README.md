@@ -329,6 +329,8 @@ The generated benchmark report lives at `docs/evaluation_report.md`.
 
 Package distribution artifacts are built by `.github/workflows/package-publish.yml` on version tags and manual runs. Publishing is manual-only: run the workflow with `publish=true` and choose `testpypi` or `pypi` after configuring PyPI Trusted Publishing environments named `testpypi` and `pypi`.
 
+The exact Trusted Publishing setup values are documented in `docs/package_publishing.md`.
+
 Recommended release order:
 
 ```bash
