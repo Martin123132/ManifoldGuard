@@ -319,9 +319,24 @@ mbt-eval
 mbt-eval --output regulator-evaluation.json
 python scripts/evaluate_regulator.py
 python scripts/evaluate_regulator.py --output regulator-evaluation.json
+python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
 ```
 
 `mbt-eval` uses the packaged regression corpus by default and accepts `--corpus path/to/corpus.jsonl` for custom offline checks.
+The generated benchmark report lives at `docs/evaluation_report.md`.
+
+## Package Build and Publish
+
+Package distribution artifacts are built by `.github/workflows/package-publish.yml` on version tags and manual runs. Publishing is manual-only: run the workflow with `publish=true` and choose `testpypi` or `pypi` after configuring PyPI Trusted Publishing environments named `testpypi` and `pypi`.
+
+Recommended release order:
+
+```bash
+python -m build
+python -m twine check dist/*
+```
+
+Use TestPyPI first for release-candidate publishing. Do not publish to PyPI until tag CI, release evidence, and the regulator evaluation report are green.
 
 Run the canonical release check sequence:
 
@@ -406,6 +421,7 @@ RELEASE_PROCESS.md    maintainer release flow
   data/csv_exports/     expanded EXP01-EXP20 CSV exports
   scripts/
     docs_quality.py
+    build_eval_report.py
     evaluate_regulator.py
     release_evidence.py
     release_readiness.py

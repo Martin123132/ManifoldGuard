@@ -46,6 +46,7 @@ mbt-eval
 mbt-eval --output regulator-evaluation.json
 python scripts/evaluate_regulator.py
 python scripts/evaluate_regulator.py --output regulator-evaluation.json
+python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
 python -m pytest -q
 python scripts/preflight.py
 python scripts/preflight.py --docs-only
@@ -59,6 +60,7 @@ Required evidence:
 - Frozen regression corpus JSON output includes taxonomy metrics by case family.
 - Installed `mbt-eval` and script-based evaluator paths are equivalent.
 - The packaged default corpus for `mbt-eval` is included in package data.
+- `docs/evaluation_report.md` is regenerated from `regulator-evaluation.json`.
 - Full pytest suite passes.
 - Full preflight prints `Preflight completed successfully.`.
 - Docs-only preflight prints `Preflight completed successfully.`.
@@ -140,13 +142,25 @@ Only tag after local gates, release evidence, readiness summary, and CI parity a
 - Known limitations are stated plainly.
 - Support docs and issue templates are visible from the repository.
 
+## 9. Package publishing
+
+Package artifacts are built by `.github/workflows/package-publish.yml` on version tags and manual runs.
+
+Publishing policy:
+
+- Tag pushes build distributions and run `twine check`.
+- Publishing is manual-only through `workflow_dispatch`.
+- Use `target=testpypi` and `publish=true` before attempting `target=pypi`.
+- Configure PyPI Trusted Publishing environments named `testpypi` and `pypi` before publishing.
+- Do not publish packages when release readiness is blocked.
+
 After publishing:
 
 - Confirm the release page points to the correct tag.
 - Confirm the tag points to the intended commit.
 - Confirm package URLs and documentation links resolve.
 
-## 9. Failure policy
+## 10. Failure policy
 
 If any required gate fails or readiness reports blockers:
 

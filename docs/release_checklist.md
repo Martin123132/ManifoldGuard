@@ -69,6 +69,7 @@ mbt-eval
 mbt-eval --output regulator-evaluation.json
 python scripts/evaluate_regulator.py
 python scripts/evaluate_regulator.py --output regulator-evaluation.json
+python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
 python scripts/release_evidence.py --run --output release-evidence.json
 python scripts/release_readiness.py --evidence release-evidence.json
 ```
@@ -86,6 +87,7 @@ Required evidence:
 - Frozen regression corpus JSON output includes taxonomy metrics by case family.
 - Installed `mbt-eval` and `python scripts/evaluate_regulator.py` remain equivalent.
 - The packaged default corpus for `mbt-eval` is included in package data.
+- `docs/evaluation_report.md` is regenerated from the regulator evaluation artifact.
 - `summary.status` is `passed`.
 - Every required gate has status `passed`.
 - Release readiness prints `Status: ready`.
@@ -214,3 +216,15 @@ After publishing:
 - Confirm the release page points to the correct tag.
 - Confirm the tag points to the intended commit.
 - Confirm issue templates and support docs are visible in GitHub.
+
+## Package Publish Gate
+
+Before publishing to a package index:
+
+- Confirm `.github/workflows/package-publish.yml` built distributions on the release tag.
+- Confirm `python -m twine check dist/*` passed in CI.
+- Confirm PyPI Trusted Publishing environments exist for `testpypi` and `pypi`.
+- Publish to TestPyPI first with `workflow_dispatch`, `target=testpypi`, and `publish=true`.
+- Publish to PyPI only after TestPyPI install smoke checks pass.
+
+Do not publish packages from a blocked release evidence report.
