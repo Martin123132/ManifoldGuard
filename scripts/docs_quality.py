@@ -305,6 +305,7 @@ def parse_args():
             "docs/release_checklist.md",
             "docs/evaluation_report.md",
             "docs/package_publishing.md",
+            "docs/package_installation.md",
         ],
         help="Markdown or JSON schema docs required for read checks.",
     )

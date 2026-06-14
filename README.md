@@ -2,6 +2,10 @@
 
 # MBT-5 Geometry-Only Output Regulator
 
+[![Offline regression tests](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/tests.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/tests.yml)
+[![Docs and manifest quality](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/docs-quality.yml)
+[![Package build](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/package-publish.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/package-publish.yml)
+
 MBT-5 tests whether AI candidate outputs remain inside a supplied semantic and relational reference manifold.
 
 It runs at inference time:
@@ -330,6 +334,7 @@ The generated benchmark report lives at `docs/evaluation_report.md`.
 Package distribution artifacts are built by `.github/workflows/package-publish.yml` on version tags and manual runs. Publishing is manual-only: run the workflow with `publish=true` and choose `testpypi` or `pypi` after configuring PyPI Trusted Publishing environments named `testpypi` and `pypi`.
 
 The exact Trusted Publishing setup values are documented in `docs/package_publishing.md`.
+Package-index install commands and smoke checks are documented in `docs/package_installation.md`.
 
 Recommended release order:
 

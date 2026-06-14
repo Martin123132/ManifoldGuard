@@ -5,6 +5,7 @@
 - Added a safe manual package build/publish workflow for TestPyPI and PyPI Trusted Publishing.
 - Added Markdown evaluation report generation from regulator evaluation JSON artifacts.
 - Added package publishing setup documentation for GitHub Actions Trusted Publishing.
+- Added package-index installation and smoke-test documentation for TestPyPI and PyPI.
 
 ## 0.1.0 Release Candidate 3 - 2026-06-14
 

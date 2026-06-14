@@ -223,6 +223,7 @@ Before publishing to a package index:
 
 - Confirm `.github/workflows/package-publish.yml` built distributions on the release tag.
 - Confirm `docs/package_publishing.md` matches the package workflow and GitHub environments.
+- Confirm `docs/package_installation.md` includes TestPyPI and PyPI smoke commands.
 - Confirm `python -m twine check dist/*` passed in CI.
 - Confirm PyPI Trusted Publishing environments exist for `testpypi` and `pypi`.
 - Publish to TestPyPI first with `workflow_dispatch`, `target=testpypi`, and `publish=true`.
