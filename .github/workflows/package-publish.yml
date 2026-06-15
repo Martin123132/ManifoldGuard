@@ -41,7 +41,7 @@ jobs:
       - name: Upload distribution artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: mbt-dist
+          name: manifoldguard-dist
           path: dist/*
           if-no-files-found: error
 
@@ -59,7 +59,7 @@ jobs:
       - name: Download distribution artifacts
         uses: actions/download-artifact@v4
         with:
-          name: mbt-dist
+          name: manifoldguard-dist
           path: dist
 
       - name: Publish to TestPyPI
@@ -81,7 +81,7 @@ jobs:
       - name: Download distribution artifacts
         uses: actions/download-artifact@v4
         with:
-          name: mbt-dist
+          name: manifoldguard-dist
           path: dist
 
       - name: Publish to PyPI

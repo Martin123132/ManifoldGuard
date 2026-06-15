@@ -72,7 +72,7 @@ Expected result:
 
 - Workflow builds wheel and source distribution.
 - `twine check dist/*` passes.
-- `mbt-dist` artifact is uploaded.
+- `manifoldguard-dist` artifact is uploaded.
 - No package is published.
 
 ## Publish sequence
