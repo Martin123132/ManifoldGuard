@@ -4,13 +4,13 @@
     "name": "manifold-guard",
     "public_name": "ManifoldGuard",
     "package_version": "0.1.0",
-    "repository": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
+    "repository": "https://github.com/Martin123132/ManifoldGuard",
     "package_urls": {
-      "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-      "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-      "documentation": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md",
-      "issues": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues",
-      "changelog": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md"
+      "homepage": "https://github.com/Martin123132/ManifoldGuard",
+      "source": "https://github.com/Martin123132/ManifoldGuard",
+      "documentation": "https://github.com/Martin123132/ManifoldGuard/blob/main/README.md",
+      "issues": "https://github.com/Martin123132/ManifoldGuard/issues",
+      "changelog": "https://github.com/Martin123132/ManifoldGuard/blob/main/CHANGELOG.md"
     }
   },
   "runtime_guarantees": [

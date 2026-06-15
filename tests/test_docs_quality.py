@@ -41,11 +41,11 @@ def build_manifest(tmp_path: Path) -> Path:
         "project": {
             "name": "manifold-guard",
             "package_urls": {
-                "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-                "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-                "documentation": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md",
-                "issues": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues",
-                "changelog": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md",
+                "homepage": "https://github.com/Martin123132/ManifoldGuard",
+                "source": "https://github.com/Martin123132/ManifoldGuard",
+                "documentation": "https://github.com/Martin123132/ManifoldGuard/blob/main/README.md",
+                "issues": "https://github.com/Martin123132/ManifoldGuard/issues",
+                "changelog": "https://github.com/Martin123132/ManifoldGuard/blob/main/CHANGELOG.md",
             },
         }
     }
@@ -157,11 +157,11 @@ def base_manifest_dict() -> dict:
             "package_version": "0.1.0",
             "name": "manifold-guard",
             "package_urls": {
-                "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-                "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-                "documentation": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md",
-                "issues": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues",
-                "changelog": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md",
+                "homepage": "https://github.com/Martin123132/ManifoldGuard",
+                "source": "https://github.com/Martin123132/ManifoldGuard",
+                "documentation": "https://github.com/Martin123132/ManifoldGuard/blob/main/README.md",
+                "issues": "https://github.com/Martin123132/ManifoldGuard/issues",
+                "changelog": "https://github.com/Martin123132/ManifoldGuard/blob/main/CHANGELOG.md",
             },
         },
         "install_modes": [
@@ -219,12 +219,12 @@ def test_validate_package_urls_passes_when_aligned(docs_quality, tmp_path: Path)
         tmp_path / "pyproject.toml",
         """
         [project.urls]
-        Homepage = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
-        Repository = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
-        Documentation = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md"
-        Source = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
-        Issues = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues"
-        Changelog = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md"
+        Homepage = "https://github.com/Martin123132/ManifoldGuard"
+        Repository = "https://github.com/Martin123132/ManifoldGuard"
+        Documentation = "https://github.com/Martin123132/ManifoldGuard/blob/main/README.md"
+        Source = "https://github.com/Martin123132/ManifoldGuard"
+        Issues = "https://github.com/Martin123132/ManifoldGuard/issues"
+        Changelog = "https://github.com/Martin123132/ManifoldGuard/blob/main/CHANGELOG.md"
         """
     )
 
@@ -266,22 +266,22 @@ def test_validate_package_urls_flags_drift(docs_quality, tmp_path: Path):
         tmp_path / "pyproject.toml",
         """
         [project.urls]
-        Homepage = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
-        Source = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time"
-        Documentation = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md"
-        Issues = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues"
-        Changelog = "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md"
+        Homepage = "https://github.com/Martin123132/ManifoldGuard"
+        Source = "https://github.com/Martin123132/ManifoldGuard"
+        Documentation = "https://github.com/Martin123132/ManifoldGuard/blob/main/README.md"
+        Issues = "https://github.com/Martin123132/ManifoldGuard/issues"
+        Changelog = "https://github.com/Martin123132/ManifoldGuard/blob/main/CHANGELOG.md"
         """
     )
     manifest = {
         "project": {
             "name": "manifold-guard",
             "package_urls": {
-                "homepage": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-                "source": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time",
-                "documentation": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/README.md",
-                "issues": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/issues",
-                "changelog": "https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/blob/main/CHANGELOG.md?changed",
+                "homepage": "https://github.com/Martin123132/ManifoldGuard",
+                "source": "https://github.com/Martin123132/ManifoldGuard",
+                "documentation": "https://github.com/Martin123132/ManifoldGuard/blob/main/README.md",
+                "issues": "https://github.com/Martin123132/ManifoldGuard/issues",
+                "changelog": "https://github.com/Martin123132/ManifoldGuard/blob/main/CHANGELOG.md?changed",
             },
         }
     }
