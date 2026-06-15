@@ -4,9 +4,9 @@
 
 # ManifoldGuard
 
-[![Offline regression tests](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/tests.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/tests.yml)
-[![Docs and manifest quality](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/docs-quality.yml)
-[![Package build](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/package-publish.yml/badge.svg)](https://github.com/Martin123132/Geometry-Only-Control-of-LLM-Output-at-Inference-Time/actions/workflows/package-publish.yml)
+[![Offline regression tests](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml)
+[![Docs and manifest quality](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml)
+[![Package build](https://github.com/Martin123132/ManifoldGuard/actions/workflows/package-publish.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/package-publish.yml)
 
 ManifoldGuard tests whether AI candidate outputs remain inside a supplied semantic and relational reference manifold.
 

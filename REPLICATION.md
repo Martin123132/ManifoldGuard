@@ -8,7 +8,7 @@ Environment:
 
 ```text
 Google Colab fresh runtime
-Input artifact: Geometry-Only-Control-of-LLM-Output-at-Inference-Time-main.zip
+Input artifact: ManifoldGuard-main.zip
 Mode tested: offline literal / relation / negation clamp path
 Embeddings: disabled with --no-embeddings
 ```

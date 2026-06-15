@@ -9,7 +9,7 @@ Publishing is intentionally manual-only. The package workflow builds distributio
 GitHub repository:
 
 - Owner: `Martin123132`
-- Repository: `Geometry-Only-Control-of-LLM-Output-at-Inference-Time`
+- Repository: `ManifoldGuard`
 - Publishing workflow: `.github/workflows/package-publish.yml`
 
 GitHub environments:
@@ -25,7 +25,7 @@ Configure these values on TestPyPI first:
 
 - Project name: `manifold-guard`
 - Owner: `Martin123132`
-- Repository name: `Geometry-Only-Control-of-LLM-Output-at-Inference-Time`
+- Repository name: `ManifoldGuard`
 - Workflow filename: `package-publish.yml`
 - Environment name: `testpypi`
 
@@ -33,7 +33,7 @@ Configure these values on PyPI after TestPyPI succeeds:
 
 - Project name: `manifold-guard`
 - Owner: `Martin123132`
-- Repository name: `Geometry-Only-Control-of-LLM-Output-at-Inference-Time`
+- Repository name: `ManifoldGuard`
 - Workflow filename: `package-publish.yml`
 - Environment name: `pypi`
 
