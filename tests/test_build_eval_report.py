@@ -55,9 +55,37 @@ def sample_report() -> dict:
                 "id": "capital_entity_swap_france",
                 "passed": True,
                 "mismatches": [],
+                "candidate_diagnostics": [],
             }
         ],
     }
+
+
+def sample_failed_report() -> dict:
+    report = sample_report()
+    report["status"] = "failed"
+    report["summary"]["failed_cases"] = 1
+    report["summary"]["passed_cases"] = 1
+    report["cases"] = [
+        {
+            "id": "capital_entity_swap_france",
+            "passed": False,
+            "mismatches": ["action expected 'block', got 'emit'"],
+            "candidate_diagnostics": [
+                {
+                    "index": 0,
+                    "safe_to_emit": False,
+                    "clamp_summary": ["protected_entity", "final_literal_block"],
+                },
+                {
+                    "index": 1,
+                    "safe_to_emit": True,
+                    "clamp_summary": ["exact_reference_member"],
+                },
+            ],
+        }
+    ]
+    return report
 
 
 def test_build_markdown_includes_summary_and_taxonomy():
@@ -99,3 +127,16 @@ def test_build_eval_report_main_writes_output_from_json(tmp_path: Path, capsys):
     assert "Generated at: `2026-06-14T00:00:00+00:00`" in output_path.read_text(
         encoding="utf-8"
     )
+
+
+def test_build_markdown_includes_failure_candidate_diagnostics():
+    build_eval_report = load_build_eval_report_module()
+
+    content = build_eval_report.build_markdown(
+        sample_failed_report(),
+        generated_at="2026-06-14T00:00:00+00:00",
+    )
+
+    assert "`capital_entity_swap_france`" in content
+    assert "candidate `0` safe=`False` clamps=`protected_entity, final_literal_block`" in content
+    assert "candidate `1` safe=`True` clamps=`exact_reference_member`" in content

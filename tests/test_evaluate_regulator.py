@@ -37,6 +37,10 @@ def test_evaluate_regulator_passes_expected_corpus(tmp_path: Path):
     assert report["summary"]["actual_block"] == 1
     assert report["summary"]["families"]["france-capital"]["passed_cases"] == 1
     assert report["summary"]["families"]["unsupported-negation"]["passed_cases"] == 1
+    assert report["cases"][0]["candidate_diagnostics"][0]["safe_to_emit"] is False
+    assert "protected_entity" in report["cases"][0]["candidate_diagnostics"][0]["clamp_summary"]
+    assert report["cases"][1]["candidate_diagnostics"][0]["safe_to_emit"] is False
+    assert "negated_positive_support_clamp" in report["cases"][1]["candidate_diagnostics"][0]["clamp_summary"]
     assert "Failures:\n- none" in evaluate_regulator.format_text(report)
 
 
@@ -63,6 +67,7 @@ def test_evaluate_regulator_reports_mismatches(tmp_path: Path):
     assert report["summary"]["failed_cases"] == 1
     assert report["cases"][0]["passed"] is False
     assert "action expected 'block', got 'emit'" in report["cases"][0]["mismatches"]
+    assert "clamps: 0=protected_entity" in evaluate_regulator.format_text(report)
 
 
 def test_evaluate_regulator_rejects_invalid_candidate_safety(tmp_path: Path):

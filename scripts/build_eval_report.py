@@ -102,9 +102,16 @@ def build_markdown(report: dict[str, Any], *, generated_at: str | None = None) -
     lines.extend(["", "## Failures", ""])
     if failures:
         for case in failures:
-            lines.append(
-                f"- `{case['id']}`: {'; '.join(case.get('mismatches', []))}"
-            )
+            lines.append(f"- `{case['id']}`: {'; '.join(case.get('mismatches', []))}")
+            diagnostics = case.get("candidate_diagnostics", [])
+            if diagnostics:
+                for candidate in diagnostics:
+                    clamps = ", ".join(candidate.get("clamp_summary", []))
+                    safe = candidate.get("safe_to_emit")
+                    lines.append(
+                        f"  - candidate `{candidate.get('index')}` "
+                        f"safe=`{safe}` clamps=`{clamps}`"
+                    )
     else:
         lines.append("- none")
 
