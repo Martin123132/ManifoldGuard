@@ -38,6 +38,14 @@ jobs:
           python -m build
           python -m twine check dist/*
 
+      - name: Smoke install built wheel
+        run: |
+          python -m venv .venv-install-smoke
+          . .venv-install-smoke/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install dist/*.whl
+          python scripts/install_smoke.py
+
       - name: Upload distribution artifacts
         uses: actions/upload-artifact@v7
         with:

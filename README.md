@@ -372,6 +372,8 @@ The generated benchmark report lives at `docs/evaluation_report.md`.
 
 Package distribution artifacts are built by
 `.github/workflows/package-publish.yml` on version tags and manual runs.
+The build job also installs the built wheel in a clean virtual environment and
+runs `scripts/install_smoke.py` before artifacts are uploaded or published.
 Publishing is manual-only: run the workflow with `publish=true` and choose
 `testpypi` or `pypi` after configuring PyPI Trusted Publishing environments
 named `testpypi` and `pypi`.
@@ -489,6 +491,7 @@ scripts/
   release_evidence.py
   release_readiness.py
   release_check.py
+  install_smoke.py
   preflight.py
   validate_reports.py
 docs/

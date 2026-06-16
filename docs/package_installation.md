@@ -32,6 +32,23 @@ manifold-check --version
 manifold-eval
 ```
 
+## Built-wheel install smoke
+
+Package CI builds the wheel, installs that wheel into a clean virtual
+environment, and runs the installed-package smoke script before artifacts are
+uploaded or published:
+
+```bash
+python -m venv .venv-install-smoke
+. .venv-install-smoke/bin/activate
+python -m pip install --upgrade pip
+python -m pip install dist/*.whl
+python scripts/install_smoke.py
+```
+
+The smoke script checks the offline Python API and installed console entry
+points without using editable-source imports.
+
 ## TestPyPI install
 
 After publishing to TestPyPI, install with PyPI as an extra dependency source because runtime dependencies such as `numpy` and `scipy` are resolved from PyPI:

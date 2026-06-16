@@ -8,6 +8,8 @@
 - Added Markdown evaluation report generation from regulator evaluation JSON artifacts.
 - Added package publishing setup documentation for GitHub Actions Trusted Publishing.
 - Added package-index installation and smoke-test documentation for TestPyPI and PyPI.
+- Added a built-wheel install smoke check to package CI so distribution
+  artifacts prove public API and CLI entry points before upload.
 
 ## 0.1.0 Release Candidate 3 - 2026-06-14
 
