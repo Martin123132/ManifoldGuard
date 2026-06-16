@@ -80,8 +80,8 @@ Expected evaluator result:
 
 ```text
 Status: passed
-Cases: 220
-Passed: 220
+Cases: 229
+Passed: 229
 Failed: 0
 ```
 

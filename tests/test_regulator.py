@@ -177,6 +177,9 @@ def test_negated_positive_support_clamp():
         ("The Sun orbits the Earth.", "The Sun will not orbit the Earth."),
         ("Earth has an atmosphere.", "Earth has no atmosphere."),
         ("Plants use sunlight.", "Plants do not use sunlight."),
+        ("Plants use sunlight.", "Plants won't use sunlight."),
+        ("DNA contains genes.", "DNA cannot contain genes."),
+        ("Mammals need oxygen.", "Mammals shouldn't need oxygen."),
     ],
 )
 def test_negations_without_embeddings_remain_blocked(reference, candidate):
@@ -188,6 +191,39 @@ def test_negations_without_embeddings_remain_blocked(reference, candidate):
 
     assert evaluation.safe_to_emit is False
     assert "negated_positive_support_clamp" in evaluation.clamp_summary
+
+
+def test_multi_word_relation_direction_swap_is_blocked():
+    evaluation = evaluate_candidate(
+        "Sunlight uses solar panels.",
+        ["Solar panels use sunlight."],
+        use_embeddings=False,
+    )
+
+    assert evaluation.safe_to_emit is False
+    assert "known_participant_unsupported_relation_clamp" in evaluation.clamp_summary
+
+
+@pytest.mark.parametrize(
+    "reference,candidate",
+    [
+        ("The model output is a candidate result.", "The model output is the final truth."),
+        (
+            "The method has preliminary support.",
+            "The method is complete and experimentally verified.",
+        ),
+        ("The answer is a candidate result.", "The answer is automatically the final answer."),
+    ],
+)
+def test_overclaim_boundaries_block_without_embeddings(reference, candidate):
+    evaluation = evaluate_candidate(
+        candidate,
+        [reference],
+        use_embeddings=False,
+    )
+
+    assert evaluation.safe_to_emit is False
+    assert "overclaim_flag" in evaluation.clamp_summary
 
 
 def test_supported_capital_paraphrase_reference_no_false_relation_clamp():

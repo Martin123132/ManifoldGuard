@@ -60,6 +60,38 @@ For local experimentation without explicit dependency pinning, `pip install -e .
 
 If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`.
 
+## 2026-06-17 Local Offline Boundary Corpus Expansion
+
+Environment:
+
+```text
+Windows local workspace
+Mode tested: offline literal / relation / negation clamp path
+Embeddings: disabled with use_embeddings=False
+```
+
+Procedure:
+
+```text
+1. Added boundary cases for unsupported negation forms.
+2. Added relation-direction swaps with multi-word participants.
+3. Added explicit overclaim boundary cases.
+4. Regenerated examples/regression_corpus.jsonl from the corpus builder.
+```
+
+Observed result:
+
+```text
+python examples/build_regression_corpus.py
+wrote 229 cases
+```
+
+Status:
+
+```text
+PENDING CI
+```
+
 ## 2026-05-08 Local Offline Corpus Expansion
 
 Environment:

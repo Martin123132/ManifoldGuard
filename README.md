@@ -424,10 +424,11 @@ Expected evidence in a healthy release path:
 ## Regression Corpus
 
 The lightweight public regression corpus lives in
-`examples/regression_corpus.jsonl`. It currently contains 220 offline cases
+`examples/regression_corpus.jsonl`. It currently contains 229 offline cases
 covering entity swaps, multi-word capital handling, all-bad abstention, numeric
 drift, unit drift, role swaps, shared-subject relation repair, unsupported
-negation, historical-date drift, supported paraphrase, and overclaim blocking.
+negation, historical-date drift, supported paraphrase, relation-direction
+boundaries, negation boundaries, and overclaim blocking.
 
 Regenerate the corpus:
 

@@ -12,6 +12,8 @@
   artifacts prove public API and CLI entry points before upload.
 - Added per-candidate evaluator diagnostics for clamp summaries, literal drift,
   extracted relations, and safety decisions in offline regression reports.
+- Expanded the offline regression corpus to 229 cases with boundary coverage for
+  unsupported negation, relation direction swaps, and overclaim clamps.
 
 ## 0.1.0 Release Candidate 3 - 2026-06-14
 

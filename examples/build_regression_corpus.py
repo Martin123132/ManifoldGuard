@@ -45,6 +45,14 @@ def safe_case(case_id: str, references: list[str], safe_candidates: Iterable[str
     }
 
 
+def with_expected_clamps(
+    case: dict,
+    expected_clamp_contains: dict[int, list[str]],
+) -> dict:
+    case["expected_clamp_contains"] = expected_clamp_contains
+    return case
+
+
 def build_cases() -> list[dict]:
     cases: list[dict] = []
 
@@ -259,6 +267,19 @@ def build_cases() -> list[dict]:
     for key, reference, bad in relation_cases:
         cases.append(emit_case(f"noncopular_relation_{key}", [reference], bad, reference))
 
+    relation_boundary_cases = [
+        ("solar_panels_sunlight", "Solar panels use sunlight.", "Sunlight uses solar panels."),
+        ("digital_records_libraries", "Libraries store digital records.", "Digital records store libraries."),
+        ("cooling_system_water", "Cooling systems use water.", "Water uses cooling systems."),
+    ]
+    for key, reference, bad in relation_boundary_cases:
+        cases.append(
+            with_expected_clamps(
+                emit_case(f"noncopular_relation_boundary_{key}", [reference], bad, reference),
+                {0: ["known_participant_unsupported_relation_clamp"]},
+            )
+        )
+
     coordinated_cases = [
         (
             "photosynthesis_release_store",
@@ -316,6 +337,19 @@ def build_cases() -> list[dict]:
     for key, reference, bad in negation_cases:
         cases.append(block_case(f"unsupported_negation_{key}", [reference], [bad]))
 
+    negation_boundary_cases = [
+        ("plants_wont_sunlight", "Plants use sunlight.", "Plants won't use sunlight."),
+        ("dna_cannot_genes", "DNA contains genes.", "DNA cannot contain genes."),
+        ("mammals_shouldnt_oxygen", "Mammals need oxygen.", "Mammals shouldn't need oxygen."),
+    ]
+    for key, reference, bad in negation_boundary_cases:
+        cases.append(
+            with_expected_clamps(
+                block_case(f"unsupported_negation_boundary_{key}", [reference], [bad]),
+                {0: ["negated_positive_support_clamp"]},
+            )
+        )
+
     overclaim_cases = [
         ("gravity_solved", "Gravity is described by models.", "Gravity is fully solved by modern physics."),
         ("final_truth", "This is a provisional result.", "This is the final truth."),
@@ -330,9 +364,29 @@ def build_cases() -> list[dict]:
             "Gravity connects mass and energy in the supplied description.",
             "General relativity proves gravity has no connection to mass or energy.",
         ),
+        (
+            "candidate_final_truth",
+            "The model output is a candidate result.",
+            "The model output is the final truth.",
+        ),
+        (
+            "method_complete_verified",
+            "The method has preliminary support.",
+            "The method is complete and experimentally verified.",
+        ),
+        (
+            "answer_automatic_final",
+            "The answer is a candidate result.",
+            "The answer is automatically the final answer.",
+        ),
     ]
     for key, reference, bad in overclaim_cases:
-        cases.append(block_case(f"overclaim_{key}", [reference], [bad]))
+        cases.append(
+            with_expected_clamps(
+                block_case(f"overclaim_{key}", [reference], [bad]),
+                {0: ["overclaim_flag"]},
+            )
+        )
 
     exact_safe = [
         "Earth orbits the Sun.",
