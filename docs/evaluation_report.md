@@ -7,12 +7,12 @@ Generated at: `2026-06-14T00:00:00+00:00`
 - Status: `passed`
 - Corpus: `C:\Users\ollet\OneDrive\Documents\ManifoldGuard\mbt_ai_tools\data\regression_corpus.jsonl`
 - Mode: `offline`
-- Cases: `220`
-- Passed: `220`
+- Cases: `229`
+- Passed: `229`
 - Failed: `0`
-- Expected actions: emit=`185` block=`35`
-- Actual actions: emit=`185` block=`35`
-- Candidate evaluations: total=`365` safe=`185` blocked=`180`
+- Expected actions: emit=`188` block=`41`
+- Actual actions: emit=`188` block=`41`
+- Candidate evaluations: total=`377` safe=`188` blocked=`189`
 
 ## Taxonomy
 
@@ -25,11 +25,11 @@ Generated at: `2026-06-14T00:00:00+00:00`
 | coordinated_relation | 3 | 3 | 0 | 3 | 0 |
 | copular_relation | 35 | 35 | 0 | 35 | 0 |
 | exact_reference_member | 20 | 20 | 0 | 20 | 0 |
-| noncopular_relation | 37 | 37 | 0 | 37 | 0 |
+| noncopular_relation | 40 | 40 | 0 | 40 | 0 |
 | numeric_drift | 24 | 24 | 0 | 24 | 0 |
-| overclaim | 5 | 5 | 0 | 0 | 5 |
+| overclaim | 8 | 8 | 0 | 0 | 8 |
 | unit_drift | 16 | 16 | 0 | 16 | 0 |
-| unsupported_negation | 25 | 25 | 0 | 0 | 25 |
+| unsupported_negation | 28 | 28 | 0 | 0 | 28 |
 
 ## Failures
 
