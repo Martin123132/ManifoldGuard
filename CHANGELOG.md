@@ -10,6 +10,8 @@
 - Added package-index installation and smoke-test documentation for TestPyPI and PyPI.
 - Added a built-wheel install smoke check to package CI so distribution
   artifacts prove public API and CLI entry points before upload.
+- Added per-candidate evaluator diagnostics for clamp summaries, literal drift,
+  extracted relations, and safety decisions in offline regression reports.
 
 ## 0.1.0 Release Candidate 3 - 2026-06-14
 

@@ -10,6 +10,7 @@ from typing import Any, Sequence
 
 from mbt_ai_tools import __version__
 from mbt_ai_tools.mbt.regulator import regulate_candidates
+from mbt_ai_tools.mbt.regulator import CandidateEvaluation
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -126,6 +127,56 @@ def expected_bool_list(
     return value
 
 
+def relation_record(relation: tuple[str, str, str]) -> dict[str, str]:
+    subject, predicate, object_ = relation
+    return {
+        "subject": subject,
+        "predicate": predicate,
+        "object": object_,
+    }
+
+
+def candidate_diagnostic(
+    evaluation: CandidateEvaluation,
+    *,
+    index: int,
+) -> dict[str, Any]:
+    literal_drift = evaluation.literal_drift
+    return {
+        "index": index,
+        "text": evaluation.text,
+        "safe_to_emit": evaluation.safe_to_emit,
+        "pred_hallucinated": evaluation.pred_hallucinated,
+        "regulator_score": evaluation.regulator_score,
+        "mbt5_shock": evaluation.mbt5_shock,
+        "threshold": evaluation.threshold,
+        "literal_score": evaluation.literal_score,
+        "clamp_summary": list(evaluation.clamp_summary),
+        "exact_reference_member": evaluation.exact_reference_member,
+        "relations": [
+            relation_record(relation) for relation in evaluation.relations
+        ],
+        "negated_relations": [
+            relation_record(relation) for relation in evaluation.negated_relations
+        ],
+        "literal_drift": {
+            "novel_numbers": list(literal_drift.novel_numbers),
+            "novel_units": list(literal_drift.novel_units),
+            "novel_entities": list(literal_drift.novel_entities),
+            "novel_content": list(literal_drift.novel_content),
+        },
+    }
+
+
+def candidate_diagnostics(
+    evaluations: Sequence[CandidateEvaluation],
+) -> list[dict[str, Any]]:
+    return [
+        candidate_diagnostic(evaluation, index=index)
+        for index, evaluation in enumerate(evaluations)
+    ]
+
+
 def evaluate_case(
     item: dict[str, Any],
     *,
@@ -189,6 +240,7 @@ def evaluate_case(
         "actual_emitted_text": result.emitted_text,
         "expected_candidate_safe": expected_candidate_safe,
         "actual_candidate_safe": actual_candidate_safe,
+        "candidate_diagnostics": candidate_diagnostics(result.evaluations),
         "candidate_count": len(candidates),
         "passed": not mismatches,
         "mismatches": mismatches,
@@ -292,7 +344,12 @@ def format_text(report: dict[str, Any], *, max_failures: int = 10) -> str:
     failures = [case for case in report["cases"] if not case["passed"]]
     if failures:
         for case in failures[:max_failures]:
-            lines.append(f"- {case['id']}: {'; '.join(case['mismatches'])}")
+            clamp_summary = "; ".join(
+                f"{candidate['index']}={','.join(candidate['clamp_summary'])}"
+                for candidate in case.get("candidate_diagnostics", [])
+            )
+            suffix = f" | clamps: {clamp_summary}" if clamp_summary else ""
+            lines.append(f"- {case['id']}: {'; '.join(case['mismatches'])}{suffix}")
         remaining = len(failures) - max_failures
         if remaining > 0:
             lines.append(f"- ... {remaining} more failure(s)")
