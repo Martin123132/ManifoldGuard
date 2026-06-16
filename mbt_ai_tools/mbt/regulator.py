@@ -620,8 +620,6 @@ def _has_unsupported_negation(
     manifold: ReferenceManifold,
     candidate_negations: Optional[Set[Relation]] = None,
 ) -> bool:
-    if not _contains_negation(text):
-        return False
     if not manifold.relations:
         return False
 

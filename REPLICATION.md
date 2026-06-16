@@ -84,12 +84,15 @@ Observed result:
 ```text
 python examples/build_regression_corpus.py
 wrote 229 cases
+
+python -m pytest -q tests/test_regulator.py tests/test_regression_corpus.py
+29 passed
 ```
 
 Status:
 
 ```text
-PENDING CI
+PASS
 ```
 
 ## 2026-05-08 Local Offline Corpus Expansion
