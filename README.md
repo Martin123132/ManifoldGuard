@@ -1,14 +1,17 @@
-<img width="1920" height="640" alt="ManifoldGuard banner" src="https://github.com/user-attachments/assets/57aa4d12-7d14-4726-a8f1-bd921692d94e" />
-
-> Rebrand note: ManifoldGuard is the public package/product name for the project previously published as `mbt-ai-tools`. The `mbt_ai_tools` import path and `mbt-check` / `mbt-eval` CLI aliases remain available for compatibility.
-
 # ManifoldGuard
+
+![ManifoldGuard banner](https://github.com/user-attachments/assets/57aa4d12-7d14-4726-a8f1-bd921692d94e)
+
+> Rebrand note: ManifoldGuard is the public package/product name for the project
+> previously published as `mbt-ai-tools`. The `mbt_ai_tools` import path and
+> `mbt-check` / `mbt-eval` CLI aliases remain available for compatibility.
 
 [![Offline regression tests](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml)
 [![Docs and manifest quality](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml)
 [![Package build](https://github.com/Martin123132/ManifoldGuard/actions/workflows/package-publish.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/package-publish.yml)
 
-ManifoldGuard tests whether AI candidate outputs remain inside a supplied semantic and relational reference manifold.
+ManifoldGuard tests whether AI candidate outputs remain inside a supplied
+semantic and relational reference manifold.
 
 It runs at inference time:
 
@@ -17,11 +20,14 @@ It runs at inference time:
 - no model-weight inspection
 - no hidden classifier
 
-The regulator checks candidate outputs and either emits the safest supported candidate or blocks when every candidate is unsafe.
+The regulator checks candidate outputs and either emits the safest supported
+candidate or blocks when every candidate is unsafe.
 
 ## Core Claim
 
-ManifoldGuard treats hallucination as semantic or relational drift from supplied reference structure. It is not a fact oracle and does not claim direct access to external truth.
+ManifoldGuard treats hallucination as semantic or relational drift from supplied
+reference structure. It is not a fact oracle and does not claim direct access
+to external truth.
 
 ```text
 Universe does facts.
@@ -40,7 +46,9 @@ and relation constraints. In the frozen EXP20 ledger, it achieved confusion
 
 ## Claims and Scope
 
-See [`CLAIMS.md`](CLAIMS.md) for the claim register. The short version: ManifoldGuard regulates outputs against supplied references and the public offline corpus; it is not claimed to be a universal fact checker.
+See [`CLAIMS.md`](CLAIMS.md) for the claim register. The short version:
+ManifoldGuard regulates outputs against supplied references and the public
+offline corpus; it is not claimed to be a universal fact checker.
 
 Continuous integration for the offline corpus lives in [`.github/workflows/tests.yml`](.github/workflows/tests.yml).
 
@@ -69,7 +77,8 @@ Emitted: 28
 Blocked: 25
 ```
 
-The current public claim is limited to the supplied test suites and reference manifolds included in the project.
+The current public claim is limited to the supplied test suites and reference
+manifolds included in the project.
 
 ## What ManifoldGuard Checks
 
@@ -104,7 +113,8 @@ The Sun orbits Earth.
 
 ### Semantic Shock
 
-Candidate outputs are embedded into semantic space. ManifoldGuard measures distance from the reference manifold:
+Candidate outputs are embedded into semantic space. ManifoldGuard measures
+distance from the reference manifold:
 
 ```text
 shock = Gamma * ||candidate_embedding - reference_center||^2
@@ -114,7 +124,8 @@ Higher shock means stronger semantic drift.
 
 ### Literal Drift Guards
 
-Geometry alone can miss small but important substitutions. ManifoldGuard protects numbers, units, named entities, and key content tokens.
+Geometry alone can miss small but important substitutions. ManifoldGuard
+protects numbers, units, named entities, and key content tokens.
 
 ### Relation Clamps
 
@@ -151,7 +162,8 @@ General relativity proves gravity has no connection to mass or energy.
 
 ### Abstention
 
-When every candidate is unsafe, ManifoldGuard blocks instead of emitting the least-bad candidate.
+When every candidate is unsafe, ManifoldGuard blocks instead of emitting the
+least-bad candidate.
 
 ## Installation
 
@@ -160,10 +172,14 @@ Install modes:
 - Offline baseline (default): `python -m pip install -e . --no-deps`
 - Optional semantic mode: `python -m pip install -e .[embeddings]`
 
-If you need a plain editable install for local experimentation, use `pip install -e .` or `python -m pip install -e .`; both remain supported for compatibility.
+If you need a plain editable install for local experimentation, use
+`pip install -e .` or `python -m pip install -e .`; both remain supported for
+compatibility.
 
-The optional extra currently installs `sentence-transformers>=2.6.0,<3` for model-backed operation.
+The optional extra currently installs `sentence-transformers>=2.6.0,<6` for
+model-backed operation.
 
+<!-- markdownlint-disable-next-line MD013 -->
 If `sentence-transformers` is unavailable, use offline literal/relation-only regulation with `--no-embeddings` / `use_embeddings=False`.
 
 ```python
@@ -176,7 +192,9 @@ evaluate_candidate(
 )
 ```
 
-When embedding-backed operation is requested without `sentence-transformers`, you'll now get a direct error directing to install the dependency or use offline mode.
+When embedding-backed operation is requested without `sentence-transformers`,
+you'll now get a direct error directing to install the dependency or use
+offline mode.
 
 ## Python Usage
 
@@ -234,7 +252,8 @@ manifold-check \
 
 See `examples/cli_json_report.md` for a complete offline JSON report demo.
 
-Optional token-level shock details can be included in regulation reports when embedding dependencies are installed:
+Optional token-level shock details can be included in regulation reports when
+embedding dependencies are installed:
 
 ```bash
 manifold-check \
@@ -245,26 +264,39 @@ manifold-check \
   --token-shock-top-k 5
 ```
 
-Token-level shock is embedding-backed, so keep `--no-embeddings` off when using `--token-shock`.
+Token-level shock is embedding-backed, so keep `--no-embeddings` off when using
+`--token-shock`.
 
 Batch JSONL evaluation:
 
 ```bash
-manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --output batch-report.jsonl
+manifold-check \
+  --input-jsonl examples/batch_input.jsonl \
+  --no-embeddings \
+  --output batch-report.jsonl
 ```
 
 CI guard mode:
 
 ```bash
-manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --summary --fail-on-block
+manifold-check \
+  --input-jsonl examples/batch_input.jsonl \
+  --no-embeddings \
+  --summary \
+  --fail-on-block
 ```
 
-`--fail-on-block` exits with status `2` when a single regulation run blocks or any batch row blocks. `--summary` appends a final batch summary JSON object.
+`--fail-on-block` exits with status `2` when a single regulation run blocks or
+any batch row blocks. `--summary` appends a final batch summary JSON object.
 
 Markdown audit report:
 
 ```bash
-manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format markdown --output audit.md
+manifold-check \
+  --input-jsonl examples/batch_input.jsonl \
+  --no-embeddings \
+  --format markdown \
+  --output audit.md
 ```
 
 See `examples/markdown_audit_report.md` for a complete Markdown audit demo.
@@ -272,7 +304,11 @@ See `examples/markdown_audit_report.md` for a complete Markdown audit demo.
 CSV audit export:
 
 ```bash
-manifold-check --input-jsonl examples/batch_input.jsonl --no-embeddings --format csv --output audit.csv
+manifold-check \
+  --input-jsonl examples/batch_input.jsonl \
+  --no-embeddings \
+  --format csv \
+  --output audit.csv
 ```
 
 See `examples/csv_audit_report.csv` for a spreadsheet-friendly batch audit demo.
@@ -328,12 +364,17 @@ python scripts/evaluate_regulator.py --output regulator-evaluation.json
 python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
 ```
 
-`manifold-eval` uses the packaged regression corpus by default and accepts `--corpus path/to/corpus.jsonl` for custom offline checks.
+`manifold-eval` uses the packaged regression corpus by default and accepts
+`--corpus path/to/corpus.jsonl` for custom offline checks.
 The generated benchmark report lives at `docs/evaluation_report.md`.
 
 ## Package Build and Publish
 
-Package distribution artifacts are built by `.github/workflows/package-publish.yml` on version tags and manual runs. Publishing is manual-only: run the workflow with `publish=true` and choose `testpypi` or `pypi` after configuring PyPI Trusted Publishing environments named `testpypi` and `pypi`.
+Package distribution artifacts are built by
+`.github/workflows/package-publish.yml` on version tags and manual runs.
+Publishing is manual-only: run the workflow with `publish=true` and choose
+`testpypi` or `pypi` after configuring PyPI Trusted Publishing environments
+named `testpypi` and `pypi`.
 
 The exact Trusted Publishing setup values are documented in `docs/package_publishing.md`.
 Package-index install commands and smoke checks are documented in `docs/package_installation.md`.
@@ -345,7 +386,8 @@ python -m build
 python -m twine check dist/*
 ```
 
-Use TestPyPI first for release-candidate publishing. Do not publish to PyPI until tag CI, release evidence, and the regulator evaluation report are green.
+Use TestPyPI first for release-candidate publishing. Do not publish to PyPI
+until tag CI, release evidence, and the regulator evaluation report are green.
 
 Run the canonical release check sequence:
 
@@ -371,13 +413,19 @@ Expected evidence in a healthy release path:
 
 - A full `pytest` success summary (all tests passed, no failures).
 - docs-quality validator exits successfully.
-- regulator evaluation reports all frozen corpus cases passing, with taxonomy metrics in JSON output.
-- preflight prints `Preflight completed successfully.` for both full and docs-only modes.
+- regulator evaluation reports all frozen corpus cases passing, with taxonomy
+  metrics in JSON output.
+- preflight prints `Preflight completed successfully.` for both full and
+  docs-only modes.
 - no schema or URL drift errors.
 
 ## Regression Corpus
 
-The lightweight public regression corpus lives in `examples/regression_corpus.jsonl`. It currently contains 220 offline cases covering entity swaps, multi-word capital handling, all-bad abstention, numeric drift, unit drift, role swaps, shared-subject relation repair, unsupported negation, historical-date drift, supported paraphrase, and overclaim blocking.
+The lightweight public regression corpus lives in
+`examples/regression_corpus.jsonl`. It currently contains 220 offline cases
+covering entity swaps, multi-word capital handling, all-bad abstention, numeric
+drift, unit drift, role swaps, shared-subject relation repair, unsupported
+negation, historical-date drift, supported paraphrase, and overclaim blocking.
 
 Regenerate the corpus:
 
@@ -393,7 +441,8 @@ uv run --with pytest python -m pytest -q
 
 ## Experiment Lineage
 
-The full EXP01-EXP20 record is in `MBT5_EXP01_EXP20_TECHNICAL_LEDGER.md`. The expanded CSV experiment exports live in `data/csv_exports/`.
+The full EXP01-EXP20 record is in `MBT5_EXP01_EXP20_TECHNICAL_LEDGER.md`.
+The expanded CSV experiment exports live in `data/csv_exports/`.
 
 Key frozen output artifacts:
 
@@ -407,7 +456,8 @@ data/csv_exports/mbt5_exp20_failure_table.csv
 data/csv_exports/mbt5_exp20_patch_lineage.csv
 ```
 
-A `docs-quality` workflow also validates manifest JSON and referenced docs/examples so support artifacts stay consistent.
+A `docs-quality` workflow also validates manifest JSON and referenced
+docs/examples so support artifacts stay consistent.
 
 ## Project Layout
 
@@ -415,35 +465,39 @@ A `docs-quality` workflow also validates manifest JSON and referenced docs/examp
 mbt_ai_tools/
   mbt/
     embeddings.py      SentenceTransformer loader
-    eval.py            offline frozen corpus evaluator
     geometry.py        geometric median, shock, distance
     stability.py       self-consistency / entropy scoring
     tokens.py          leave-one-out token shock
     consensus.py       multi-agent / council logic
     regulator.py       v11 candidate regulator
+  data/
+    regression_corpus.jsonl
   cli.py               manifold-check command
+  eval.py              manifold-eval offline frozen corpus evaluator
 .github/workflows/
   tests.yml            GitHub Actions offline regression test workflow
+  docs-quality.yml     docs and manifest quality workflow
+  package-publish.yml  package build and manual publish workflow
 CHANGELOG.md          release notes
 CLAIMS.md             scoped public claims register
 RELEASE_PROCESS.md    maintainer release flow
-  data/csv_exports/     expanded EXP01-EXP20 CSV exports
-  scripts/
-    docs_quality.py
-    build_eval_report.py
-    evaluate_regulator.py
-    release_evidence.py
-    release_readiness.py
-    release_check.py
-    preflight.py
-    validate_reports.py
-  docs/
+data/csv_exports/     expanded EXP01-EXP20 CSV exports
+scripts/
+  docs_quality.py
+  build_eval_report.py
+  evaluate_regulator.py
+  release_evidence.py
+  release_readiness.py
+  release_check.py
+  preflight.py
+  validate_reports.py
+docs/
   product_readiness_manifest.json
   report_schema.json
   quality_gates.md
   release_checklist.md
   report_schema.md
-  examples/
+examples/
   batch_input.jsonl
   build_regression_corpus.py
   cli_json_report.md
@@ -464,4 +518,3 @@ LICENSE
 ## License
 
 See `LICENSE`.
-

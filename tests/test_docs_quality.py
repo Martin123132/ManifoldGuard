@@ -331,7 +331,7 @@ def test_validate_embedding_extra_passes_when_pinned(docs_quality, tmp_path: Pat
         tmp_path / "pyproject.toml",
         """
         [project.optional-dependencies]
-        embeddings = ["sentence-transformers>=2.6.0,<3", "torch"]
+        embeddings = ["sentence-transformers>=2.6.0,<6", "torch"]
         """
     )
 
@@ -387,7 +387,7 @@ def test_validate_embedding_extra_accepts_formatted_spec_range(docs_quality, tmp
         tmp_path / "pyproject.toml",
         """
         [project.optional-dependencies]
-        embeddings = ["sentence-transformers >= 2.6.0, < 3", "torch"]
+        embeddings = ["sentence-transformers >= 2.6.0, < 6", "torch"]
         """
     )
 

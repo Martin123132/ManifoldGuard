@@ -434,7 +434,7 @@ def validate_embedding_extra(pyproject_path: Path) -> None:
     if not any(
         isinstance(spec, str)
         and re.fullmatch(
-            r"sentence-transformers\s*>=\s*2\.6\.0\s*,\s*<\s*3",
+            r"sentence-transformers\s*>=\s*2\.6\.0\s*,\s*<\s*6",
             spec.strip(),
         )
         for spec in embeddings
