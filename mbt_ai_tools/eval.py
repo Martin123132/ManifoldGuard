@@ -60,6 +60,30 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Write the full JSON evaluation report to this path.",
     )
     parser.add_argument(
+        "--family",
+        action="append",
+        dest="families",
+        default=[],
+        help="Only evaluate cases from this family. Repeat to include multiple families.",
+    )
+    parser.add_argument(
+        "--case-id",
+        action="append",
+        dest="case_ids",
+        default=[],
+        help="Only evaluate an exact case id. Repeat to include multiple cases.",
+    )
+    parser.add_argument(
+        "--failures-only",
+        action="store_true",
+        help="Only include failing cases in the reported case list.",
+    )
+    parser.add_argument(
+        "--list-families",
+        action="store_true",
+        help="List evaluated corpus families and exit.",
+    )
+    parser.add_argument(
         "--max-failures",
         type=int,
         default=10,
@@ -301,17 +325,80 @@ def summarize_cases(cases: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def evaluate_corpus(path: Path = DEFAULT_CORPUS) -> dict[str, Any]:
-    cases = read_corpus(path)
-    summary = summarize_cases(cases)
+def normalized_filters(values: Sequence[str] | None) -> list[str]:
+    if values is None:
+        return []
+    return [value.strip() for value in values if value.strip()]
+
+
+def filter_evaluated_cases(
+    cases: list[dict[str, Any]],
+    *,
+    families: Sequence[str] | None = None,
+    case_ids: Sequence[str] | None = None,
+) -> list[dict[str, Any]]:
+    family_filters = set(normalized_filters(families))
+    case_id_filters = set(normalized_filters(case_ids))
+    selected_cases = cases
+    if family_filters:
+        selected_cases = [
+            case for case in selected_cases if case["family"] in family_filters
+        ]
+    if case_id_filters:
+        selected_cases = [
+            case for case in selected_cases if case["id"] in case_id_filters
+        ]
+    return selected_cases
+
+
+def evaluate_corpus(
+    path: Path = DEFAULT_CORPUS,
+    *,
+    families: Sequence[str] | None = None,
+    case_ids: Sequence[str] | None = None,
+    failures_only: bool = False,
+) -> dict[str, Any]:
+    all_cases = read_corpus(path)
+    selected_cases = filter_evaluated_cases(
+        all_cases,
+        families=families,
+        case_ids=case_ids,
+    )
+    reported_cases = (
+        [case for case in selected_cases if not case["passed"]]
+        if failures_only
+        else selected_cases
+    )
+    summary = summarize_cases(selected_cases)
     return {
         "schema_version": "1.0",
         "corpus": str(path),
         "mode": "offline",
         "status": "passed" if summary["failed_cases"] == 0 else "failed",
+        "case_filters": {
+            "families": normalized_filters(families),
+            "case_ids": normalized_filters(case_ids),
+            "failures_only": failures_only,
+            "selected_cases": len(selected_cases),
+            "reported_cases": len(reported_cases),
+        },
         "summary": summary,
-        "cases": cases,
+        "cases": reported_cases,
     }
+
+
+def format_family_list(report: dict[str, Any]) -> str:
+    lines = ["ManifoldGuard Offline Regression Families", ""]
+    families = report["summary"]["families"]
+    if not families:
+        lines.append("- none")
+    else:
+        for family, metrics in families.items():
+            lines.append(
+                f"- {family}: cases={metrics['total_cases']} "
+                f"passed={metrics['passed_cases']} failed={metrics['failed_cases']}"
+            )
+    return "\n".join(lines) + "\n"
 
 
 def format_text(report: dict[str, Any], *, max_failures: int = 10) -> str:
@@ -360,13 +447,33 @@ def format_text(report: dict[str, Any], *, max_failures: int = 10) -> str:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    report = evaluate_corpus(args.corpus)
+    report = evaluate_corpus(
+        args.corpus,
+        families=args.families,
+        case_ids=args.case_ids,
+        failures_only=args.failures_only,
+    )
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(
             json.dumps(report, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    if args.list_families:
+        if args.format == "json":
+            print(
+                json.dumps(
+                    {
+                        "case_filters": report["case_filters"],
+                        "families": report["summary"]["families"],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+        else:
+            print(format_family_list(report), end="")
+        return 0
     if args.format == "json":
         print(json.dumps(report, indent=2, sort_keys=True))
     else:

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `manifold-eval` filtering ergonomics with `--family`, `--case-id`,
+  `--failures-only`, and `--list-families` for faster offline corpus triage.
 
 ## 0.1.1 - 2026-06-17
 
