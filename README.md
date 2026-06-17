@@ -176,7 +176,7 @@ If you need a plain editable install for local experimentation, use
 `pip install -e .` or `python -m pip install -e .`; both remain supported for
 compatibility.
 
-The optional extra currently installs `sentence-transformers>=2.6.0,<6` for
+The optional extra currently installs `sentence-transformers>=2.6.0,<3` for
 model-backed operation.
 
 <!-- markdownlint-disable-next-line MD013 -->
