@@ -83,6 +83,34 @@ def test_release_evidence_run_records_success_and_failure(tmp_path: Path):
     assert report["gates"][1]["returncode"] == 3
 
 
+def test_release_evidence_adds_project_root_to_pythonpath(tmp_path: Path):
+    release_evidence = load_release_evidence_module()
+    marker = tmp_path / "local_marker.py"
+    marker.write_text("VALUE = 'available from project root'\n", encoding="utf-8")
+    gates = [
+        {
+            "name": "project_root_import",
+            "description": "Import from project root.",
+            "command": [
+                sys.executable,
+                "-c",
+                "import local_marker; print(local_marker.VALUE)",
+            ],
+        },
+    ]
+
+    report = release_evidence.build_release_evidence(
+        run=True,
+        gates=gates,
+        project_root=tmp_path,
+        max_output_chars=100,
+        generated_at="2026-06-12T00:00:00+00:00",
+    )
+
+    assert report["summary"]["status"] == "passed"
+    assert "available from project root" in report["gates"][0]["stdout_tail"]
+
+
 def test_release_evidence_empty_gate_list_is_partial_free(tmp_path: Path):
     release_evidence = load_release_evidence_module()
 
