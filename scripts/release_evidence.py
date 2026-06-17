@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import platform
 import shlex
 import subprocess
@@ -124,6 +125,18 @@ def dry_run_gate(gate: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def subprocess_env(project_root: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    existing_pythonpath = env.get("PYTHONPATH")
+    root = str(project_root)
+    env["PYTHONPATH"] = (
+        root
+        if not existing_pythonpath
+        else os.pathsep.join([root, existing_pythonpath])
+    )
+    return env
+
+
 def run_gate(
     gate: dict[str, Any],
     *,
@@ -137,6 +150,7 @@ def run_gate(
         check=False,
         capture_output=True,
         text=True,
+        env=subprocess_env(project_root),
     )
     duration = time.perf_counter() - started
     return {

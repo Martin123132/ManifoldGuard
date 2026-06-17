@@ -3,6 +3,8 @@
 ## Unreleased
 
 
+## 0.1.1 - 2026-06-17
+
 - Rebrand the public package and CLI surface to ManifoldGuard (`manifold-guard`, `manifold-check`, `manifold-eval`) while keeping `mbt_ai_tools`, `mbt-check`, and `mbt-eval` as compatibility paths.
 - Added a safe manual package build/publish workflow for TestPyPI and PyPI Trusted Publishing.
 - Added Markdown evaluation report generation from regulator evaluation JSON artifacts.
