@@ -70,6 +70,59 @@ def test_evaluate_regulator_reports_mismatches(tmp_path: Path):
     assert "clamps: 0=protected_entity" in evaluate_regulator.format_text(report)
 
 
+def test_evaluate_regulator_filters_by_family(tmp_path: Path):
+    evaluate_regulator = load_evaluate_regulator_module()
+    corpus = tmp_path / "corpus.jsonl"
+    corpus.write_text(PASSING_CORPUS, encoding="utf-8")
+
+    report = evaluate_regulator.evaluate_corpus(
+        corpus,
+        families=["unsupported-negation"],
+    )
+
+    assert report["status"] == "passed"
+    assert report["case_filters"]["families"] == ["unsupported-negation"]
+    assert report["case_filters"]["selected_cases"] == 1
+    assert report["summary"]["total_cases"] == 1
+    assert report["summary"]["actual_block"] == 1
+    assert report["cases"][0]["id"] == "unsupported-negation"
+
+
+def test_evaluate_regulator_filters_by_case_id(tmp_path: Path):
+    evaluate_regulator = load_evaluate_regulator_module()
+    corpus = tmp_path / "corpus.jsonl"
+    corpus.write_text(PASSING_CORPUS, encoding="utf-8")
+
+    report = evaluate_regulator.evaluate_corpus(
+        corpus,
+        case_ids=["france-capital"],
+    )
+
+    assert report["status"] == "passed"
+    assert report["case_filters"]["case_ids"] == ["france-capital"]
+    assert report["summary"]["total_cases"] == 1
+    assert report["summary"]["actual_emit"] == 1
+    assert report["cases"][0]["id"] == "france-capital"
+
+
+def test_evaluate_regulator_failures_only_reports_only_failing_cases(tmp_path: Path):
+    evaluate_regulator = load_evaluate_regulator_module()
+    corpus = tmp_path / "corpus.jsonl"
+    corpus.write_text(
+        PASSING_CORPUS.replace('"expected_action":"emit"', '"expected_action":"block"', 1),
+        encoding="utf-8",
+    )
+
+    report = evaluate_regulator.evaluate_corpus(corpus, failures_only=True)
+
+    assert report["status"] == "failed"
+    assert report["summary"]["total_cases"] == 2
+    assert report["summary"]["failed_cases"] == 1
+    assert report["case_filters"]["failures_only"] is True
+    assert report["case_filters"]["reported_cases"] == 1
+    assert [case["id"] for case in report["cases"]] == ["france-capital"]
+
+
 def test_evaluate_regulator_rejects_invalid_candidate_safety(tmp_path: Path):
     evaluate_regulator = load_evaluate_regulator_module()
     corpus = tmp_path / "corpus.jsonl"
@@ -107,6 +160,26 @@ def test_evaluate_regulator_main_writes_json_output(tmp_path: Path, capsys):
     assert saved["status"] == "passed"
     assert saved["summary"]["total_cases"] == 2
     assert "ManifoldGuard Offline Regression Evaluation" in captured.out
+
+
+def test_evaluate_regulator_main_lists_families(tmp_path: Path, capsys):
+    evaluate_regulator = load_evaluate_regulator_module()
+    corpus = tmp_path / "corpus.jsonl"
+    corpus.write_text(PASSING_CORPUS, encoding="utf-8")
+
+    result = evaluate_regulator.main(
+        [
+            "--corpus",
+            str(corpus),
+            "--list-families",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert result == 0
+    assert "ManifoldGuard Offline Regression Families" in captured.out
+    assert "- france-capital: cases=1 passed=1 failed=0" in captured.out
+    assert "- unsupported-negation: cases=1 passed=1 failed=0" in captured.out
 
 
 def test_package_evaluator_matches_script_interface(tmp_path: Path, capsys):

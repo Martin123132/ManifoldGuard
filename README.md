@@ -359,13 +359,20 @@ Run the frozen offline regression corpus evaluation:
 ```bash
 manifold-eval
 manifold-eval --output regulator-evaluation.json
+manifold-eval --list-families
+manifold-eval --family unsupported_negation
+manifold-eval --case-id unsupported_negation_water
+manifold-eval --failures-only --format json --output failing-cases.json
 python scripts/evaluate_regulator.py
 python scripts/evaluate_regulator.py --output regulator-evaluation.json
 python scripts/build_eval_report.py --input regulator-evaluation.json --output docs/evaluation_report.md
 ```
 
 `manifold-eval` uses the packaged regression corpus by default and accepts
-`--corpus path/to/corpus.jsonl` for custom offline checks.
+`--corpus path/to/corpus.jsonl` for custom offline checks. Use `--family` or
+`--case-id` to narrow a regression pass, `--failures-only` to export only
+failing case details, and `--list-families` to inspect available taxonomy
+groups.
 The generated benchmark report lives at `docs/evaluation_report.md`.
 
 ## Package Build and Publish
