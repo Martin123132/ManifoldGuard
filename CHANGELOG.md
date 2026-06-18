@@ -1,13 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.1.2 - Unreleased
 
+- Started the 0.1.2 development cycle after the public 0.1.1 PyPI release.
+
+## 0.1.1 - 2026-06-18
+
+- Published `manifold-guard==0.1.1` to PyPI and verified a clean public install
+  with `manifold-check --version` plus `manifold-eval` passing 229 / 229 cases.
 - Added `manifold-eval` filtering ergonomics with `--family`, `--case-id`,
   `--failures-only`, and `--list-families` for faster offline corpus triage.
 - Tightened the optional embeddings extra to `sentence-transformers>=2.6.0,<3`
   and aligned docs-quality enforcement with the release-hardening policy.
-
-## 0.1.1 - 2026-06-17
 
 - Rebrand the public package and CLI surface to ManifoldGuard (`manifold-guard`, `manifold-check`, `manifold-eval`) while keeping `mbt_ai_tools`, `mbt-check`, and `mbt-eval` as compatibility paths.
 - Added a safe manual package build/publish workflow for TestPyPI and PyPI Trusted Publishing.
