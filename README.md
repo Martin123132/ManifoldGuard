@@ -24,6 +24,51 @@ It runs at inference time:
 The regulator checks candidate outputs and either emits the safest supported
 candidate or blocks when every candidate is unsafe.
 
+## 30-Second Quickstart
+
+Install ManifoldGuard from PyPI:
+
+```bash
+python -m pip install manifold-guard
+```
+
+Run an offline reference-bounded check:
+
+```bash
+manifold-check \
+  --reference "The capital of France is Paris." \
+  --candidate "The capital of France is London." \
+  --candidate "The capital of France is Paris." \
+  --no-embeddings
+```
+
+Expected result:
+
+```text
+EMIT | The capital of France is Paris. | score=0.0000
+```
+
+Python API:
+
+```python
+from mbt_ai_tools import regulate_candidates
+
+result = regulate_candidates(
+    [
+        "The capital of France is London.",
+        "The capital of France is Paris.",
+    ],
+    ["The capital of France is Paris."],
+    use_embeddings=False,
+)
+
+print(result.action)
+print(result.emitted_text)
+```
+
+ManifoldGuard is useful when you already have trusted reference statements and
+want to reject outputs that drift away from them.
+
 ## Core Claim
 
 ManifoldGuard treats hallucination as semantic or relational drift from supplied
@@ -80,6 +125,19 @@ Blocked: 25
 
 The current public claim is limited to the supplied test suites and reference
 manifolds included in the project.
+
+## Known Limitations
+
+- ManifoldGuard is not a universal fact checker.
+- It only regulates against the references you provide.
+- If the references are wrong, incomplete, or ambiguous, outputs are judged
+  against that flawed reference structure.
+- Offline mode emphasizes literal, relation, negation, numeric, and unit drift;
+  embedding-backed semantic geometry is optional.
+- Public performance claims are limited to the frozen supplied corpus and
+  documented experiment lineage.
+- Token-shock diagnostics require embedding dependencies and are not available
+  in strict `--no-embeddings` mode.
 
 ## What ManifoldGuard Checks
 
