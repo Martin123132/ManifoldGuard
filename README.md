@@ -9,6 +9,7 @@
 [![Offline regression tests](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml)
 [![Docs and manifest quality](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml)
 [![Package build](https://github.com/Martin123132/ManifoldGuard/actions/workflows/package-publish.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/package-publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/manifold-guard.svg)](https://pypi.org/project/manifold-guard/)
 
 ManifoldGuard tests whether AI candidate outputs remain inside a supplied
 semantic and relational reference manifold.
@@ -168,6 +169,13 @@ least-bad candidate.
 ## Installation
 
 Install modes:
+
+Public PyPI install:
+
+- Offline/core mode: `python -m pip install manifold-guard`
+- Optional semantic mode: `python -m pip install "manifold-guard[embeddings]"`
+
+Source checkout install:
 
 - Offline baseline (default): `python -m pip install -e . --no-deps`
 - Optional semantic mode: `python -m pip install -e .[embeddings]`
