@@ -9,6 +9,8 @@
   so lettered subjects and delayed-opening cases remain aligned offline.
 - Added `docs/exp21_challenge.md` to document the challenge corpus workflow,
   replay packs, report comparison, and promotion boundary.
+- Added the EXP21 challenge guide to the product readiness manifest and
+  docs-quality required document set.
 - Added opt-in `manifold-check --explain` decision explanations for text, JSON,
   and Markdown regulation reports.
 - Added `scripts/compare_eval_reports.py` to compare saved offline evaluator

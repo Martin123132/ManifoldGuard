@@ -304,6 +304,7 @@ def parse_args():
             "docs/quality_gates.md",
             "docs/release_checklist.md",
             "docs/evaluation_report.md",
+            "docs/exp21_challenge.md",
             "docs/package_publishing.md",
             "docs/package_installation.md",
         ],
