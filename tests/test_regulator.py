@@ -167,6 +167,54 @@ def test_negated_positive_support_clamp():
     assert "negated_positive_support_clamp" in evaluation.clamp_summary
 
 
+def test_supported_reference_negation_blocks_positive_counterclaim():
+    result = regulate_candidates(
+        [
+            "The dataset contains city names and phone numbers.",
+            "The dataset contains city names but no phone numbers.",
+        ],
+        ["The dataset contains city names but does not contain phone numbers."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The dataset contains city names but no phone numbers."
+    assert result.evaluations[0].safe_to_emit is False
+    assert "negated_reference_relation_clamp" in result.evaluations[0].clamp_summary
+    assert result.evaluations[1].safe_to_emit is True
+    assert "negated_positive_support_clamp" not in result.evaluations[1].clamp_summary
+
+
+def test_supported_reference_negation_keeps_exact_negative_reference_safe():
+    evaluation = evaluate_candidate(
+        "Mars has two moons and does not have a dense ring system.",
+        ["Mars has two moons and does not have a dense ring system."],
+        use_embeddings=False,
+    )
+
+    assert evaluation.safe_to_emit is True
+    assert "exact_reference_member" in evaluation.clamp_summary
+    assert "negated_positive_support_clamp" not in evaluation.clamp_summary
+    assert "negated_reference_relation_clamp" not in evaluation.clamp_summary
+
+
+def test_exclusion_supports_equivalent_negative_candidate():
+    result = regulate_candidates(
+        [
+            "The trial included adults and children.",
+            "The trial included adults and did not include children.",
+        ],
+        ["The trial included adults and excluded children."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The trial included adults and did not include children."
+    assert result.evaluations[0].safe_to_emit is False
+    assert "negated_reference_relation_clamp" in result.evaluations[0].clamp_summary
+    assert result.evaluations[1].safe_to_emit is True
+
+
 @pytest.mark.parametrize(
     "reference,candidate",
     [

@@ -14,6 +14,8 @@
   relation composition, qualifier overclaims, and all-bad near misses.
 - Added evaluator taxonomy prefixes for EXP21 challenge families so challenge
   reports summarize by intended family instead of per-case fragments.
+- Added reference-side negative relation support so candidates can preserve
+  supplied negative evidence while positive counterclaims are clamped.
 
 ## 0.1.1 - 2026-06-18
 
