@@ -3,6 +3,8 @@
 ## 0.1.2 - Unreleased
 
 - Started the 0.1.2 development cycle after the public 0.1.1 PyPI release.
+- Added relation-composition extraction for shared-subject verb chains and
+  additional relation verbs so EXP21 recombination swaps are clamped offline.
 - Added opt-in `manifold-check --explain` decision explanations for text, JSON,
   and Markdown regulation reports.
 - Added `scripts/compare_eval_reports.py` to compare saved offline evaluator
