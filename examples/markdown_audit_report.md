@@ -80,7 +80,7 @@ Expected output:
 - Score: 0.0000
 - Shock: 0.0000
 - Literal score: 0.0000
-- Clamps: negated_positive_support_clamp, known_participant_unsupported_relation_clamp, guarded_known_participant_unsupported_relation_clamp, exp19b_guarded_patch_clamp
-- Relations: water / is / not liquid at room temperature
+- Clamps: negated_positive_support_clamp
+- Relations: none
 - Negated relations: water / is / liquid at room temperature
 ```
