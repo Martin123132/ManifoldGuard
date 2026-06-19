@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.3 - Unreleased
+## 0.1.3 - 2026-06-19
 
 - Started the 0.1.3 development cycle after the public 0.1.2 PyPI release.
 - Added the exploratory EXP22 challenge corpus seed for broader post-EXP21
