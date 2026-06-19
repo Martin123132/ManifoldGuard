@@ -159,6 +159,26 @@ _NEGATION_PREFIX = (
     r"are not|was not|were not|doesnt|dont|didnt|arent|isnt|wasnt|werent|cant|wont|"
     r"wouldnt|couldnt|shouldnt|hasnt|havent|mustnt|mightnt|not|never|aint)"
 )
+_AUXILIARY_SUBJECTS = {
+    "does",
+    "do",
+    "did",
+    "can",
+    "will",
+    "would",
+    "should",
+    "could",
+    "must",
+    "may",
+    "might",
+    "has",
+    "have",
+    "had",
+    "is",
+    "are",
+    "was",
+    "were",
+}
 _CAPITAL_OF_PREFIXES = (
     "capital of ",
     "capital city of ",
@@ -233,6 +253,7 @@ class ReferenceManifold:
 
     references: List[str]
     relations: Set[Relation] = field(default_factory=set)
+    negated_relations: Set[Relation] = field(default_factory=set)
     center: Optional[np.ndarray] = None
     threshold: float = THRESHOLD_FLOOR
     normalized_reference_members: Set[str] = field(default_factory=set)
@@ -256,6 +277,9 @@ class ReferenceManifold:
         extracted_relations = (
             set().union(*(extract_relations(r) for r in refs)) if refs else set()
         )
+        extracted_negated_relations = (
+            set().union(*(_extract_negated_relations(r) for r in refs)) if refs else set()
+        )
         relation_set = supplied_relations | extracted_relations
 
         center: Optional[np.ndarray] = None
@@ -272,6 +296,7 @@ class ReferenceManifold:
         return cls(
             references=refs,
             relations=relation_set,
+            negated_relations=extracted_negated_relations,
             center=center,
             threshold=threshold,
             normalized_reference_members={normalize_text(r) for r in refs},
@@ -315,6 +340,7 @@ def _extract_negated_relations(text: str) -> Set[Relation]:
         return set()
 
     negated: Set[Relation] = set()
+    negated.update(_extract_negated_relations_from_segment(normalized))
     for segment in _split_relation_segments(normalized):
         negated.update(_extract_negated_relations_from_segment(segment))
     return {_normalize_relation(r) for r in negated if r[0] and r[2]}
@@ -401,21 +427,72 @@ def _extract_negated_relations_from_segment(segment: str) -> Set[Relation]:
     """Extract explicit negated relation claims."""
 
     relations: Set[Relation] = set()
+    verbs = (
+        "orbits|orbit|contains|contain|produces|produce|releases|release|stores|store|"
+        "converts|convert|improves|improve|uses|use|needs|need|has|have|included|"
+        "includes|include|allows|allow|approved|approves|approve|is|are|was|were|"
+        "stored|release|produce|released|using|adopted|signed|occurred|landed"
+    )
+    shared_subject_intro = (
+        "orbits|orbit|contains|contain|produces|produce|releases|release|stores|store|"
+        "converts|convert|improves|improve|uses|use|needs|need|has|have|included|"
+        "includes|include|allows|allow|approved|approves|approve|is|are|was|were"
+    )
+
+    for m in re.finditer(
+        rf"\b([a-z][a-z ]+?) (?:{shared_subject_intro}) [a-z0-9 ]+? "
+        rf"(?:and|but|,) (?:{_NEGATION_PREFIX}) ({verbs}) ([a-z][a-z0-9 ]+?)(?:$| and | but |,)",
+        segment,
+    ):
+        relations.add(
+            (
+                _clean_span(m.group(1)),
+                _lemma_predicate(m.group(2)),
+                _clean_span(m.group(3)),
+            )
+        )
+
+    for m in re.finditer(
+        rf"\b([a-z][a-z ]+?) (?:{shared_subject_intro}) [a-z0-9 ]+? "
+        r"(?:and|but|,) no ([a-z][a-z0-9 ]+?)(?:$| and | but |,)",
+        segment,
+    ):
+        relations.add((_clean_span(m.group(1)), "has", _clean_span(m.group(2))))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z ]+?) (?:included|includes|include) [a-z0-9 ]+? "
+        r"(?:and|but|,) excluded ([a-z][a-z0-9 ]+?)(?:$| and | but |,)",
+        segment,
+    ):
+        relations.add((_clean_span(m.group(1)), "include", _clean_span(m.group(2))))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) (?:was|were|is|are) excluded from ([a-z][a-z0-9 ]+?)(?:$| and | but |,)",
+        segment,
+    ):
+        relations.add((_clean_span(m.group(2)), "include", _clean_span(m.group(1))))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z ]+?) lacks? (?:a |an |the )?([a-z][a-z0-9 ]+?)(?:$| and | but |,)",
+        segment,
+    ):
+        relations.add((_clean_span(m.group(1)), "has", _clean_span(m.group(2))))
+
     copular_pattern = (
         rf"\b([a-z][a-z ]+?) (?:{_NEGATION_PREFIX}) (?:a |an |the )?"
         r"([a-z0-9][a-z0-9 ]+?)(?:$| and | but )"
     )
     for m in re.finditer(copular_pattern, segment):
         subj, obj = _clean_span(m.group(1)), _clean_span(m.group(2))
-        if subj and obj and len(subj.split()) <= 5 and len(obj.split()) <= 8:
+        if (
+            subj
+            and obj
+            and subj not in _AUXILIARY_SUBJECTS
+            and len(subj.split()) <= 5
+            and len(obj.split()) <= 8
+        ):
             relations.add((subj, "is", obj))
 
-    verbs = (
-        "orbits|orbit|contains|contain|produces|produce|releases|release|stores|store|"
-        "converts|convert|improves|improve|uses|use|needs|need|has|is|are|was|were|"
-        "stored|release|produce|released|included|contains|contained|using|need|needs|"
-        "adopted|signed|occurred|landed|have"
-    )
     pattern = (
         r"\b([a-z][a-z ]+?) "
         rf"(?:{_NEGATION_PREFIX}) "
@@ -481,6 +558,13 @@ def evaluate_candidate(
         clamps.append("overclaim_flag")
     if _has_unsupported_negation(candidate, manifold, candidate_negations):
         clamps.append("negated_positive_support_clamp")
+    if _has_negated_reference_assertion(
+        candidate,
+        candidate_relations,
+        candidate_negations,
+        manifold.negated_relations,
+    ):
+        clamps.append("negated_reference_relation_clamp")
 
     relation_clamps = _relation_clamps(candidate_relations, manifold.relations)
     clamps.extend(relation_clamps)
@@ -620,7 +704,7 @@ def _has_unsupported_negation(
     manifold: ReferenceManifold,
     candidate_negations: Optional[Set[Relation]] = None,
 ) -> bool:
-    if not manifold.relations:
+    if not manifold.relations and not manifold.negated_relations:
         return False
 
     negations = candidate_negations or _extract_negated_relations(text)
@@ -628,10 +712,13 @@ def _has_unsupported_negation(
         return False
 
     ref_relations = manifold.relations
+    ref_negated_relations = manifold.negated_relations
     ref_subjects = {r[0] for r in ref_relations}
     ref_objects = {r[2] for r in ref_relations}
     ref_predicates = {r[1] for r in ref_relations}
     for negation in negations:
+        if _negation_supported_by_reference(text, negation, ref_negated_relations):
+            continue
         subj, pred, obj = negation
         if (subj, pred, obj) in ref_relations:
             return True
@@ -640,6 +727,76 @@ def _has_unsupported_negation(
         if pred in ref_predicates and (subj in ref_subjects or obj in ref_objects):
             return True
     return False
+
+
+def _has_negated_reference_assertion(
+    text: str,
+    candidate_relations: Set[Relation],
+    candidate_negations: Set[Relation],
+    reference_negated_relations: Set[Relation],
+) -> bool:
+    if not reference_negated_relations:
+        return False
+
+    for reference_negation in reference_negated_relations:
+        if _negation_supported_by_reference(text, reference_negation, candidate_negations):
+            continue
+        if any(
+            _relations_match(candidate_relation, reference_negation, text)
+            for candidate_relation in candidate_relations
+        ):
+            return True
+        obj = reference_negation[2]
+        if _mentions_object(text, obj) and not _object_has_negation_nearby(text, obj):
+            return True
+    return False
+
+
+def _negation_supported_by_reference(
+    text: str,
+    negation: Relation,
+    reference_negated_relations: Set[Relation],
+) -> bool:
+    return any(
+        _relations_match(negation, reference_negation, text)
+        for reference_negation in reference_negated_relations
+    )
+
+
+def _relations_match(left: Relation, right: Relation, text: str = "") -> bool:
+    left_subj, left_pred, left_obj = left
+    right_subj, right_pred, right_obj = right
+    if left == right:
+        return True
+    if left_pred != right_pred or left_obj != right_obj:
+        return False
+    if left_subj == right_subj:
+        return True
+    if left_subj in _AUXILIARY_SUBJECTS and right_subj in normalize_text(text).split():
+        return True
+    return False
+
+
+def _mentions_object(text: str, obj: str) -> bool:
+    normalized = normalize_text(text)
+    return bool(obj and re.search(rf"\b{re.escape(obj)}\b", normalized))
+
+
+def _object_has_negation_nearby(text: str, obj: str) -> bool:
+    normalized = _normalize_negation_text(text)
+    if not obj or not _mentions_object(normalized, obj):
+        return False
+    escaped = re.escape(obj)
+    patterns = (
+        rf"\bno {escaped}\b",
+        rf"\bwithout {escaped}\b",
+        rf"\blacks? (?:a |an |the )?{escaped}\b",
+        rf"\bomits? {escaped}\b",
+        rf"\b(?:{_NEGATION_PREFIX}) (?:[a-z]+ ){{0,4}}{escaped}\b",
+        rf"\b{escaped} (?:was |were |is |are )?excluded\b",
+        rf"\bexcluded {escaped}\b",
+    )
+    return any(re.search(pattern, normalized) for pattern in patterns)
 
 
 def _contains_negation(text: str) -> bool:
@@ -696,6 +853,14 @@ def _lemma_predicate(predicate: str) -> str:
         "contains": "contain",
         "contain": "contain",
         "contained": "contain",
+        "includes": "include",
+        "include": "include",
+        "included": "include",
+        "allows": "allow",
+        "allow": "allow",
+        "approved": "approve",
+        "approves": "approve",
+        "approve": "approve",
         "produces": "produce",
         "produce": "produce",
         "produced": "produce",
