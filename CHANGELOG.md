@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3 - Unreleased
+
+- Started the 0.1.3 development cycle after the public 0.1.2 PyPI release.
+
 ## 0.1.2 - 2026-06-19
 
 - Started the 0.1.2 development cycle after the public 0.1.1 PyPI release.
