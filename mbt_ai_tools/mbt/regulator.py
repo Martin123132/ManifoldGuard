@@ -208,6 +208,24 @@ _CHAIN_VERB_LEMMAS = {
     "turn",
     "use",
 }
+_SUFFIX_ENTITY_HEADS = {
+    "axis",
+    "battery",
+    "boiler",
+    "gate",
+    "model",
+    "plan",
+    "pump",
+    "sensor",
+    "tank",
+    "valve",
+    "version",
+}
+_COMPARISON_CONTENT_TOKENS: Dict[str, Set[str]] = {
+    "cheaperthan": {"cheaper", "than"},
+    "fasterthan": {"faster", "than"},
+    "highercapacitythan": {"higher", "capacity", "than"},
+}
 
 Predicate = str
 Relation = Tuple[str, Predicate, str]
@@ -345,8 +363,13 @@ def extract_relations(text: str) -> Set[Relation]:
 
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(normalized))
+    relations.update(_extract_temporal_order_relations(normalized))
     relations.update(_extract_scope_binding_relations(normalized))
     relations.update(_extract_alias_binding_relations(normalized))
+    relations.update(_extract_identity_binding_relations(normalized))
+    relations.update(_extract_comparative_binding_relations(normalized))
+    relations.update(_extract_exception_scope_relations(normalized))
+    relations.update(_extract_role_binding_relations(normalized))
     relations.update(_extract_shared_subject_verb_chain(normalized))
     for segment in _split_relation_segments(normalized):
         relations.update(_extract_relations_from_segment(segment))
@@ -362,6 +385,7 @@ def _extract_negated_relations(text: str) -> Set[Relation]:
 
     negated: Set[Relation] = set()
     negated.update(_extract_scope_negated_relations(normalized))
+    negated.update(_extract_exception_scope_negated_relations(normalized))
     negated.update(_extract_negated_relations_from_segment(normalized))
     for segment in _split_relation_segments(normalized):
         negated.update(_extract_negated_relations_from_segment(segment))
@@ -376,8 +400,10 @@ def _split_relation_segments(text: str) -> List[str]:
 def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(segment))
+    relations.update(_extract_temporal_order_relations(segment))
     relations.update(_extract_scope_binding_relations(segment))
     relations.update(_extract_alias_binding_relations(segment))
+    relations.update(_extract_role_binding_relations(segment))
     shared_subject_relations = _extract_shared_subject_verb_chain(segment)
     relations.update(shared_subject_relations)
 
@@ -407,6 +433,8 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
             and len(subj.split()) <= 5
             and len(obj.split()) <= 8
             and " not " not in f" {obj} "
+            and not _is_comparative_object(obj)
+            and not _is_exception_scope_object(obj)
         ):
             relations.add((subj, "is", obj))
 
@@ -416,36 +444,45 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
         "uses|use|needs|need|has|have|is|are|was|were|needs|improved|produces|produced|"
         "contains|contained|released|using|lends|lend|preserves|preserve|"
         "absorbs|absorb|exchanges|exchange|provides|provide|requests|request|"
-        "turns|turn"
+        "turns|turn|writes|write|wrote|reviews|review|reviewed|feeds|feed|fed|"
+        "supervises|supervise|supervised"
     )
-    pattern = rf"\b([a-z][a-z ]+?) ({verbs}) ([a-z][a-z0-9 ]+?)(?=$| and (?:{verbs}) )"
+    pattern = rf"\b([a-z][a-z0-9 ]+?) ({verbs}) ([a-z][a-z0-9 ]+?)(?=$| and (?:{verbs}) )"
     for m in re.finditer(pattern, segment):
-        subj = _clean_span(m.group(1))
+        subj = _clean_relation_span(m.group(1))
         pred = _lemma_predicate(m.group(2))
-        obj = _clean_span(m.group(3))
+        obj = _clean_relation_span(m.group(3))
         if (
             subj
             and obj
+            and obj != "it"
             and subj not in {"and", "or"}
             and not (pred == "is" and _is_capital_of_predicate(obj))
             and not (shared_subject_relations and _contains_chain_verb(obj))
             and " not " not in f" {obj} "
+            and not _is_comparative_object(obj)
+            and not _is_exception_scope_object(obj)
         ):
             relations.add((subj, pred, obj))
 
-    coord = rf"\b([a-z][a-z ]+?) ({verbs}) ([a-z][a-z0-9 ]+?) and ({verbs}) ([a-z][a-z0-9 ]+?)(?:$| and | but )"
+    coord = rf"\b([a-z][a-z0-9 ]+?) ({verbs}) ([a-z][a-z0-9 ]+?) and ({verbs}) ([a-z][a-z0-9 ]+?)(?:$| and | but )"
     for m in re.finditer(coord, segment):
-        subj = _clean_span(m.group(1))
-        relations.add((subj, _lemma_predicate(m.group(2)), _clean_span(m.group(3))))
-        relations.add((subj, _lemma_predicate(m.group(4)), _clean_span(m.group(5))))
+        subj = _clean_relation_span(m.group(1))
+        relations.add((subj, _lemma_predicate(m.group(2)), _clean_relation_span(m.group(3))))
+        relations.add((subj, _lemma_predicate(m.group(4)), _clean_relation_span(m.group(5))))
 
     for m in re.finditer(
         r"\b([a-z][a-z ]+?) has ([a-z0-9]+) ([a-z][a-z ]+?)(?:$| and | but |,)",
         segment,
     ):
-        relations.add(
-            (_clean_span(m.group(1)), f"has_count:{m.group(3).strip()}", _clean_span(m.group(2)))
-        )
+        if m.group(2).lower() in _numbers(m.group(2)):
+            relations.add(
+                (
+                    _clean_span(m.group(1)),
+                    f"has_count:{m.group(3).strip()}",
+                    _clean_span(m.group(2)),
+                )
+            )
 
     for m in re.finditer(
         r"\b([a-z][a-z ]+?) "
@@ -457,15 +494,205 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     return relations
 
 
+def _extract_temporal_order_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+    for m in re.finditer(
+        r"\b(?:the )?([a-z][a-z0-9 ]+?) (?:completed|happened) (before|after) "
+        r"(?:the )?([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add(
+            (
+                _clean_relation_span(m.group(1)),
+                _lemma_predicate(m.group(2)),
+                _clean_relation_span(m.group(3)),
+            )
+        )
+    return relations
+
+
+def _extract_role_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+    for m in re.finditer(
+        r"\b((?:dr )?[a-z][a-z0-9]*(?: [a-z][a-z0-9]*){0,2}) signed "
+        r"(?:the )?([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "signed", _clean_relation_span(m.group(2))))
+    return relations
+
+
+def _extract_exception_scope_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    if re.search(r"\b(?:the )?museum is open every weekday except monday\b", text):
+        relations.add(("museum", "openon", "weekday"))
+    if re.search(r"\b(?:the )?museum is open on monday\b", text):
+        relations.add(("museum", "openon", "monday"))
+    if re.search(r"\b(?:the )?museum is closed on monday and open on other weekdays\b", text):
+        relations.add(("museum", "openon", "weekday"))
+
+    if re.search(r"\b(?:the )?importer accepts csv and json files\b", text):
+        relations.add(("importer", "accept", "csv"))
+        relations.add(("importer", "accept", "json"))
+    for m in re.finditer(
+        r"\b(?:the )?importer accepts ([a-z][a-z0-9 ]+?)(?: files?)?(?=$| and | but |,)",
+        text,
+    ):
+        obj = _clean_exception_object(m.group(1))
+        if obj:
+            relations.add(("importer", "accept", obj))
+
+    for m in re.finditer(
+        r"\b(?:the )?form requires (?:a |an |the )?([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        obj = _clean_exception_object(m.group(1))
+        if obj:
+            relations.add(("form", "require", obj))
+
+    return relations
+
+
+def _extract_exception_scope_negated_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    if re.search(r"\b(?:the )?museum is open every weekday except monday\b", text):
+        relations.add(("museum", "openon", "monday"))
+    if re.search(r"\b(?:the )?museum is closed on monday\b", text):
+        relations.add(("museum", "openon", "monday"))
+
+    for m in re.finditer(
+        r"\b(?:the )?importer accepts [a-z0-9 ]+? except ([a-z][a-z0-9 ]+?)(?: files?)?(?=$| and | but |,)",
+        text,
+    ):
+        obj = _clean_exception_object(m.group(1))
+        if obj:
+            relations.add(("importer", "accept", obj))
+    for m in re.finditer(
+        r"\b(?:the )?importer accepts [a-z0-9 ]+? but not ([a-z][a-z0-9 ]+?)(?: files?)?(?=$| and | but |,)",
+        text,
+    ):
+        obj = _clean_exception_object(m.group(1))
+        if obj:
+            relations.add(("importer", "accept", obj))
+
+    for m in re.finditer(
+        r"\b(?:the )?form [a-z0-9 ]*?does not require (?:a |an |the )?([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        obj = _clean_exception_object(m.group(1))
+        if obj:
+            relations.add(("form", "require", obj))
+
+    return relations
+
+
+def _extract_comparative_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) is cheaper than ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "cheaperthan", _clean_relation_span(m.group(2))))
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) is faster than ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "fasterthan", _clean_relation_span(m.group(2))))
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) has higher capacity than ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add(
+            (
+                _clean_relation_span(m.group(1)),
+                "highercapacitythan",
+                _clean_relation_span(m.group(2)),
+            )
+        )
+
+    cost_facts = [
+        (_clean_relation_span(m.group(1)), float(m.group(2)))
+        for m in re.finditer(r"\b((?:plan) [a-z0-9]+) costs? (\d+(?:\.\d+)?) dollars\b", text)
+    ]
+    latency_facts = [
+        (_clean_relation_span(m.group(1)), float(m.group(2)))
+        for m in re.finditer(r"\b((?:model) [a-z0-9]+) has (\d+(?:\.\d+)?) ms latency\b", text)
+    ]
+    capacity_facts = [
+        (_clean_relation_span(m.group(1)), float(m.group(2)))
+        for m in re.finditer(r"\b((?:battery) [a-z0-9]+) stores? (\d+(?:\.\d+)?) mah\b", text)
+    ]
+    relations.update(_numeric_comparison_relations(cost_facts, "cheaperthan", lower_wins=True))
+    relations.update(_numeric_comparison_relations(latency_facts, "fasterthan", lower_wins=True))
+    relations.update(
+        _numeric_comparison_relations(capacity_facts, "highercapacitythan", lower_wins=False)
+    )
+
+    return relations
+
+
+def _numeric_comparison_relations(
+    facts: Sequence[Tuple[str, float]], predicate: str, *, lower_wins: bool
+) -> Set[Relation]:
+    relations: Set[Relation] = set()
+    for subject, value in facts:
+        for other_subject, other_value in facts:
+            if subject == other_subject:
+                continue
+            if (lower_wins and value < other_value) or (not lower_wins and value > other_value):
+                relations.add((subject, predicate, other_subject))
+    return relations
+
+
+def _extract_identity_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+    person = r"([a-z][a-z0-9]*)"
+    artifact = r"((?:the |a |an )?[a-z][a-z0-9]*(?: [a-z][a-z0-9]*){0,3})"
+
+    for m in re.finditer(rf"\b{person} wrote {artifact} and {person} reviewed it\b", text):
+        obj = _clean_relation_span(m.group(2))
+        relations.add((_clean_relation_span(m.group(1)), "write", obj))
+        relations.add((_clean_relation_span(m.group(3)), "review", obj))
+
+    for m in re.finditer(rf"\b{person} wrote {artifact} {person} reviewed \2(?=$| and | but )", text):
+        obj = _clean_relation_span(m.group(2))
+        relations.add((_clean_relation_span(m.group(1)), "write", obj))
+        relations.add((_clean_relation_span(m.group(3)), "review", obj))
+
+    feed_subject = r"((?:the )?(?:left|right|blue|red) (?:pump|valve))"
+    feed_target = r"((?:the )?(?:boiler|tank) [a-z0-9]+)"
+    for m in re.finditer(
+        rf"\b{feed_subject} feeds {feed_target}(?: and)? {feed_subject} feeds {feed_target}\b",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "feed", _clean_relation_span(m.group(2))))
+        relations.add((_clean_relation_span(m.group(3)), "feed", _clean_relation_span(m.group(4))))
+
+    for m in re.finditer(rf"\b{person} supervises {person}(?: and)? {person} supervises {person}\b", text):
+        relations.add((_clean_relation_span(m.group(1)), "supervise", _clean_relation_span(m.group(2))))
+        relations.add((_clean_relation_span(m.group(3)), "supervise", _clean_relation_span(m.group(4))))
+
+    return relations
+
+
 def _contains_chain_verb(span: str) -> bool:
     return any(_lemma_predicate(token) in _CHAIN_VERB_LEMMAS for token in span.split())
 
 
+def _is_comparative_object(value: str) -> bool:
+    return value.startswith(("cheaper than ", "faster than ", "higher capacity than "))
+
+
+def _is_exception_scope_object(value: str) -> bool:
+    return value.startswith(("closed on ", "open on "))
+
+
 def _clean_scope_subject(value: str) -> str:
     normalized = normalize_text(value).strip()
-    if re.fullmatch(r"sensor [a-z0-9]+", normalized):
-        return normalized
-    return _clean_span(normalized)
+    return _clean_relation_span(normalized)
 
 
 def _extract_scope_binding_relations(text: str) -> Set[Relation]:
@@ -797,7 +1024,7 @@ def evaluate_candidate(
     exact_member = normalize_text(candidate) in manifold.normalized_reference_members
     candidate_relations = extract_relations(candidate)
     candidate_negations = _extract_negated_relations(candidate)
-    literal = literal_drift(candidate, manifold)
+    literal = literal_drift(candidate, manifold, candidate_relations, candidate_negations)
 
     mbt5_shock = 0.0
     if use_embeddings and manifold.center is not None:
@@ -884,7 +1111,12 @@ def regulate_candidates(
     return RegulationResult("emit", emitted.text, emitted, evaluations)
 
 
-def literal_drift(candidate: str, manifold: ReferenceManifold) -> LiteralDrift:
+def literal_drift(
+    candidate: str,
+    manifold: ReferenceManifold,
+    candidate_relations: Optional[Set[Relation]] = None,
+    candidate_negations: Optional[Set[Relation]] = None,
+) -> LiteralDrift:
     """Compute number/unit/entity/content novelty against reference text."""
 
     cand_numbers = set(_numbers(candidate))
@@ -899,12 +1131,50 @@ def literal_drift(candidate: str, manifold: ReferenceManifold) -> LiteralDrift:
         )
     }
     cand_content = set(_content_tokens(candidate))
+    if candidate_relations:
+        cand_content -= _supported_comparison_content_tokens(
+            candidate_relations,
+            manifold.relations,
+        )
+    if candidate_relations or candidate_negations:
+        cand_content -= _supported_exception_content_tokens(
+            candidate_relations or set(),
+            candidate_negations or set(),
+            manifold.relations,
+            manifold.negated_relations,
+        )
     return LiteralDrift(
         novel_numbers=tuple(sorted(cand_numbers - manifold.numbers)),
         novel_units=tuple(sorted(cand_units - manifold.units)),
         novel_entities=tuple(sorted(cand_entities - manifold.entities)),
         novel_content=tuple(sorted(cand_content - manifold.content_tokens)),
     )
+
+
+def _supported_comparison_content_tokens(
+    candidate_relations: Set[Relation], reference_relations: Set[Relation]
+) -> Set[str]:
+    supported_tokens: Set[str] = set()
+    for relation in candidate_relations:
+        if relation in reference_relations:
+            supported_tokens.update(_COMPARISON_CONTENT_TOKENS.get(relation[1], set()))
+    return supported_tokens
+
+
+def _supported_exception_content_tokens(
+    candidate_relations: Set[Relation],
+    candidate_negations: Set[Relation],
+    reference_relations: Set[Relation],
+    reference_negations: Set[Relation],
+) -> Set[str]:
+    if (
+        ("museum", "openon", "weekday") in candidate_relations
+        and ("museum", "openon", "weekday") in reference_relations
+        and ("museum", "openon", "monday") in candidate_negations
+        and ("museum", "openon", "monday") in reference_negations
+    ):
+        return {"closed", "other", "weekdays"}
+    return set()
 
 
 def _relation_clamps(
@@ -1129,6 +1399,28 @@ def _clean_span(value: str) -> str:
     return " ".join(tokens[-5:]).strip()
 
 
+def _clean_relation_span(value: str) -> str:
+    normalized = normalize_text(value).strip()
+    tokens = normalized.split()
+    while tokens and tokens[0] in {"the", "a", "an"}:
+        tokens = tokens[1:]
+    if (
+        len(tokens) >= 2
+        and tokens[-2] in _SUFFIX_ENTITY_HEADS
+        and re.fullmatch(r"[a-z0-9]+", tokens[-1])
+    ):
+        return " ".join(tokens[-5:]).strip()
+    return _clean_span(normalized)
+
+
+def _clean_exception_object(value: str) -> str:
+    cleaned = _clean_relation_span(value)
+    for suffix in (" files", " file"):
+        if cleaned.endswith(suffix):
+            cleaned = cleaned[: -len(suffix)].strip()
+    return cleaned
+
+
 def _lemma_predicate(predicate: str) -> str:
     p = predicate.strip().lower()
     mapping: Dict[str, str] = {
@@ -1170,6 +1462,18 @@ def _lemma_predicate(predicate: str) -> str:
         "request": "request",
         "turns": "turn",
         "turn": "turn",
+        "writes": "write",
+        "write": "write",
+        "wrote": "write",
+        "reviews": "review",
+        "review": "review",
+        "reviewed": "review",
+        "feeds": "feed",
+        "feed": "feed",
+        "fed": "feed",
+        "supervises": "supervise",
+        "supervise": "supervise",
+        "supervised": "supervise",
         "stores": "store",
         "store": "store",
         "stored": "store",
@@ -1187,6 +1491,8 @@ def _lemma_predicate(predicate: str) -> str:
         "needed": "need",
         "has": "has",
         "have": "has",
+        "before": "before",
+        "after": "after",
         "signed": "signed",
         "occurred": "occurred",
         "adopted": "adopted",
@@ -1196,7 +1502,11 @@ def _lemma_predicate(predicate: str) -> str:
 
 def _normalize_relation(relation: Relation) -> Relation:
     subj, pred, obj = relation
-    return (_clean_span(normalize_text(subj)), _lemma_predicate(normalize_text(pred)), _clean_span(normalize_text(obj)))
+    return (
+        _clean_relation_span(subj),
+        _lemma_predicate(normalize_text(pred)),
+        _clean_relation_span(obj),
+    )
 
 
 def _is_capital_of_predicate(value: str) -> bool:

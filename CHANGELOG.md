@@ -6,6 +6,15 @@
 - Added the exploratory EXP22 challenge corpus seed for broader post-EXP21
   development probes across coreference, comparison, exception scope, unit
   binding, temporal order, and all-bad near misses.
+- Added offline identity-binding relation extraction for EXP22 coreference,
+  valve/tank, supervision-chain, and numbered pump/boiler swap probes.
+- Added offline numeric-comparison binding for EXP22 cost, latency, and
+  capacity paraphrases so directed swaps are clamped while supported
+  comparative summaries can emit.
+- Added scoped exception/exclusion bindings for EXP22 weekday, file-format,
+  and form-requirement negation probes.
+- Added temporal order and active signing-role bindings for the remaining
+  EXP22 before/after and alias-role near-miss probes.
 
 ## 0.1.2 - 2026-06-19
 

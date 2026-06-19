@@ -496,6 +496,226 @@ def test_temporal_office_opened_dates_preserve_subject_binding():
     assert result.evaluations[1].safe_to_emit is True
 
 
+def test_exp22_pronoun_review_binding_preserves_original_object():
+    result = regulate_candidates(
+        [
+            "Linus wrote the parser and Ada reviewed it.",
+            "Ada wrote the parser and Linus reviewed it.",
+        ],
+        ["Ada wrote the parser. Linus reviewed the parser."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Ada wrote the parser and Linus reviewed it."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_lettered_tank_binding_preserves_valve_direction():
+    assert ("blue valve", "feed", "tank a") in extract_relations(
+        "The blue valve feeds Tank A and the red valve feeds Tank B."
+    )
+
+    result = regulate_candidates(
+        [
+            "The red valve feeds Tank A and the blue valve feeds Tank B.",
+            "The blue valve feeds Tank A and the red valve feeds Tank B.",
+        ],
+        ["The blue valve feeds Tank A. The red valve feeds Tank B."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The blue valve feeds Tank A and the red valve feeds Tank B."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_supervision_chain_preserves_role_order():
+    result = regulate_candidates(
+        [
+            "Omar supervises Kim and Kim supervises Maya.",
+            "Maya supervises Kim and Kim supervises Omar.",
+        ],
+        ["Maya supervises Kim. Kim supervises Omar."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Maya supervises Kim and Kim supervises Omar."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_all_bad_numbered_boiler_swaps_block():
+    result = regulate_candidates(
+        [
+            "The left pump feeds Boiler 2.",
+            "The right pump feeds Boiler 1.",
+            "Boiler 1 feeds the left pump.",
+        ],
+        ["The left pump feeds Boiler 1. The right pump feeds Boiler 2."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [
+        False,
+        False,
+        False,
+    ]
+
+
+def test_exp22_plan_cost_comparison_preserves_lower_value_direction():
+    assert ("plan a", "cheaperthan", "plan b") in extract_relations(
+        "Plan A costs 40 dollars. Plan B costs 55 dollars."
+    )
+
+    result = regulate_candidates(
+        [
+            "Plan B is cheaper than Plan A.",
+            "Plan A is cheaper than Plan B.",
+        ],
+        ["Plan A costs 40 dollars. Plan B costs 55 dollars."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Plan A is cheaper than Plan B."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_model_latency_comparison_preserves_lower_latency_direction():
+    result = regulate_candidates(
+        [
+            "Model Y is faster than Model X.",
+            "Model X is faster than Model Y.",
+        ],
+        ["Model X has 80 ms latency. Model Y has 120 ms latency."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Model X is faster than Model Y."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_battery_capacity_comparison_preserves_higher_value_direction():
+    result = regulate_candidates(
+        [
+            "Battery Beta has higher capacity than Battery Alpha.",
+            "Battery Alpha has higher capacity than Battery Beta.",
+        ],
+        ["Battery Alpha stores 3000 mAh. Battery Beta stores 2500 mAh."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Battery Alpha has higher capacity than Battery Beta."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_weekday_exception_preserves_closed_day_scope():
+    result = regulate_candidates(
+        [
+            "The museum is open on Monday.",
+            "The museum is closed on Monday and open on other weekdays.",
+        ],
+        ["The museum is open every weekday except Monday."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The museum is closed on Monday and open on other weekdays."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_file_format_exception_blocks_excluded_encrypted_json():
+    result = regulate_candidates(
+        [
+            "The importer accepts encrypted JSON files.",
+            "The importer accepts CSV and JSON files but not encrypted JSON.",
+        ],
+        ["The importer accepts CSV and JSON files, except encrypted JSON."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The importer accepts CSV and JSON files but not encrypted JSON."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_all_bad_negated_form_exception_blocks_reversals():
+    result = regulate_candidates(
+        [
+            "The form requires a witness and does not require a signature.",
+            "The form does not require a signature.",
+        ],
+        ["The form requires a signature and does not require a witness."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [False, False]
+
+
+def test_exp22_backup_migration_temporal_order_blocks_reversal():
+    result = regulate_candidates(
+        [
+            "The backup completed before the migration.",
+            "The backup completed after the migration.",
+        ],
+        ["The backup completed after the migration."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The backup completed after the migration."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_inspection_repair_temporal_order_preserves_event_binding():
+    result = regulate_candidates(
+        [
+            "The repair happened before launch and the inspection happened after launch.",
+            "The inspection happened before launch and the repair happened after launch.",
+        ],
+        ["The inspection happened before launch and the repair happened after launch."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "The inspection happened before launch and the repair happened after launch."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp22_all_bad_alias_role_swap_blocks_report_as_actor():
+    result = regulate_candidates(
+        [
+            "Dr. Chen signed the report.",
+            "The report signed Mira Rao.",
+        ],
+        ["Dr. Rao, also called Mira Rao, signed the report."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [False, False]
+
+
 @pytest.mark.parametrize(
     "reference,candidate",
     [
