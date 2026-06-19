@@ -11,6 +11,8 @@
   replay packs, report comparison, and promotion boundary.
 - Added the EXP21 challenge guide to the product readiness manifest and
   docs-quality required document set.
+- Added `docs/benchmark.md` to document evidence tiers, benchmark commands, and
+  public claim boundaries.
 - Added opt-in `manifold-check --explain` decision explanations for text, JSON,
   and Markdown regulation reports.
 - Documented `manifold-check --explain` in the README CLI examples.

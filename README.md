@@ -455,6 +455,8 @@ python scripts/build_eval_report.py --input regulator-evaluation.json --output d
 failing case details, and `--list-families` to inspect available taxonomy
 groups.
 The generated benchmark report lives at `docs/evaluation_report.md`.
+Benchmark/evidence tiers and claim boundaries are documented in
+`docs/benchmark.md`.
 
 Compare two saved evaluator JSON reports:
 
