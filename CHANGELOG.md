@@ -15,6 +15,7 @@
   and Markdown regulation reports.
 - Documented `manifold-check --explain` in the README CLI examples.
 - Added `examples/explain_report.md` and included it in docs-quality coverage.
+- Linked the explanation example from the report schema documentation.
 - Added `scripts/compare_eval_reports.py` to compare saved offline evaluator
   JSON reports and highlight summary, family, and case-level changes.
 - Added `scripts/build_eval_replay_pack.py` to turn evaluator JSON plus corpus

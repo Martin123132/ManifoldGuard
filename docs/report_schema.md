@@ -129,3 +129,7 @@ Example machine-validated payloads:
 
 - `examples/single_report_example.json`
 - `examples/batch_report_example.jsonl`
+
+Human-readable explanation example:
+
+- `examples/explain_report.md`
