@@ -344,6 +344,7 @@ def extract_relations(text: str) -> Set[Relation]:
 
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(normalized))
+    relations.update(_extract_scope_binding_relations(normalized))
     relations.update(_extract_shared_subject_verb_chain(normalized))
     for segment in _split_relation_segments(normalized):
         relations.update(_extract_relations_from_segment(segment))
@@ -358,6 +359,7 @@ def _extract_negated_relations(text: str) -> Set[Relation]:
         return set()
 
     negated: Set[Relation] = set()
+    negated.update(_extract_scope_negated_relations(normalized))
     negated.update(_extract_negated_relations_from_segment(normalized))
     for segment in _split_relation_segments(normalized):
         negated.update(_extract_negated_relations_from_segment(segment))
@@ -372,6 +374,7 @@ def _split_relation_segments(text: str) -> List[str]:
 def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(segment))
+    relations.update(_extract_scope_binding_relations(segment))
     shared_subject_relations = _extract_shared_subject_verb_chain(segment)
     relations.update(shared_subject_relations)
 
@@ -400,6 +403,7 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
             and not _looks_like_temporal_value(obj)
             and len(subj.split()) <= 5
             and len(obj.split()) <= 8
+            and " not " not in f" {obj} "
         ):
             relations.add((subj, "is", obj))
 
@@ -422,6 +426,7 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
             and subj not in {"and", "or"}
             and not (pred == "is" and _is_capital_of_predicate(obj))
             and not (shared_subject_relations and _contains_chain_verb(obj))
+            and " not " not in f" {obj} "
         ):
             relations.add((subj, pred, obj))
 
@@ -451,6 +456,90 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
 
 def _contains_chain_verb(span: str) -> bool:
     return any(_lemma_predicate(token) in _CHAIN_VERB_LEMMAS for token in span.split())
+
+
+def _clean_scope_subject(value: str) -> str:
+    normalized = normalize_text(value).strip()
+    if re.fullmatch(r"sensor [a-z0-9]+", normalized):
+        return normalized
+    return _clean_span(normalized)
+
+
+def _extract_scope_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+    gate = r"((?:the )?[a-z]+ gate)"
+    time = r"(\d{3,4})"
+
+    for m in re.finditer(rf"\b{gate} opens at {time}\b", text):
+        relations.add((_clean_scope_subject(m.group(1)), "opens_at", m.group(2)))
+    for m in re.finditer(rf"\b{gate} (?:does not|did not|do not) open until {time}\b", text):
+        relations.add((_clean_scope_subject(m.group(1)), "opens_at", m.group(2)))
+    for m in re.finditer(rf"\b{gate} waits until {time}\b", text):
+        relations.add((_clean_scope_subject(m.group(1)), "opens_at", m.group(2)))
+
+    for m in re.finditer(
+        r"\b(sensor [a-z0-9]+) measures ([a-z][a-z0-9 ]+?)"
+        r"(?=$| sensor [a-z0-9]+ does not| and | but | while )",
+        text,
+    ):
+        relations.add((_clean_scope_subject(m.group(1)), "measure", _clean_span(m.group(2))))
+
+    for m in re.finditer(r"\b(axis [a-z0-9]+) moved during calibration\b", text):
+        relations.add((_clean_scope_subject(m.group(1)), "move", "during calibration"))
+
+    for m in re.finditer(r"\b(?:the )?policy allows ([a-z][a-z0-9 ]+?)(?=$| and | but |,)", text):
+        relations.add(("policy", "allow", _clean_span(m.group(1))))
+    for m in re.finditer(r"\b(?:the )?policy blocks ([a-z][a-z0-9 ]+?)(?=$| and | but |,)", text):
+        relations.add(("policy", "block", _clean_span(m.group(1))))
+
+    for m in re.finditer(
+        r"\b(?:the )?medicine is approved for ([a-z][a-z0-9 ]+?)"
+        r"(?: and is not approved for| not) ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add(("medicine", "approve", f"for {_clean_span(m.group(1))}"))
+
+    return relations
+
+
+def _extract_scope_negated_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    for m in re.finditer(
+        r"\b(?:the )?policy allows [a-z][a-z0-9 ]+? but not ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add(("policy", "allow", _clean_span(m.group(1))))
+
+    for m in re.finditer(
+        r"\b(?:the )?medicine is approved for [a-z][a-z0-9 ]+?"
+        r"(?: and is not approved for| not) ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        obj = _clean_span(m.group(1))
+        relations.add(("medicine", "approve", obj))
+        relations.add(("medicine", "approve", f"for {obj}"))
+
+    for m in re.finditer(
+        r"\b(sensor [a-z0-9]+) measures ([a-z][a-z0-9 ]+?) "
+        r"(?:(?:and|but|while) )?(sensor [a-z0-9]+) does not(?: measure(?: \2)?)?(?=$| and | but | while )",
+        text,
+    ):
+        relations.add((_clean_scope_subject(m.group(3)), "measure", _clean_span(m.group(2))))
+    for m in re.finditer(
+        r"\b(sensor [a-z0-9]+) does not measure ([a-z][a-z0-9 ]+?)(?=$| and | but | while )",
+        text,
+    ):
+        relations.add((_clean_scope_subject(m.group(1)), "measure", _clean_span(m.group(2))))
+
+    for m in re.finditer(
+        r"\b(axis [a-z0-9]+) moved during calibration "
+        r"(?:(?:and|but|while) )?(axis [a-z0-9]+) did not(?: move)?(?=$| and | but | while )",
+        text,
+    ):
+        relations.add((_clean_scope_subject(m.group(2)), "move", "during calibration"))
+
+    return relations
 
 
 def _extract_shared_subject_verb_chain(text: str) -> Set[Relation]:
@@ -556,6 +645,7 @@ def _extract_negated_relations_from_segment(segment: str) -> Set[Relation]:
     """Extract explicit negated relation claims."""
 
     relations: Set[Relation] = set()
+    relations.update(_extract_scope_negated_relations(segment))
     verbs = (
         "orbits|orbit|contains|contain|produces|produce|releases|release|stores|store|"
         "converts|convert|improves|improve|uses|use|needs|need|has|have|included|"

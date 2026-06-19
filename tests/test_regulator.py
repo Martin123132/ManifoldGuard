@@ -339,6 +339,92 @@ def test_relation_composition_transform_swap_is_blocked():
     assert result.evaluations[1].safe_to_emit is True
 
 
+def test_negation_scope_gate_until_binding_is_blocked():
+    result = regulate_candidates(
+        [
+            "The south gate opens at 08:00 and the north gate opens at 10:00.",
+            "The north gate opens at 08:00 and the south gate waits until 10:00.",
+        ],
+        ["The north gate opens at 08:00; the south gate does not open until 10:00."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "The north gate opens at 08:00 and the south gate waits until 10:00."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_negation_scope_sensor_ellipsis_preserves_lettered_subjects():
+    result = regulate_candidates(
+        [
+            "Sensor B measures humidity and Sensor A does not.",
+            "Sensor A measures humidity and Sensor B does not.",
+        ],
+        ["Sensor A measures humidity; Sensor B does not measure humidity."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Sensor A measures humidity and Sensor B does not."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_negation_scope_axis_ellipsis_is_bound_to_prior_event():
+    result = regulate_candidates(
+        [
+            "Axis Y moved during calibration while Axis X did not.",
+            "Axis X moved during calibration while Axis Y did not.",
+        ],
+        ["Axis X moved during calibration; Axis Y did not move."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Axis X moved during calibration while Axis Y did not."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_supported_negation_policy_compact_form_blocks_positive_reversal():
+    result = regulate_candidates(
+        [
+            "The policy allows remote work and overseas payroll.",
+            "The policy allows remote work but not overseas payroll.",
+            "The policy blocks remote work.",
+        ],
+        ["The policy allows remote work but does not allow overseas payroll."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The policy allows remote work but not overseas payroll."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+    assert result.evaluations[2].safe_to_emit is False
+
+
+def test_supported_negation_prepositional_contrast_object_is_preserved():
+    result = regulate_candidates(
+        [
+            "The medicine is approved for adults and children.",
+            "The medicine is approved for adults, not children.",
+            "The medicine is not approved for adults.",
+        ],
+        ["The medicine is approved for adults and is not approved for children."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The medicine is approved for adults, not children."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+    assert result.evaluations[2].safe_to_emit is False
+
+
 @pytest.mark.parametrize(
     "reference,candidate",
     [
