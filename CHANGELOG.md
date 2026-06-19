@@ -1,8 +1,10 @@
 # Changelog
 
-## 0.1.3 - 2026-06-19
+## 0.1.3 - 2026-06-20
 
 - Started the 0.1.3 development cycle after the public 0.1.2 PyPI release.
+- Published `manifold-guard==0.1.3` to TestPyPI and PyPI, then verified fresh
+  public installs with offline EXP22-style smoke checks.
 - Added the exploratory EXP22 challenge corpus seed for broader post-EXP21
   development probes across coreference, comparison, exception scope, unit
   binding, temporal order, and all-bad near misses.

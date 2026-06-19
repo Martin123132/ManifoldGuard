@@ -491,8 +491,8 @@ named `testpypi` and `pypi`.
 
 The exact Trusted Publishing setup values are documented in `docs/package_publishing.md`.
 Package-index install commands and smoke checks are documented in `docs/package_installation.md`.
-The `v0.1.2` post-release verification note is recorded in
-`docs/v0.1.2_release_verification.md`.
+The `v0.1.3` post-release verification note is recorded in
+`docs/v0.1.3_release_verification.md`.
 
 Recommended release order:
 
