@@ -91,6 +91,46 @@
         "exact_reference_member": {
           "type": "boolean"
         },
+        "explanation": {
+          "type": "object",
+          "required": [
+            "decision",
+            "summary",
+            "reasons"
+          ],
+          "properties": {
+            "decision": {
+              "type": "string",
+              "enum": [
+                "safe",
+                "blocked"
+              ]
+            },
+            "summary": {
+              "type": "string"
+            },
+            "reasons": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
         "token_shock": {
           "type": "array",
           "items": {

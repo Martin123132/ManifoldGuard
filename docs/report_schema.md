@@ -11,6 +11,7 @@ Machine-readable schema file:
 `--summary` appends a final summary object in batch JSONL mode.
 `--format markdown` emits a human-readable single report or batch audit report.
 `--format csv` emits one spreadsheet-friendly row per candidate evaluation.
+`--explain` adds optional per-candidate decision explanations to text, JSON, and Markdown reports.
 
 ## Single Report
 
@@ -37,6 +38,7 @@ Each evaluation contains:
 - `relations`: extracted candidate relation tuples.
 - `negated_relations`: extracted negated relation tuples.
 - `exact_reference_member`: whether candidate exactly matches a reference after normalization.
+- `explanation`: optional decision explanation object when `--explain` is used.
 - `token_shock`: optional embedding-backed token shock entries when `--token-shock` is used.
 
 ## Batch Input JSONL
@@ -84,6 +86,7 @@ Single regulation Markdown includes:
 - report title.
 - action, emitted index, and emitted text.
 - per-candidate status, score, shock, literal score, clamps, relations, and negated relations.
+- optional per-candidate explanation summaries when `--explain` is used.
 
 Batch Markdown includes:
 
@@ -118,6 +121,9 @@ CSV output contains one row per candidate evaluation with these columns:
 - `negated_relations`: negated relation tuples joined with `; `.
 - `exact_reference_member`: lowercase boolean.
 - `token_shock`: optional embedding-backed token shock entries joined as `token:score`.
+
+CSV keeps the stable candidate-row columns. Use JSON or Markdown with `--explain`
+when machine-readable or human-readable decision explanations are required.
 
 Example machine-validated payloads:
 

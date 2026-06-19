@@ -3,6 +3,8 @@
 ## 0.1.2 - Unreleased
 
 - Started the 0.1.2 development cycle after the public 0.1.1 PyPI release.
+- Added opt-in `manifold-check --explain` decision explanations for text, JSON,
+  and Markdown regulation reports.
 
 ## 0.1.1 - 2026-06-18
 

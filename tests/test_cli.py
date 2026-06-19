@@ -9,6 +9,7 @@ from mbt_ai_tools import __version__
 from mbt_ai_tools import regulate_candidates
 from mbt_ai_tools.cli import (
     build_batch_summary,
+    build_decision_explanation,
     build_regulation_report,
     format_csv_audit,
     format_markdown_audit,
@@ -65,6 +66,38 @@ def test_cli_regulation_json_report_without_embeddings(monkeypatch, capsys):
     assert report["evaluations"][0]["status"] == "blocked"
     assert "known_participant_unsupported_relation_clamp" in report["evaluations"][0]["clamps"]
     assert report["evaluations"][1]["status"] == "safe"
+
+
+def test_cli_regulation_json_report_can_include_explanations(monkeypatch, capsys):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "manifold-check",
+            "--reference",
+            "The capital of France is Paris.",
+            "--candidate",
+            "The capital of France is London.",
+            "--candidate",
+            "The capital of France is Paris.",
+            "--no-embeddings",
+            "--format",
+            "json",
+            "--explain",
+        ],
+    )
+
+    assert main() == 0
+
+    report = json.loads(capsys.readouterr().out)
+    blocked = report["evaluations"][0]["explanation"]
+    safe = report["evaluations"][1]["explanation"]
+    assert blocked["decision"] == "blocked"
+    assert "known_participant_unsupported_relation_clamp" in {
+        reason["code"] for reason in blocked["reasons"]
+    }
+    assert safe["decision"] == "safe"
+    assert "exactly matches a supplied reference" in safe["summary"]
 
 
 def test_cli_regulation_json_report_can_write_output(monkeypatch, capsys, tmp_path):
@@ -525,3 +558,37 @@ def test_format_regulation_text_matches_existing_cli_shape():
     assert output.startswith("EMIT | The capital of France is Paris. | score=0.0000\n")
     assert "[0] blocked | score=" in output
     assert "[1] safe | score=0.0000 | clamps=exact_reference_member" in output
+
+
+def test_explain_text_and_markdown_render_decision_reasons():
+    result = regulate_candidates(
+        [
+            "The capital of France is London.",
+            "The capital of France is Paris.",
+        ],
+        ["The capital of France is Paris."],
+        use_embeddings=False,
+    )
+    report = build_regulation_report(result, include_explanations=True)
+
+    text = format_regulation_text(report)
+    markdown = format_markdown_report(report)
+
+    assert "explain | Blocked because these guards fired:" in text
+    assert "reason | known_participant_unsupported_relation_clamp" in text
+    assert "Explanation:" in markdown
+    assert "`known_participant_unsupported_relation_clamp`" in markdown
+
+
+def test_build_decision_explanation_describes_safe_reference_member():
+    result = regulate_candidates(
+        ["The capital of France is Paris."],
+        ["The capital of France is Paris."],
+        use_embeddings=False,
+    )
+
+    explanation = build_decision_explanation(result.evaluations[0])
+
+    assert explanation["decision"] == "safe"
+    assert explanation["reasons"][0]["code"] == "exact_reference_member"
+    assert "exactly matches a supplied reference" in explanation["summary"]

@@ -73,6 +73,11 @@ def main() -> int:
         help="Output format for regulation reports. Batch mode defaults to JSONL unless markdown or csv is selected.",
     )
     parser.add_argument(
+        "--explain",
+        action="store_true",
+        help="Include per-candidate decision explanations in text, JSON, and Markdown reports.",
+    )
+    parser.add_argument(
         "--token-shock",
         action="store_true",
         help="Include token-level shock scores for each candidate in regulation mode.",
@@ -111,6 +116,7 @@ def main() -> int:
                 build_batch_reports(
                     args.input_jsonl,
                     use_embeddings=not args.no_embeddings,
+                    include_explanations=args.explain,
                     include_token_shock=args.token_shock,
                     token_shock_max_samples=args.token_shock_max_samples,
                     token_shock_top_k=args.token_shock_top_k,
@@ -145,6 +151,7 @@ def main() -> int:
         )
         report = build_regulation_report(
             result,
+            include_explanations=args.explain,
             include_token_shock=args.token_shock,
             token_shock_max_samples=args.token_shock_max_samples,
             token_shock_top_k=args.token_shock_top_k,
@@ -174,6 +181,7 @@ def main() -> int:
 def build_regulation_report(
     result,
     *,
+    include_explanations: bool = False,
     include_token_shock: bool = False,
     token_shock_max_samples: Optional[int] = None,
     token_shock_top_k: Optional[int] = None,
@@ -207,6 +215,8 @@ def build_regulation_report(
             "negated_relations": list(evaluation.negated_relations),
             "exact_reference_member": evaluation.exact_reference_member,
         }
+        if include_explanations:
+            item["explanation"] = build_decision_explanation(evaluation)
         if include_token_shock:
             item["token_shock"] = [
                 {"token": token, "shock": score}
@@ -230,10 +240,67 @@ def build_regulation_report(
     }
 
 
+CLAMP_EXPLANATIONS = {
+    "protected_number": "Candidate introduces a number that is not supported by the supplied references.",
+    "protected_unit": "Candidate introduces a unit that is not supported by the supplied references.",
+    "protected_entity": "Candidate introduces a named entity that is not supported by the supplied references.",
+    "protected_literal_drift": "Candidate changes protected literal content such as numbers, units, or entities.",
+    "final_literal_block": "Literal drift exceeded the offline blocking threshold.",
+    "content_clamp_flag": "Candidate introduces unsupported content tokens beyond ordinary paraphrase.",
+    "overclaim_flag": "Candidate makes a stronger claim than the supplied references support.",
+    "negated_positive_support_clamp": "Candidate negates a relation that is positively supported by the references.",
+    "role_swapped_relation_clamp": "Candidate reverses a supported relation between known participants.",
+    "known_participant_unsupported_relation_clamp": "Candidate uses known reference participants in an unsupported relation.",
+    "missed_predicate_relation_clamp": "Candidate changes the supported predicate for a known reference participant.",
+    "historical_date_relation_clamp": "Candidate changes a supported historical/date relation.",
+    "guarded_known_participant_unsupported_relation_clamp": "Guarded relation recall confirmed unsupported known-participant drift.",
+    "exp19b_guarded_patch_clamp": "Guarded relation patch lineage marked this candidate as unsupported.",
+    "final_geometric_block": "Embedding-backed semantic shock exceeded the active manifold threshold.",
+    "exact_reference_member": "Candidate exactly matches a supplied reference after normalization.",
+    "reference_member_geometry_override": "Exact reference membership overrode a geometry-only block.",
+}
+
+
+def build_decision_explanation(evaluation) -> Dict[str, Any]:
+    """Build a compact, user-facing explanation for one candidate decision."""
+
+    clamps = [clamp for clamp in evaluation.clamp_summary if clamp != "none"]
+    reasons = [
+        {
+            "code": clamp,
+            "message": CLAMP_EXPLANATIONS.get(
+                clamp,
+                "Candidate triggered this regulator guard.",
+            ),
+        }
+        for clamp in clamps
+    ]
+
+    if evaluation.safe_to_emit:
+        if evaluation.exact_reference_member:
+            summary = "Safe because the candidate exactly matches a supplied reference."
+        elif reasons:
+            summary = "Safe after non-blocking guards because no hard block remained active."
+        else:
+            summary = "Safe because no blocking literal, relation, negation, or geometry guard fired."
+    elif reasons:
+        codes = ", ".join(reason["code"] for reason in reasons)
+        summary = f"Blocked because these guards fired: {codes}."
+    else:
+        summary = "Blocked by the regulator, but no named clamp was recorded."
+
+    return {
+        "decision": "safe" if evaluation.safe_to_emit else "blocked",
+        "summary": summary,
+        "reasons": reasons,
+    }
+
+
 def build_batch_reports(
     input_jsonl: Path,
     *,
     use_embeddings: bool = True,
+    include_explanations: bool = False,
     include_token_shock: bool = False,
     token_shock_max_samples: Optional[int] = None,
     token_shock_top_k: Optional[int] = None,
@@ -262,6 +329,7 @@ def build_batch_reports(
             )
             report = build_regulation_report(
                 result,
+                include_explanations=include_explanations,
                 include_token_shock=include_token_shock,
                 token_shock_max_samples=token_shock_max_samples,
                 token_shock_top_k=token_shock_top_k,
@@ -426,6 +494,23 @@ def _markdown_evaluations(report: Dict[str, Any]) -> List[str]:
                 "",
             ]
         )
+        explanation = evaluation.get("explanation")
+        if explanation:
+            lines.extend(
+                [
+                    "Explanation:",
+                    "",
+                    f"- Decision: {explanation['decision']}",
+                    f"- Summary: {explanation['summary']}",
+                ]
+            )
+            if explanation["reasons"]:
+                lines.append("- Reasons:")
+                lines.extend(
+                    f"  - `{reason['code']}`: {reason['message']}"
+                    for reason in explanation["reasons"]
+                )
+            lines.append("")
         token_shock = evaluation.get("token_shock", [])
         if token_shock:
             lines.extend(["Token shock:", ""])
@@ -453,6 +538,11 @@ def format_regulation_text(report: Dict[str, Any]) -> str:
         )
         for token in evaluation.get("token_shock", []):
             lines.append(f"    token_shock | {token['token']} | shock={token['shock']:.4f}")
+        explanation = evaluation.get("explanation")
+        if explanation:
+            lines.append(f"    explain | {explanation['summary']}")
+            for reason in explanation["reasons"]:
+                lines.append(f"    reason | {reason['code']} | {reason['message']}")
     return "\n".join(lines) + "\n"
 
 
