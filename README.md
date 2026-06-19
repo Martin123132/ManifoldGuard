@@ -441,6 +441,15 @@ failing case details, and `--list-families` to inspect available taxonomy
 groups.
 The generated benchmark report lives at `docs/evaluation_report.md`.
 
+Compare two saved evaluator JSON reports:
+
+```bash
+python scripts/compare_eval_reports.py \
+  --before baseline-evaluation.json \
+  --after candidate-evaluation.json \
+  --output evaluation-diff.json
+```
+
 ## Package Build and Publish
 
 Package distribution artifacts are built by

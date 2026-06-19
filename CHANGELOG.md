@@ -5,6 +5,8 @@
 - Started the 0.1.2 development cycle after the public 0.1.1 PyPI release.
 - Added opt-in `manifold-check --explain` decision explanations for text, JSON,
   and Markdown regulation reports.
+- Added `scripts/compare_eval_reports.py` to compare saved offline evaluator
+  JSON reports and highlight summary, family, and case-level changes.
 
 ## 0.1.1 - 2026-06-18
 
