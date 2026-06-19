@@ -16,6 +16,8 @@
   reports summarize by intended family instead of per-case fragments.
 - Added reference-side negative relation support so candidates can preserve
   supplied negative evidence while positive counterclaims are clamped.
+- Added temporal binding relation extraction for year/value, version/change,
+  quarter/value, opened-date, and start/end-date swaps.
 
 ## 0.1.1 - 2026-06-18
 

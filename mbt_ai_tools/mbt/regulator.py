@@ -191,6 +191,10 @@ _OVERCLAIM_PATTERNS = (
     "proves gravity has no connection",
     "proves there is no connection",
 )
+_MONTH_PATTERN = (
+    r"(?:january|february|march|april|may|june|july|august|september|"
+    r"october|november|december)"
+)
 
 Predicate = str
 Relation = Tuple[str, Predicate, str]
@@ -327,6 +331,7 @@ def extract_relations(text: str) -> Set[Relation]:
         return set()
 
     relations: Set[Relation] = set()
+    relations.update(_extract_temporal_binding_relations(normalized))
     for segment in _split_relation_segments(normalized):
         relations.update(_extract_relations_from_segment(segment))
     return {_normalize_relation(r) for r in relations if r[0] and r[2]}
@@ -353,6 +358,7 @@ def _split_relation_segments(text: str) -> List[str]:
 
 def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations: Set[Relation] = set()
+    relations.update(_extract_temporal_binding_relations(segment))
 
     m = re.search(r"\bcapital of ([a-z][a-z ]+?) is ([a-z][a-z ]+?)(?:$| and | but )", segment)
     if m:
@@ -375,6 +381,8 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
             and obj
             and "capital of" not in subj
             and not obj.startswith(("capital of", "capital city of"))
+            and subj != "it"
+            and not _looks_like_temporal_value(obj)
             and len(subj.split()) <= 5
             and len(obj.split()) <= 8
         ):
@@ -419,6 +427,73 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
         segment,
     ):
         relations.add((_clean_span(m.group(1)), _lemma_predicate(m.group(2)), m.group(3)))
+
+    return relations
+
+
+def _extract_temporal_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    last_subject = ""
+    for m in re.finditer(
+        r"\bin (\d{4}) ([a-z][a-z ]+?) (?:was|were) "
+        r"([a-z0-9]+(?: [a-z]+)?)(?=$| and in \d{4}\b| in \d{4}\b| and | but )",
+        text,
+    ):
+        year = m.group(1)
+        subject = _clean_span(m.group(2))
+        if subject == "it" and last_subject:
+            subject = last_subject
+        elif subject != "it":
+            last_subject = subject
+        value = _clean_span(m.group(3))
+        if subject and value:
+            relations.add((f"{subject} in {year}", "temporal_value", value))
+
+    reverse_subjects: List[Tuple[int, str]] = []
+    for m in re.finditer(
+        r"\b([a-z][a-z ]+?) (?:was|were) ([a-z0-9]+(?: [a-z]+)?) in (\d{4})",
+        text,
+    ):
+        subject = _clean_span(m.group(1))
+        value = _clean_span(m.group(2))
+        year = m.group(3)
+        if subject and value:
+            relations.add((f"{subject} in {year}", "temporal_value", value))
+            reverse_subjects.append((m.end(), subject))
+    for offset, subject in reverse_subjects:
+        trailing = text[offset:]
+        for m in re.finditer(r"\band ([a-z0-9]+(?: [a-z]+)?) in (\d{4})", trailing):
+            value = _clean_span(m.group(1))
+            year = m.group(2)
+            if value:
+                relations.add((f"{subject} in {year}", "temporal_value", value))
+
+    for m in re.finditer(r"\b([a-z][a-z ]+? office) opened in (\d{4})", text):
+        relations.add((_clean_span(m.group(1)), "opened_in", m.group(2)))
+
+    for m in re.finditer(
+        r"\bversion ([0-9]+) added ([a-z][a-z ]+? support)(?=$| version [0-9]+| and | but )",
+        text,
+    ):
+        relations.add((f"version {m.group(1)}", "added", _clean_span(m.group(2))))
+
+    for m in re.finditer(
+        r"\b(q[0-9]+ [a-z][a-z ]+?) (?:was|were) ([0-9]+ [a-z]+)(?=$| q[0-9]+ | and | but )",
+        text,
+    ):
+        relations.add((_clean_span(m.group(1)), "temporal_value", _clean_span(m.group(2))))
+
+    date = rf"{_MONTH_PATTERN} [0-9]+"
+    for m in re.finditer(rf"\b([a-z][a-z ]+?) starts on ({date})", text):
+        subject = _clean_span(m.group(1))
+        relations.add((subject, "starts_on", _clean_span(m.group(2))))
+        trailing = text[m.end():]
+        end = re.search(rf"\b(?:and )?ends on ({date})", trailing)
+        if end:
+            relations.add((subject, "ends_on", _clean_span(end.group(1))))
+    for m in re.finditer(rf"\b([a-z][a-z ]+?) ends on ({date})", text):
+        relations.add((_clean_span(m.group(1)), "ends_on", _clean_span(m.group(2))))
 
     return relations
 
@@ -627,7 +702,15 @@ def literal_drift(candidate: str, manifold: ReferenceManifold) -> LiteralDrift:
 
     cand_numbers = set(_numbers(candidate))
     cand_units = set(_units(candidate))
-    cand_entities = set(_entities(candidate))
+    cand_entities = {
+        entity
+        for entity in _entities(candidate)
+        if not _is_sentence_initial_content_entity(
+            candidate,
+            entity,
+            manifold.content_tokens,
+        )
+    }
     cand_content = set(_content_tokens(candidate))
     return LiteralDrift(
         novel_numbers=tuple(sorted(cand_numbers - manifold.numbers)),
@@ -780,6 +863,25 @@ def _relations_match(left: Relation, right: Relation, text: str = "") -> bool:
 def _mentions_object(text: str, obj: str) -> bool:
     normalized = normalize_text(text)
     return bool(obj and re.search(rf"\b{re.escape(obj)}\b", normalized))
+
+
+def _looks_like_temporal_value(value: str) -> bool:
+    return bool(
+        re.search(r"\b\d{3,4}\b", value)
+        or re.search(r"\b\d+(?: mm| cm| m| km| units?| hours?| minutes?| seconds?)\b", value)
+    )
+
+
+def _is_sentence_initial_content_entity(
+    text: str,
+    entity: str,
+    reference_content_tokens: Set[str],
+) -> bool:
+    normalized_entity = normalize_text(entity)
+    if " " in normalized_entity or normalized_entity not in reference_content_tokens:
+        return False
+    tokens = normalize_text(text).split()
+    return bool(tokens and tokens[0] == normalized_entity)
 
 
 def _object_has_negation_nearby(text: str, obj: str) -> bool:
