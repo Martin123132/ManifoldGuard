@@ -215,6 +215,57 @@ def test_exclusion_supports_equivalent_negative_candidate():
     assert result.evaluations[1].safe_to_emit is True
 
 
+def test_temporal_year_value_swap_is_blocked():
+    result = regulate_candidates(
+        [
+            "In 2020, rainfall was 45 mm and in 2021 it was 30 mm.",
+            "Rainfall was 30 mm in 2020 and 45 mm in 2021.",
+        ],
+        ["In 2020, rainfall was 30 mm. In 2021, rainfall was 45 mm."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Rainfall was 30 mm in 2020 and 45 mm in 2021."
+    assert result.evaluations[0].safe_to_emit is False
+    assert "known_participant_unsupported_relation_clamp" in result.evaluations[0].clamp_summary
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_temporal_version_binding_swap_is_blocked():
+    result = regulate_candidates(
+        [
+            "Version 1.2 added import support and version 1.3 added export support.",
+            "Version 1.2 added export support and version 1.3 added import support.",
+        ],
+        ["Version 1.2 added export support. Version 1.3 added import support."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "Version 1.2 added export support and version 1.3 added import support."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_temporal_start_end_date_swap_is_blocked():
+    result = regulate_candidates(
+        [
+            "The lease starts on August 31 and ends on March 1.",
+            "The lease starts on March 1 and ends on August 31.",
+        ],
+        ["The lease starts on March 1 and ends on August 31."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The lease starts on March 1 and ends on August 31."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
 @pytest.mark.parametrize(
     "reference,candidate",
     [
