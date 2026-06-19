@@ -9,6 +9,9 @@
   JSON reports and highlight summary, family, and case-level changes.
 - Added `scripts/build_eval_replay_pack.py` to turn evaluator JSON plus corpus
   rows into compact Markdown or JSON replay packs for failed/selected cases.
+- Added an exploratory EXP21 challenge corpus seed for harder non-claim
+  development probes across negation scope, aliases, temporal binding,
+  relation composition, qualifier overclaims, and all-bad near misses.
 
 ## 0.1.1 - 2026-06-18
 

@@ -527,6 +527,19 @@ Regenerate the corpus:
 uv run python examples/build_regression_corpus.py
 ```
 
+An exploratory EXP21 challenge seed lives in `examples/challenge_corpus.jsonl`.
+It is separate from the frozen release/regression evidence and is intended for
+harder development probes, not current public pass-rate claims.
+
+```bash
+uv run python examples/build_challenge_corpus.py
+manifold-eval --corpus examples/challenge_corpus.jsonl --output challenge-evaluation.json
+python scripts/build_eval_replay_pack.py \
+  --evaluation challenge-evaluation.json \
+  --corpus examples/challenge_corpus.jsonl \
+  --output challenge-replay.md
+```
+
 Run the tests:
 
 ```bash
