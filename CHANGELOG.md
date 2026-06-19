@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 - Unreleased
+## 0.1.2 - 2026-06-19
 
 - Started the 0.1.2 development cycle after the public 0.1.1 PyPI release.
 - Added relation-composition extraction for shared-subject verb chains and
