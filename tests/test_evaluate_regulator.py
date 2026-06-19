@@ -50,6 +50,18 @@ def test_evaluate_regulator_groups_underscore_case_families():
     assert evaluate_regulator.case_family("capital_entity_swap_france") == "capital_entity_swap"
     assert evaluate_regulator.case_family("numeric_drift_mars_2025") == "numeric_drift"
     assert evaluate_regulator.case_family("unsupported_negation_water") == "unsupported_negation"
+    assert (
+        evaluate_regulator.case_family("challenge_supported_negation_trial_children")
+        == "challenge_supported_negation"
+    )
+    assert (
+        evaluate_regulator.case_family("challenge_all_bad_near_miss_capitals_close")
+        == "challenge_all_bad_near_miss"
+    )
+    assert (
+        evaluate_regulator.case_family("challenge_relation_composition_library_archive")
+        == "challenge_relation_composition"
+    )
     assert evaluate_regulator.case_family("short_case") == "short_case"
 
 

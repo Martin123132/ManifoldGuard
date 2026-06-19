@@ -12,6 +12,8 @@
 - Added an exploratory EXP21 challenge corpus seed for harder non-claim
   development probes across negation scope, aliases, temporal binding,
   relation composition, qualifier overclaims, and all-bad near misses.
+- Added evaluator taxonomy prefixes for EXP21 challenge families so challenge
+  reports summarize by intended family instead of per-case fragments.
 
 ## 0.1.1 - 2026-06-18
 
