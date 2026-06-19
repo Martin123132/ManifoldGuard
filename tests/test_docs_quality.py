@@ -670,6 +670,16 @@ def test_benchmark_guide_is_manifested_and_required(docs_quality, monkeypatch):
     assert "docs/benchmark.md" in docs_quality.parse_args().required_markdown
 
 
+def test_getting_started_guide_is_manifested_and_required(docs_quality, monkeypatch):
+    project_root = Path(__file__).resolve().parent.parent
+    manifest_path = project_root / "docs" / "product_readiness_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    monkeypatch.setattr("sys.argv", ["docs_quality.py"])
+
+    assert "docs/getting_started.md" in manifest["documentation"]
+    assert "docs/getting_started.md" in docs_quality.parse_args().required_markdown
+
+
 def test_validate_runtime_guarantees_rejects_missing_token_shock_policy(docs_quality):
     manifest = base_manifest_dict()
     manifest["runtime_guarantees"] = [

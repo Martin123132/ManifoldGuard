@@ -68,6 +68,7 @@ print(result.emitted_text)
 
 ManifoldGuard is useful when you already have trusted reference statements and
 want to reject outputs that drift away from them.
+For a fuller onboarding path, see `docs/getting_started.md`.
 
 ## Core Claim
 

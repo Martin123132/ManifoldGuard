@@ -299,6 +299,7 @@ def parse_args():
             "SECURITY.md",
             "SUPPORT.md",
             "CODE_OF_CONDUCT.md",
+            "docs/getting_started.md",
             "docs/report_schema.md",
             "docs/report_schema.json",
             "docs/quality_gates.md",
