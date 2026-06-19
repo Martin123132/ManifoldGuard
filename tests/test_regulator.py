@@ -266,6 +266,79 @@ def test_temporal_start_end_date_swap_is_blocked():
     assert result.evaluations[1].safe_to_emit is True
 
 
+def test_relation_composition_shared_subject_chain_is_blocked():
+    references = [
+        "Photosynthesis uses carbon dioxide.",
+        "Photosynthesis releases oxygen.",
+        "Photosynthesis stores chemical energy.",
+    ]
+
+    assert ("photosynthesis", "use", "carbon dioxide") in extract_relations(
+        "Photosynthesis uses carbon dioxide, releases oxygen, and stores chemical energy."
+    )
+    assert ("photosynthesis", "release", "oxygen") in extract_relations(
+        "Photosynthesis uses carbon dioxide, releases oxygen, and stores chemical energy."
+    )
+    result = regulate_candidates(
+        [
+            "Photosynthesis releases carbon dioxide and uses oxygen.",
+            "Photosynthesis uses carbon dioxide, releases oxygen, and stores chemical energy.",
+        ],
+        references,
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "Photosynthesis uses carbon dioxide, releases oxygen, and stores chemical energy."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert "known_participant_unsupported_relation_clamp" in result.evaluations[0].clamp_summary
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_relation_composition_cross_subject_verb_swap_is_blocked():
+    result = regulate_candidates(
+        [
+            "Libraries preserve records and archives lend books.",
+            "Libraries lend books and archives preserve records.",
+        ],
+        [
+            "Libraries lend books.",
+            "Archives preserve records.",
+        ],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Libraries lend books and archives preserve records."
+    assert result.evaluations[0].safe_to_emit is False
+    assert "known_participant_unsupported_relation_clamp" in result.evaluations[0].clamp_summary
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_relation_composition_transform_swap_is_blocked():
+    result = regulate_candidates(
+        [
+            "Evaporation turns vapor into liquid water and condensation turns liquid water into vapor.",
+            "Evaporation turns liquid water into vapor and condensation turns vapor into liquid water.",
+        ],
+        [
+            "Evaporation turns liquid water into vapor.",
+            "Condensation turns vapor into liquid water.",
+        ],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "Evaporation turns liquid water into vapor and condensation turns vapor into liquid water."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert "known_participant_unsupported_relation_clamp" in result.evaluations[0].clamp_summary
+    assert result.evaluations[1].safe_to_emit is True
+
+
 @pytest.mark.parametrize(
     "reference,candidate",
     [

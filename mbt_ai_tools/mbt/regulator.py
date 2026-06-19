@@ -195,6 +195,18 @@ _MONTH_PATTERN = (
     r"(?:january|february|march|april|may|june|july|august|september|"
     r"october|november|december)"
 )
+_CHAIN_VERB_LEMMAS = {
+    "absorb",
+    "exchange",
+    "lend",
+    "preserve",
+    "provide",
+    "release",
+    "request",
+    "store",
+    "turn",
+    "use",
+}
 
 Predicate = str
 Relation = Tuple[str, Predicate, str]
@@ -332,6 +344,7 @@ def extract_relations(text: str) -> Set[Relation]:
 
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(normalized))
+    relations.update(_extract_shared_subject_verb_chain(normalized))
     for segment in _split_relation_segments(normalized):
         relations.update(_extract_relations_from_segment(segment))
     return {_normalize_relation(r) for r in relations if r[0] and r[2]}
@@ -359,6 +372,8 @@ def _split_relation_segments(text: str) -> List[str]:
 def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(segment))
+    shared_subject_relations = _extract_shared_subject_verb_chain(segment)
+    relations.update(shared_subject_relations)
 
     m = re.search(r"\bcapital of ([a-z][a-z ]+?) is ([a-z][a-z ]+?)(?:$| and | but )", segment)
     if m:
@@ -392,7 +407,9 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
         "orbits|orbit|contains|contain|contain|produces|produce|"
         "releases|release|stores|store|converts|convert|improves|improve|"
         "uses|use|needs|need|has|have|is|are|was|were|needs|improved|produces|produced|"
-        "contains|contained|released|using"
+        "contains|contained|released|using|lends|lend|preserves|preserve|"
+        "absorbs|absorb|exchanges|exchange|provides|provide|requests|request|"
+        "turns|turn"
     )
     pattern = rf"\b([a-z][a-z ]+?) ({verbs}) ([a-z][a-z0-9 ]+?)(?=$| and (?:{verbs}) )"
     for m in re.finditer(pattern, segment):
@@ -404,6 +421,7 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
             and obj
             and subj not in {"and", "or"}
             and not (pred == "is" and _is_capital_of_predicate(obj))
+            and not (shared_subject_relations and _contains_chain_verb(obj))
         ):
             relations.add((subj, pred, obj))
 
@@ -428,6 +446,42 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     ):
         relations.add((_clean_span(m.group(1)), _lemma_predicate(m.group(2)), m.group(3)))
 
+    return relations
+
+
+def _contains_chain_verb(span: str) -> bool:
+    return any(_lemma_predicate(token) in _CHAIN_VERB_LEMMAS for token in span.split())
+
+
+def _extract_shared_subject_verb_chain(text: str) -> Set[Relation]:
+    tokens = normalize_text(text).split()
+    verb_indexes = [
+        index
+        for index, token in enumerate(tokens)
+        if _lemma_predicate(token) in _CHAIN_VERB_LEMMAS
+    ]
+    if len(verb_indexes) < 2 or verb_indexes[0] == 0:
+        return set()
+
+    subject = _clean_span(" ".join(tokens[: verb_indexes[0]]))
+    if not subject or len(subject.split()) > 5:
+        return set()
+
+    relations: Set[Relation] = set()
+    for position, verb_index in enumerate(verb_indexes):
+        next_verb_index = (
+            verb_indexes[position + 1]
+            if position + 1 < len(verb_indexes)
+            else len(tokens)
+        )
+        object_tokens = tokens[verb_index + 1 : next_verb_index]
+        if object_tokens and object_tokens[-1] == "and":
+            object_tokens = object_tokens[:-1]
+        if "and" in object_tokens or "but" in object_tokens:
+            return set()
+        obj = _clean_span(" ".join(object_tokens))
+        if obj:
+            relations.add((subject, _lemma_predicate(tokens[verb_index]), obj))
     return relations
 
 
@@ -969,6 +1023,20 @@ def _lemma_predicate(predicate: str) -> str:
         "releases": "release",
         "release": "release",
         "released": "release",
+        "lends": "lend",
+        "lend": "lend",
+        "preserves": "preserve",
+        "preserve": "preserve",
+        "absorbs": "absorb",
+        "absorb": "absorb",
+        "exchanges": "exchange",
+        "exchange": "exchange",
+        "provides": "provide",
+        "provide": "provide",
+        "requests": "request",
+        "request": "request",
+        "turns": "turn",
+        "turn": "turn",
         "stores": "store",
         "store": "store",
         "stored": "store",
