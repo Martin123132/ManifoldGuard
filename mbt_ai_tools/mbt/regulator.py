@@ -190,6 +190,7 @@ _OVERCLAIM_PATTERNS = (
     "automatically the final",
     "proves gravity has no connection",
     "proves there is no connection",
+    "always boils",
 )
 _MONTH_PATTERN = (
     r"(?:january|february|march|april|may|june|july|august|september|"
@@ -345,6 +346,7 @@ def extract_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(normalized))
     relations.update(_extract_scope_binding_relations(normalized))
+    relations.update(_extract_alias_binding_relations(normalized))
     relations.update(_extract_shared_subject_verb_chain(normalized))
     for segment in _split_relation_segments(normalized):
         relations.update(_extract_relations_from_segment(segment))
@@ -375,6 +377,7 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(segment))
     relations.update(_extract_scope_binding_relations(segment))
+    relations.update(_extract_alias_binding_relations(segment))
     shared_subject_relations = _extract_shared_subject_verb_chain(segment)
     relations.update(shared_subject_relations)
 
@@ -542,6 +545,46 @@ def _extract_scope_negated_relations(text: str) -> Set[Relation]:
     return relations
 
 
+def _extract_alias_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) acquired ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_span(m.group(1)), "acquire", _clean_span(m.group(2))))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) also called ([a-z0-9 ]+?) acquired ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        canonical = _clean_span(m.group(1))
+        alias = _clean_span(m.group(2))
+        obj = _clean_span(m.group(3))
+        relations.add((canonical, "acquire", obj))
+        relations.add((alias, "acquire", obj))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) is in ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_span(m.group(1)), "located_in", _clean_span(m.group(2))))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9 ]+?) abbreviated ([a-z0-9]+) is in ([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        canonical = _clean_span(m.group(1))
+        alias = _clean_span(m.group(2))
+        location = _clean_span(m.group(3))
+        relations.add((canonical, "located_in", location))
+        relations.add((alias, "located_in", location))
+        relations.add((canonical, "is", f"in {location}"))
+        relations.add((alias, "is", f"in {location}"))
+
+    return relations
+
+
 def _extract_shared_subject_verb_chain(text: str) -> Set[Relation]:
     tokens = normalize_text(text).split()
     verb_indexes = [
@@ -612,7 +655,7 @@ def _extract_temporal_binding_relations(text: str) -> Set[Relation]:
             if value:
                 relations.add((f"{subject} in {year}", "temporal_value", value))
 
-    for m in re.finditer(r"\b([a-z][a-z ]+? office) opened in (\d{4})", text):
+    for m in re.finditer(r"(?:^|\b(?:and|but) )([a-z][a-z ]+? office) opened in (\d{4})", text):
         relations.add((_clean_span(m.group(1)), "opened_in", m.group(2)))
 
     for m in re.finditer(
@@ -1071,7 +1114,7 @@ def _entities(text: str) -> List[str]:
     entities = []
     for match in re.finditer(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b", text):
         value = _clean_span(match.group(0).lower())
-        if value and value not in {"the", "a", "an"}:
+        if value and value not in {"the", "a", "an"} and value not in _STOPWORDS:
             entities.append(value)
     return entities
 

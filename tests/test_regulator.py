@@ -425,6 +425,77 @@ def test_supported_negation_prepositional_contrast_object_is_preserved():
     assert result.evaluations[2].safe_to_emit is False
 
 
+def test_alias_binding_acquisition_direction_is_preserved():
+    result = regulate_candidates(
+        [
+            "Intel acquired Red Hat.",
+            "IBM acquired Red Hat.",
+            "Red Hat acquired IBM.",
+        ],
+        ["International Business Machines, also called IBM, acquired Red Hat."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "IBM acquired Red Hat."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+    assert result.evaluations[2].safe_to_emit is False
+
+
+def test_alias_binding_location_direction_is_preserved():
+    result = regulate_candidates(
+        [
+            "NYC is in California.",
+            "NYC is in New York State.",
+            "New York State is in NYC.",
+        ],
+        ["New York City, abbreviated NYC, is in New York State."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "NYC is in New York State."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+    assert result.evaluations[2].safe_to_emit is False
+
+
+def test_qualifier_overclaim_sea_level_scope_is_preserved():
+    result = regulate_candidates(
+        [
+            "Water always boils at 100 degrees Celsius.",
+            "At sea level, water boils at 100 degrees Celsius.",
+        ],
+        ["Water boils at 100 degrees Celsius at sea level."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "At sea level, water boils at 100 degrees Celsius."
+    assert result.evaluations[0].safe_to_emit is False
+    assert "overclaim_flag" in result.evaluations[0].clamp_summary
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_temporal_office_opened_dates_preserve_subject_binding():
+    result = regulate_candidates(
+        [
+            "The Paris office opened in 2018 and the Berlin office opened in 2020.",
+            "The Berlin office opened in 2018 and the Paris office opened in 2020.",
+        ],
+        ["The Berlin office opened in 2018. The Paris office opened in 2020."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "The Berlin office opened in 2018 and the Paris office opened in 2020."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
 @pytest.mark.parametrize(
     "reference,candidate",
     [

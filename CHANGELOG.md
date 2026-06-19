@@ -7,6 +7,8 @@
   additional relation verbs so EXP21 recombination swaps are clamped offline.
 - Added negation-scope binding for compact contrast objects and ellipsis forms
   so lettered subjects and delayed-opening cases remain aligned offline.
+- Added alias-aware acquisition/location bindings plus sea-level and office-date
+  guards to close the remaining EXP21 challenge corpus gaps offline.
 - Added `docs/exp21_challenge.md` to document the challenge corpus workflow,
   replay packs, report comparison, and promotion boundary.
 - Added the EXP21 challenge guide to the product readiness manifest and
