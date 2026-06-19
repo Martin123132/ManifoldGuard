@@ -7,6 +7,8 @@
   additional relation verbs so EXP21 recombination swaps are clamped offline.
 - Added negation-scope binding for compact contrast objects and ellipsis forms
   so lettered subjects and delayed-opening cases remain aligned offline.
+- Added `docs/exp21_challenge.md` to document the challenge corpus workflow,
+  replay packs, report comparison, and promotion boundary.
 - Added opt-in `manifold-check --explain` decision explanations for text, JSON,
   and Markdown regulation reports.
 - Added `scripts/compare_eval_reports.py` to compare saved offline evaluator

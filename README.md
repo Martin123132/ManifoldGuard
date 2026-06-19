@@ -530,6 +530,7 @@ uv run python examples/build_regression_corpus.py
 An exploratory EXP21 challenge seed lives in `examples/challenge_corpus.jsonl`.
 It is separate from the frozen release/regression evidence and is intended for
 harder development probes, not current public pass-rate claims.
+The EXP21 workflow is documented in `docs/exp21_challenge.md`.
 
 ```bash
 uv run python examples/build_challenge_corpus.py
