@@ -7,6 +7,8 @@
   and Markdown regulation reports.
 - Added `scripts/compare_eval_reports.py` to compare saved offline evaluator
   JSON reports and highlight summary, family, and case-level changes.
+- Added `scripts/build_eval_replay_pack.py` to turn evaluator JSON plus corpus
+  rows into compact Markdown or JSON replay packs for failed/selected cases.
 
 ## 0.1.1 - 2026-06-18
 

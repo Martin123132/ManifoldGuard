@@ -450,6 +450,15 @@ python scripts/compare_eval_reports.py \
   --output evaluation-diff.json
 ```
 
+Build a compact replay pack for failed or selected evaluator cases:
+
+```bash
+python scripts/build_eval_replay_pack.py \
+  --evaluation regulator-evaluation.json \
+  --corpus examples/regression_corpus.jsonl \
+  --output eval-replay.md
+```
+
 ## Package Build and Publish
 
 Package distribution artifacts are built by
