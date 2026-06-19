@@ -3,6 +3,9 @@
 ## 0.1.3 - Unreleased
 
 - Started the 0.1.3 development cycle after the public 0.1.2 PyPI release.
+- Added the exploratory EXP22 challenge corpus seed for broader post-EXP21
+  development probes across coreference, comparison, exception scope, unit
+  binding, temporal order, and all-bad near misses.
 
 ## 0.1.2 - 2026-06-19
 
