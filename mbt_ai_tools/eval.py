@@ -30,6 +30,13 @@ CASE_FAMILY_PREFIXES = (
     "overclaim",
     "unit_drift",
     "unsupported_negation",
+    "challenge_alias_binding",
+    "challenge_all_bad_near_miss",
+    "challenge_negation_scope",
+    "challenge_qualifier_overclaim",
+    "challenge_relation_composition",
+    "challenge_supported_negation",
+    "challenge_temporal_scope",
 )
 
 
