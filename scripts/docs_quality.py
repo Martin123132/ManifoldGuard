@@ -321,6 +321,7 @@ def parse_args():
             "examples/explain_report.md",
             "examples/markdown_audit_report.md",
             "examples/csv_audit_report.csv",
+            "examples/personal_corpus_template.jsonl",
             "examples/regression_corpus.jsonl",
             "examples/single_report_example.json",
             "examples/batch_report_example.jsonl",

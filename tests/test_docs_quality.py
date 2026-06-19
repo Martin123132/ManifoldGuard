@@ -660,6 +660,19 @@ def test_explain_report_example_is_manifested_and_required(docs_quality, monkeyp
     assert "examples/explain_report.md" in docs_quality.parse_args().required_example_paths
 
 
+def test_personal_corpus_template_is_manifested_and_required(docs_quality, monkeypatch):
+    project_root = Path(__file__).resolve().parent.parent
+    manifest_path = project_root / "docs" / "product_readiness_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    monkeypatch.setattr("sys.argv", ["docs_quality.py"])
+
+    assert "examples/personal_corpus_template.jsonl" in manifest["examples"]
+    assert (
+        "examples/personal_corpus_template.jsonl"
+        in docs_quality.parse_args().required_example_paths
+    )
+
+
 def test_benchmark_guide_is_manifested_and_required(docs_quality, monkeypatch):
     project_root = Path(__file__).resolve().parent.parent
     manifest_path = project_root / "docs" / "product_readiness_manifest.json"

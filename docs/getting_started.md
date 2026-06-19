@@ -105,6 +105,12 @@ Create a JSONL file with one case per line:
 {"id":"france-capital","references":["The capital of France is Paris."],"candidates":["The capital of France is London.","The capital of France is Paris."]}
 ```
 
+A starter template is available at:
+
+```text
+examples/personal_corpus_template.jsonl
+```
+
 Run:
 
 ```bash
@@ -147,6 +153,7 @@ Vague references make it harder to decide whether a candidate drifted.
 The easiest extension path is data-first:
 
 - add cases to your own JSONL corpus
+- start from `examples/personal_corpus_template.jsonl` if helpful
 - run `manifold-eval --corpus your-corpus.jsonl`
 - inspect failures with `scripts/build_eval_replay_pack.py`
 - promote stable cases into tests only after expected behavior is clear

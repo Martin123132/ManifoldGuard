@@ -15,6 +15,8 @@
   public claim boundaries.
 - Added `docs/getting_started.md` to improve first-run usability,
   onboarding, and personal extension guidance.
+- Added `examples/personal_corpus_template.jsonl` as a starter template for
+  users building private reference-bounded corpora.
 - Added opt-in `manifold-check --explain` decision explanations for text, JSON,
   and Markdown regulation reports.
 - Documented `manifold-check --explain` in the README CLI examples.
