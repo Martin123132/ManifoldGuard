@@ -185,4 +185,5 @@ truth, it probably belongs outside ManifoldGuard or needs explicit references.
 - `docs/report_schema.md`: report fields and output contracts
 - `docs/benchmark.md`: evidence tiers and public claim boundaries
 - `docs/exp21_challenge.md`: challenge corpus workflow
+- `docs/extending.md`: extension paths for personal corpora and code changes
 - `CLAIMS.md`: supported and unsupported public claims

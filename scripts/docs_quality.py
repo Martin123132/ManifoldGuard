@@ -300,6 +300,7 @@ def parse_args():
             "SUPPORT.md",
             "CODE_OF_CONDUCT.md",
             "docs/getting_started.md",
+            "docs/extending.md",
             "docs/report_schema.md",
             "docs/report_schema.json",
             "docs/quality_gates.md",

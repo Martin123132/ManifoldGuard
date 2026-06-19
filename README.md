@@ -70,6 +70,7 @@ ManifoldGuard is useful when you already have trusted reference statements and
 want to reject outputs that drift away from them.
 For a fuller onboarding path, see `docs/getting_started.md`.
 For a starter personal corpus, see `examples/personal_corpus_template.jsonl`.
+For extension guidance, see `docs/extending.md`.
 
 ## Core Claim
 
