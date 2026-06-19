@@ -331,6 +331,7 @@ manifold-check \
 
 `--explain` adds per-candidate summaries and guard reasons to text, JSON, and
 Markdown regulation reports without changing the default report shape.
+See `examples/explain_report.md` for a complete offline explanation example.
 
 Optional token-level shock details can be included in regulation reports when
 embedding dependencies are installed:

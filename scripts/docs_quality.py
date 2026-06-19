@@ -316,6 +316,7 @@ def parse_args():
         default=[
             "examples/batch_input.jsonl",
             "examples/cli_json_report.md",
+            "examples/explain_report.md",
             "examples/markdown_audit_report.md",
             "examples/csv_audit_report.csv",
             "examples/regression_corpus.jsonl",
