@@ -13,6 +13,7 @@
   docs-quality required document set.
 - Added opt-in `manifold-check --explain` decision explanations for text, JSON,
   and Markdown regulation reports.
+- Documented `manifold-check --explain` in the README CLI examples.
 - Added `scripts/compare_eval_reports.py` to compare saved offline evaluator
   JSON reports and highlight summary, family, and case-level changes.
 - Added `scripts/build_eval_replay_pack.py` to turn evaluator JSON plus corpus

@@ -318,6 +318,20 @@ manifold-check \
 
 See `examples/cli_json_report.md` for a complete offline JSON report demo.
 
+Decision explanations:
+
+```bash
+manifold-check \
+  --reference "The capital of France is Paris." \
+  --candidate "The capital of France is London." \
+  --candidate "The capital of France is Paris." \
+  --no-embeddings \
+  --explain
+```
+
+`--explain` adds per-candidate summaries and guard reasons to text, JSON, and
+Markdown regulation reports without changing the default report shape.
+
 Optional token-level shock details can be included in regulation reports when
 embedding dependencies are installed:
 
