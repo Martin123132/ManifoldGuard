@@ -8,6 +8,16 @@
   ordinal binding, aggregate binding, and all-bad near misses.
 - Added `docs/roadmap.md` to capture the next development track and release
   hardening rhythm.
+- Added offline ordinal-binding extraction for EXP23 runner rank, priority
+  label, and pipeline stage-slot probes.
+- Added offline nested-exception support for EXP23 lab access, animated GIF,
+  and emergency walk-in exclusion probes.
+- Added offline conditional-scope and permission bindings for EXP23 alarm lock,
+  switch/motor, and Team Red/Blue ledger probes.
+- Added offline aggregate count-to-group binding for the EXP23 trial
+  adult/children enrollment swap probe.
+- Added offline applicant age-range paraphrase support for the EXP23
+  `at least 18 and under 65` to `18 through 64` bound conversion.
 
 ## 0.1.3 - 2026-06-20
 

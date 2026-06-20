@@ -814,3 +814,188 @@ def test_multi_word_capital_relations_are_not_truncated():
     assert ("argentina", "capital", "buenos aires") in extract_relations(
         "Buenos Aires is the capital city of Argentina."
     )
+
+
+def test_exp23_runner_finish_order_preserves_rank_binding():
+    result = regulate_candidates(
+        [
+            "Runner B finished first and Runner A finished second.",
+            "Runner A finished first and Runner B finished second.",
+        ],
+        ["Runner A finished first. Runner B finished second."],
+        use_embeddings=False,
+    )
+
+    assert ("runner a", "ordinalrank", "first") in extract_relations(
+        "Runner A finished first. Runner B finished second."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Runner A finished first and Runner B finished second."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_priority_labels_preserve_number_binding():
+    result = regulate_candidates(
+        [
+            "Priority 2 is critical and Priority 1 is warning.",
+            "Priority 1 is critical and Priority 2 is warning.",
+        ],
+        [
+            "Priority 1 is critical. Priority 2 is warning. "
+            "Priority 3 is informational."
+        ],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Priority 1 is critical and Priority 2 is warning."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_pipeline_stage_values_preserve_ordinal_binding():
+    result = regulate_candidates(
+        [
+            "The first stage is review and the second stage is intake.",
+            "The first stage is intake and the second stage is review.",
+        ],
+        [
+            "The first stage is intake. The second stage is review. "
+            "The third stage is approval."
+        ],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The first stage is intake and the second stage is review."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_lab_exception_preserves_excluded_interns():
+    result = regulate_candidates(
+        [
+            "Interns can enter the lab.",
+            "Interns cannot enter the lab, and supervisors can enter after hours.",
+        ],
+        ["All staff can enter the lab except interns; supervisors can enter after hours."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "Interns cannot enter the lab, and supervisors can enter after hours."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_animated_gif_exception_preserves_static_allowance():
+    result = regulate_candidates(
+        [
+            "The importer accepts animated GIFs.",
+            "The importer accepts static GIFs but not animated GIFs.",
+        ],
+        ["The importer accepts images except animated GIFs; it accepts static GIFs."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The importer accepts static GIFs but not animated GIFs."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_clinic_exception_preserves_walkin_exclusion():
+    result = regulate_candidates(
+        [
+            "The clinic treats all adults including emergency walk-ins.",
+            "The clinic treats adults except emergency walk-ins.",
+        ],
+        ["The clinic treats adults except emergency walk-ins; children require referral."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The clinic treats adults except emergency walk-ins."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_alarm_conditional_blocks_unconditional_lock_claim():
+    result = regulate_candidates(
+        [
+            "The door lock always engages.",
+            "The door lock engages when the alarm is armed.",
+        ],
+        ["If the alarm is armed, the door lock engages."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The door lock engages when the alarm is armed."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_switch_motor_all_bad_conditionals_block():
+    result = regulate_candidates(
+        [
+            "The motor stops when the switch is on.",
+            "The switch stops when the motor is off.",
+        ],
+        ["If the switch is off, the motor stops."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [False, False]
+
+
+def test_exp23_ledger_permission_scope_blocks_wrong_actor_and_direction():
+    result = regulate_candidates(
+        [
+            "Team Blue may edit the ledger.",
+            "The ledger may edit Team Red.",
+        ],
+        ["Only Team Red may edit the ledger; Team Blue may view it."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [False, False]
+
+
+def test_exp23_trial_aggregate_binding_preserves_group_counts():
+    result = regulate_candidates(
+        [
+            "The trial enrolled 10 adults and 40 children.",
+            "The trial enrolled 40 adults and 10 children.",
+        ],
+        ["The trial enrolled 40 adults and 10 children."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "The trial enrolled 40 adults and 10 children."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp23_applicant_age_range_preserves_under_bound_paraphrase():
+    result = regulate_candidates(
+        [
+            "Applicants aged 17 are eligible.",
+            "Applicants aged 18 through 64 are eligible.",
+        ],
+        ["Applicants must be at least 18 and under 65."],
+        use_embeddings=False,
+    )
+
+    assert result.action == "emit"
+    assert result.emitted_text == "Applicants aged 18 through 64 are eligible."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True

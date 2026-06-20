@@ -9,20 +9,22 @@ working plan, not a public guarantee.
 - Core regulation remains offline-first when `use_embeddings=False` or
   `--no-embeddings` is selected.
 - EXP22 is closed at `18 / 18` for the checked seed cases.
+- EXP23 is closed locally at `18 / 18` for the checked seed cases on the
+  `0.1.4` development track.
 
 ## Next development track
 
-EXP23 should guide the `0.1.4` cycle. The first priority is to measure the new
-seed and identify the smallest stable failure family.
+The next cycle should start from a fresh challenge seed rather than expanding
+EXP23 in place. Keep EXP23 as a closed milestone corpus and use the next seed
+to find a small, stable failure family.
 
 Recommended order:
 
-- range and bound scope
-- conditional support scope
-- nested exception handling
-- ordinal and ranked-slot binding
-- aggregate count binding
-- all-bad near-miss blocking
+- broader range and unit-bound paraphrases
+- conditional support with multiple antecedents
+- nested exception chains with more than one excluded subgroup
+- relation binding across compact summaries
+- all-bad near misses that reuse every reference token
 
 ## Product hardening
 

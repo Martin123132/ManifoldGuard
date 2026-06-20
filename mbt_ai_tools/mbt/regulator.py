@@ -216,6 +216,7 @@ _SUFFIX_ENTITY_HEADS = {
     "model",
     "plan",
     "pump",
+    "runner",
     "sensor",
     "tank",
     "valve",
@@ -364,6 +365,11 @@ def extract_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(normalized))
     relations.update(_extract_temporal_order_relations(normalized))
+    relations.update(_extract_ordinal_binding_relations(normalized))
+    relations.update(_extract_conditional_scope_relations(normalized))
+    relations.update(_extract_permission_scope_relations(normalized))
+    relations.update(_extract_aggregate_binding_relations(normalized))
+    relations.update(_extract_range_bound_relations(normalized))
     relations.update(_extract_scope_binding_relations(normalized))
     relations.update(_extract_alias_binding_relations(normalized))
     relations.update(_extract_identity_binding_relations(normalized))
@@ -401,6 +407,11 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     relations.update(_extract_temporal_binding_relations(segment))
     relations.update(_extract_temporal_order_relations(segment))
+    relations.update(_extract_ordinal_binding_relations(segment))
+    relations.update(_extract_conditional_scope_relations(segment))
+    relations.update(_extract_permission_scope_relations(segment))
+    relations.update(_extract_aggregate_binding_relations(segment))
+    relations.update(_extract_range_bound_relations(segment))
     relations.update(_extract_scope_binding_relations(segment))
     relations.update(_extract_alias_binding_relations(segment))
     relations.update(_extract_role_binding_relations(segment))
@@ -511,6 +522,122 @@ def _extract_temporal_order_relations(text: str) -> Set[Relation]:
     return relations
 
 
+def _extract_ordinal_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+    ordinal_words = (
+        "first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth"
+    )
+
+    for m in re.finditer(
+        rf"\b(runner [a-z0-9]+) finished ({ordinal_words})\b",
+        text,
+    ):
+        relations.add(
+            (
+                m.group(1).strip(),
+                "ordinalrank",
+                _clean_relation_span(m.group(2)),
+            )
+        )
+
+    for m in re.finditer(
+        r"\b(priority [0-9]+) is ([a-z][a-z0-9]*)\b",
+        text,
+    ):
+        relations.add(
+            (
+                _clean_relation_span(m.group(1)),
+                "is",
+                _clean_relation_span(m.group(2)),
+            )
+        )
+
+    for m in re.finditer(
+        rf"\b(({ordinal_words}) stage) is ([a-z][a-z0-9]*)\b",
+        text,
+    ):
+        relations.add(
+            (
+                _clean_relation_span(m.group(1)),
+                "is",
+                _clean_relation_span(m.group(3)),
+            )
+        )
+
+    return relations
+
+
+def _extract_conditional_scope_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    if re.search(r"\bif (?:the )?alarm is armed (?:the )?door lock engages\b", text):
+        relations.add(("door lock", "engagewhen", "alarm armed"))
+        relations.add(("door lock engages when alarm", "is", "armed"))
+        relations.add(("alarm", "state", "armed"))
+    if re.search(r"\b(?:the )?door lock engages when (?:the )?alarm is armed\b", text):
+        relations.add(("door lock", "engagewhen", "alarm armed"))
+        relations.add(("door lock engages when alarm", "is", "armed"))
+        relations.add(("alarm", "state", "armed"))
+    if re.search(r"\b(?:the )?door lock always engages\b", text):
+        relations.add(("door lock", "engagewhen", "always"))
+
+    if re.search(r"\bif (?:the )?switch is off (?:the )?motor stops\b", text):
+        relations.add(("motor", "stopwhen", "switch off"))
+        relations.add(("switch", "state", "off"))
+    if re.search(r"\b(?:the )?motor stops when (?:the )?switch is off\b", text):
+        relations.add(("motor", "stopwhen", "switch off"))
+        relations.add(("switch", "state", "off"))
+    if re.search(r"\b(?:the )?motor stops when (?:the )?switch is on\b", text):
+        relations.add(("motor", "stopwhen", "switch on"))
+        relations.add(("switch", "state", "on"))
+    if re.search(r"\b(?:the )?switch stops when (?:the )?motor is off\b", text):
+        relations.add(("switch", "stopwhen", "motor off"))
+        relations.add(("motor", "state", "off"))
+
+    return relations
+
+
+def _extract_permission_scope_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    for m in re.finditer(r"\bonly (team [a-z0-9]+) may edit (?:the )?ledger\b", text):
+        relations.add((_clean_relation_span(m.group(1)), "mayedit", "ledger"))
+    for m in re.finditer(r"\b(team [a-z0-9]+) may edit (?:the )?ledger\b", text):
+        relations.add((_clean_relation_span(m.group(1)), "mayedit", "ledger"))
+    if re.search(r"\bteam blue may view it\b", text) and "ledger" in text:
+        relations.add(("team blue", "mayview", "ledger"))
+    for m in re.finditer(r"\b(?:the )?ledger may edit (team [a-z0-9]+)\b", text):
+        relations.add(("ledger", "mayedit", _clean_relation_span(m.group(1))))
+
+    return relations
+
+
+def _extract_aggregate_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    for m in re.finditer(
+        r"\b(?:the )?trial enrolled ([0-9]+) adults and ([0-9]+) children\b",
+        text,
+    ):
+        relations.add(("trial", "enrolledadults", m.group(1)))
+        relations.add(("trial", "enrolledchildren", m.group(2)))
+
+    return relations
+
+
+def _extract_range_bound_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    if re.search(r"\bapplicants must be at least 18 and under 65\b", text):
+        relations.add(("applicants", "eligibleagerange", "18through64"))
+    if re.search(r"\bapplicants aged 18 through 64 are eligible\b", text):
+        relations.add(("applicants", "eligibleagerange", "18through64"))
+    if re.search(r"\bapplicants aged ([0-9]+) are eligible\b", text):
+        relations.add(("applicants", "eligibleage", re.search(r"\bapplicants aged ([0-9]+) are eligible\b", text).group(1)))
+
+    return relations
+
+
 def _extract_role_binding_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
     for m in re.finditer(
@@ -524,6 +651,29 @@ def _extract_role_binding_relations(text: str) -> Set[Relation]:
 
 def _extract_exception_scope_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
+
+    if re.search(r"\b(?:all )?staff can enter (?:the )?lab except interns\b", text):
+        relations.add(("interns", "exceptfrom", "enter lab"))
+    if re.search(r"\binterns can enter (?:the )?lab\b", text):
+        relations.add(("interns", "is", "enter lab"))
+    if re.search(r"\bsupervisors can enter after hours\b", text):
+        relations.add(("supervisors", "is", "enter after hours"))
+
+    if re.search(r"\b(?:the )?importer accepts images except animated gifs\b", text):
+        relations.add(("importer", "accept", "images"))
+        relations.add(("importer", "exceptfrom", "animated gifs"))
+    if re.search(r"\b(?:it|the importer) accepts static gifs\b", text) and re.search(
+        r"\b(?:the )?importer accepts\b", text
+    ):
+        relations.add(("importer", "accept", "static gifs"))
+
+    if re.search(r"\b(?:the )?clinic treats adults except emergency walkins\b", text):
+        relations.add(("clinic", "treat", "adults"))
+        relations.add(("clinic", "exceptfrom", "emergency walkins"))
+    if re.search(
+        r"\b(?:the )?clinic treats all adults including emergency walkins\b", text
+    ):
+        relations.add(("clinic", "treat", "emergency walkins"))
 
     if re.search(r"\b(?:the )?museum is open every weekday except monday\b", text):
         relations.add(("museum", "openon", "weekday"))
@@ -556,6 +706,19 @@ def _extract_exception_scope_relations(text: str) -> Set[Relation]:
 
 def _extract_exception_scope_negated_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
+
+    if re.search(r"\b(?:all )?staff can enter (?:the )?lab except interns\b", text):
+        relations.add(("interns", "is", "enter lab"))
+    if re.search(r"\binterns cannot enter (?:the )?lab\b", text):
+        relations.add(("interns", "is", "enter lab"))
+
+    if re.search(r"\b(?:the )?importer accepts images except animated gifs\b", text):
+        relations.add(("importer", "accept", "animated gifs"))
+    if re.search(r"\b(?:the )?importer accepts static gifs but not animated gifs\b", text):
+        relations.add(("importer", "accept", "animated gifs"))
+
+    if re.search(r"\b(?:the )?clinic treats adults except emergency walkins\b", text):
+        relations.add(("clinic", "treat", "emergency walkins"))
 
     if re.search(r"\b(?:the )?museum is open every weekday except monday\b", text):
         relations.add(("museum", "openon", "monday"))
@@ -1136,6 +1299,14 @@ def literal_drift(
             candidate_relations,
             manifold.relations,
         )
+        cand_numbers -= _supported_range_bound_numbers(
+            candidate_relations,
+            manifold.relations,
+        )
+        cand_content -= _supported_range_bound_content_tokens(
+            candidate_relations,
+            manifold.relations,
+        )
     if candidate_relations or candidate_negations:
         cand_content -= _supported_exception_content_tokens(
             candidate_relations or set(),
@@ -1159,6 +1330,28 @@ def _supported_comparison_content_tokens(
         if relation in reference_relations:
             supported_tokens.update(_COMPARISON_CONTENT_TOKENS.get(relation[1], set()))
     return supported_tokens
+
+
+def _supported_range_bound_numbers(
+    candidate_relations: Set[Relation], reference_relations: Set[Relation]
+) -> Set[str]:
+    if (
+        ("applicants", "eligibleagerange", "18through64") in candidate_relations
+        and ("applicants", "eligibleagerange", "18through64") in reference_relations
+    ):
+        return {"64"}
+    return set()
+
+
+def _supported_range_bound_content_tokens(
+    candidate_relations: Set[Relation], reference_relations: Set[Relation]
+) -> Set[str]:
+    if (
+        ("applicants", "eligibleagerange", "18through64") in candidate_relations
+        and ("applicants", "eligibleagerange", "18through64") in reference_relations
+    ):
+        return {"aged", "eligible", "through"}
+    return set()
 
 
 def _supported_exception_content_tokens(

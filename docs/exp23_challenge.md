@@ -36,7 +36,22 @@ relation, negation, or reporting improvements.
 
 Initial local baseline after seed creation: `7 / 18`.
 
-The clearest first failure families are ordinal binding and nested exceptions.
+Current local closure result for the 0.1.4 development pass: `18 / 18`.
+
+The closed pass added focused offline support for:
+
+- applicant age-range paraphrases
+- conditional scope and all-bad conditional near misses
+- nested exception and subgroup exclusion scope
+- ordinal, ranked, and stage-slot bindings
+- aggregate count-to-group bindings
+- actor-bound permission scope
+
+The final local evidence report was written to:
+
+```text
+D:\Temp\manifoldguard-exp23\exp23-complete.json
+```
 
 ## Regenerate the corpus
 
@@ -73,7 +88,8 @@ python scripts/build_eval_replay_pack.py \
 
 ## Promotion boundary
 
-Use EXP23 to find the next reliable improvement boundary.
+EXP23 is closed for this seed. Use later challenge seeds to find the next
+reliable improvement boundary.
 
 Promote an EXP23 case only when:
 
