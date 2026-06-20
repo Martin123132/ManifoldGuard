@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4 - Unreleased
+
+- Started the 0.1.4 development cycle after the public 0.1.3 PyPI release.
+- Added the exploratory EXP23 challenge corpus seed for broader post-EXP22
+  development probes across range bounds, conditional scope, nested exceptions,
+  ordinal binding, aggregate binding, and all-bad near misses.
+- Added `docs/roadmap.md` to capture the next development track and release
+  hardening rhythm.
+
 ## 0.1.3 - 2026-06-20
 
 - Started the 0.1.3 development cycle after the public 0.1.2 PyPI release.

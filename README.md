@@ -558,6 +558,12 @@ The next post-release challenge seed lives in
 `examples/exp22_challenge_corpus.jsonl`. EXP22 is broader and intentionally
 rougher than EXP21, with guidance in `docs/exp22_challenge.md`.
 
+The current development seed lives in `examples/exp23_challenge_corpus.jsonl`.
+EXP23 opens the `0.1.4` track with range, conditional, nested-exception,
+ordinal, aggregate, and all-bad near-miss probes. The workflow is documented in
+`docs/exp23_challenge.md`, and the broader development direction is recorded in
+`docs/roadmap.md`.
+
 ```bash
 uv run python examples/build_challenge_corpus.py
 manifold-eval --corpus examples/challenge_corpus.jsonl --output challenge-evaluation.json
