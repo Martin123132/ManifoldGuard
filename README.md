@@ -558,10 +558,14 @@ The next post-release challenge seed lives in
 `examples/exp22_challenge_corpus.jsonl`. EXP22 is broader and intentionally
 rougher than EXP21, with guidance in `docs/exp22_challenge.md`.
 
-The current development seed lives in `examples/exp23_challenge_corpus.jsonl`.
-EXP23 opens the `0.1.4` track with range, conditional, nested-exception,
-ordinal, aggregate, and all-bad near-miss probes. The workflow is documented in
-`docs/exp23_challenge.md`, and the broader development direction is recorded in
+The EXP23 development seed lives in `examples/exp23_challenge_corpus.jsonl`.
+EXP23 closed the `0.1.4` track at `18 / 18` for the checked seed cases.
+
+The current development seed lives in `examples/exp24_challenge_corpus.jsonl`.
+EXP24 opens the `0.1.5` track with multi-antecedent conditionals, alias-bound
+permissions, unit/range paraphrases, chained exceptions, compact bindings, and
+all-bad token-reuse near misses. The workflow is documented in
+`docs/exp24_challenge.md`, and the broader development direction is recorded in
 `docs/roadmap.md`.
 
 ```bash

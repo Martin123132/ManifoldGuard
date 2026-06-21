@@ -5,7 +5,7 @@ working plan, not a public guarantee.
 
 ## Current release baseline
 
-- `manifold-guard==0.1.3` is published to PyPI.
+- `manifold-guard==0.1.4` is published to PyPI.
 - Core regulation remains offline-first when `use_embeddings=False` or
   `--no-embeddings` is selected.
 - EXP22 is closed at `18 / 18` for the checked seed cases.
@@ -14,17 +14,16 @@ working plan, not a public guarantee.
 
 ## Next development track
 
-The next cycle should start from a fresh challenge seed rather than expanding
-EXP23 in place. Keep EXP23 as a closed milestone corpus and use the next seed
-to find a small, stable failure family.
+EXP24 should guide the `0.1.5` cycle. Keep EXP23 as a closed milestone corpus
+and use EXP24 to find the next small, stable failure family.
 
 Recommended order:
 
-- broader range and unit-bound paraphrases
-- conditional support with multiple antecedents
-- nested exception chains with more than one excluded subgroup
-- relation binding across compact summaries
-- all-bad near misses that reuse every reference token
+- measure the EXP24 baseline
+- choose the clearest failing family with minimal API risk
+- promote focused tests for that family
+- rerun EXP24 and record the before/after evidence
+- leave public claims tied to release evidence, not exploratory pass rates
 
 ## Product hardening
 

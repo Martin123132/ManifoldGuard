@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.5 - Unreleased
+
+- Started the 0.1.5 development cycle after the public 0.1.4 PyPI release.
+- Added the exploratory EXP24 challenge corpus seed for broader post-EXP23
+  development probes across multi-antecedent conditionals, alias-bound
+  permissions, unit/range paraphrases, chained exceptions, compact bindings,
+  and all-bad token-reuse near misses.
+- Added `docs/exp24_challenge.md` to document the EXP24 workflow and promotion
+  boundary.
+
 ## 0.1.4 - 2026-06-21
 
 - Started the 0.1.4 development cycle after the public 0.1.3 PyPI release.
