@@ -23,7 +23,7 @@ from .mbt import (  # noqa: F401
     regulate_candidates,
 )
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 for _distribution_name in ("manifold-guard", "mbt-ai-tools"):
     try:
         __version__ = version(_distribution_name)
