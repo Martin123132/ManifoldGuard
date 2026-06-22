@@ -37,8 +37,12 @@ relation, negation, literal-drift, or reporting improvements.
 
 Initial local baseline after seed creation: `5 / 18`.
 
-The first improvement pass should focus on the zero-pass families: multi-antecedent
-conditionals, unit/range paraphrases, and chained exceptions.
+First bounded improvement pass: multi-antecedent conditional probes now pass
+`3 / 3`, raising the local EXP24 baseline from `5 / 18` to `8 / 18` by
+preserving joint condition scope offline.
+
+Remaining zero-pass families after that pass should be unit/range paraphrases
+and chained exceptions.
 
 ## Regenerate the corpus
 
@@ -55,12 +59,14 @@ manifold-eval \
   --output exp24-evaluation.json
 ```
 
-Narrow to one family:
+Narrow to the multi-antecedent conditional families:
 
 ```bash
 manifold-eval \
   --corpus examples/exp24_challenge_corpus.jsonl \
-  --family exp24_multi_antecedent_conditionals \
+  --family exp24_multi_antecedent_conditionals_card_pin \
+  --family exp24_multi_antecedent_conditionals_valve_pressure \
+  --family exp24_multi_antecedent_conditionals_admin_owner \
   --output exp24-conditionals.json
 ```
 

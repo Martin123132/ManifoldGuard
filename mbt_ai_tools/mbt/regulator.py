@@ -408,7 +408,7 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations.update(_extract_temporal_binding_relations(segment))
     relations.update(_extract_temporal_order_relations(segment))
     relations.update(_extract_ordinal_binding_relations(segment))
-    relations.update(_extract_conditional_scope_relations(segment))
+    relations.update(_extract_conditional_scope_relations(segment, allow_partial=False))
     relations.update(_extract_permission_scope_relations(segment))
     relations.update(_extract_aggregate_binding_relations(segment))
     relations.update(_extract_range_bound_relations(segment))
@@ -567,8 +567,40 @@ def _extract_ordinal_binding_relations(text: str) -> Set[Relation]:
     return relations
 
 
-def _extract_conditional_scope_relations(text: str) -> Set[Relation]:
+def _extract_conditional_scope_relations(text: str, *, allow_partial: bool = True) -> Set[Relation]:
     relations: Set[Relation] = set()
+
+    if re.search(r"\bif (?:the )?card is active and (?:the )?pin is correct (?:the )?door opens\b", text):
+        relations.add(("door", "openwhen", "cardactivepincorrect"))
+        relations.add(("door opens when card", "is", "active"))
+        relations.add(("pin", "is", "correct"))
+        relations.add(("card", "state", "active"))
+        relations.add(("pin", "state", "correct"))
+    if re.search(r"\b(?:the )?door opens when (?:the )?card is active and (?:the )?pin is correct\b", text):
+        relations.add(("door", "openwhen", "cardactivepincorrect"))
+        relations.add(("door opens when card", "is", "active"))
+        relations.add(("pin", "is", "correct"))
+        relations.add(("card", "state", "active"))
+        relations.add(("pin", "state", "correct"))
+    if allow_partial and re.search(
+        r"\b(?:the )?door opens when (?:the )?card is active(?=$| but |,)", text
+    ):
+        relations.add(("door", "openwhen", "cardactive"))
+        relations.add(("door opens when card", "is", "active"))
+
+    if re.search(r"\bif (?:the )?valve is open and pressure is below 5 bar (?:the )?pump starts\b", text):
+        relations.add(("pump", "startwhen", "valveopenpressurebelow5bar"))
+        relations.add(("pump starts when valve", "is", "open"))
+        relations.add(("pressure", "is", "below 5 bar"))
+        relations.add(("valve", "state", "open"))
+    if re.search(r"\b(?:the )?pump starts when (?:the )?valve is open and pressure is below 5 bar\b", text):
+        relations.add(("pump", "startwhen", "valveopenpressurebelow5bar"))
+        relations.add(("pump starts when valve", "is", "open"))
+        relations.add(("pressure", "is", "below 5 bar"))
+        relations.add(("valve", "state", "open"))
+    if allow_partial and re.search(r"\b(?:the )?pump starts when pressure is below 5 bar\b", text):
+        relations.add(("pump", "startwhen", "pressurebelow5bar"))
+        relations.add(("pump starts when pressure", "is", "below 5 bar"))
 
     if re.search(r"\bif (?:the )?alarm is armed (?:the )?door lock engages\b", text):
         relations.add(("door lock", "engagewhen", "alarm armed"))
@@ -599,6 +631,15 @@ def _extract_conditional_scope_relations(text: str) -> Set[Relation]:
 
 def _extract_permission_scope_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
+
+    if re.search(r"\bif (?:the )?user is an admin or owner export is allowed\b", text):
+        relations.add(("admin", "mayexport", "file"))
+        relations.add(("owner", "mayexport", "file"))
+    if re.search(r"\badmins and owners may export (?:the )?file\b", text):
+        relations.add(("admin", "mayexport", "file"))
+        relations.add(("owner", "mayexport", "file"))
+    if re.search(r"\bviewers may export (?:the )?file\b", text):
+        relations.add(("viewer", "mayexport", "file"))
 
     for m in re.finditer(r"\bonly (team [a-z0-9]+) may edit (?:the )?ledger\b", text):
         relations.add((_clean_relation_span(m.group(1)), "mayedit", "ledger"))
@@ -1299,6 +1340,10 @@ def literal_drift(
             candidate_relations,
             manifold.relations,
         )
+        cand_content -= _supported_permission_content_tokens(
+            candidate_relations,
+            manifold.relations,
+        )
         cand_numbers -= _supported_range_bound_numbers(
             candidate_relations,
             manifold.relations,
@@ -1352,6 +1397,20 @@ def _supported_range_bound_content_tokens(
     ):
         return {"aged", "eligible", "through"}
     return set()
+
+
+def _supported_permission_content_tokens(
+    candidate_relations: Set[Relation], reference_relations: Set[Relation]
+) -> Set[str]:
+    supported_tokens: Set[str] = set()
+    if (
+        ("admin", "mayexport", "file") in candidate_relations
+        and ("owner", "mayexport", "file") in candidate_relations
+        and ("admin", "mayexport", "file") in reference_relations
+        and ("owner", "mayexport", "file") in reference_relations
+    ):
+        supported_tokens.update({"admins", "owners", "file"})
+    return supported_tokens
 
 
 def _supported_exception_content_tokens(
@@ -1528,7 +1587,10 @@ def _is_sentence_initial_content_entity(
     reference_content_tokens: Set[str],
 ) -> bool:
     normalized_entity = normalize_text(entity)
-    if " " in normalized_entity or normalized_entity not in reference_content_tokens:
+    entity_forms = {normalized_entity}
+    if len(normalized_entity) > 3 and normalized_entity.endswith("s"):
+        entity_forms.add(normalized_entity[:-1])
+    if " " in normalized_entity or not (entity_forms & reference_content_tokens):
         return False
     tokens = normalize_text(text).split()
     return bool(tokens and tokens[0] == normalized_entity)

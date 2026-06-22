@@ -9,6 +9,8 @@
   and all-bad token-reuse near misses.
 - Added `docs/exp24_challenge.md` to document the EXP24 workflow and promotion
   boundary.
+- Added offline multi-antecedent conditional and role-permission bindings for
+  the first EXP24 improvement pass.
 
 ## 0.1.4 - 2026-06-21
 

@@ -954,6 +954,68 @@ def test_exp23_switch_motor_all_bad_conditionals_block():
     assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [False, False]
 
 
+def test_exp24_card_pin_multi_antecedent_condition_preserves_joint_scope():
+    result = regulate_candidates(
+        [
+            "The door opens when the card is active.",
+            "The door opens when the card is active and the PIN is correct.",
+        ],
+        ["If the card is active and the PIN is correct, the door opens."],
+        use_embeddings=False,
+    )
+
+    assert ("door", "openwhen", "cardactivepincorrect") in extract_relations(
+        "If the card is active and the PIN is correct, the door opens."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The door opens when the card is active and the PIN is correct."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_valve_pressure_multi_antecedent_condition_preserves_joint_scope():
+    result = regulate_candidates(
+        [
+            "The pump starts when pressure is below 5 bar.",
+            "The pump starts when the valve is open and pressure is below 5 bar.",
+        ],
+        ["If the valve is open and pressure is below 5 bar, the pump starts."],
+        use_embeddings=False,
+    )
+
+    assert ("pump", "startwhen", "valveopenpressurebelow5bar") in extract_relations(
+        "If the valve is open and pressure is below 5 bar, the pump starts."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "The pump starts when the valve is open and pressure is below 5 bar."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_admin_owner_permission_preserves_allowed_roles():
+    result = regulate_candidates(
+        [
+            "Viewers may export the file.",
+            "Admins and owners may export the file.",
+        ],
+        ["If the user is an admin or owner, export is allowed."],
+        use_embeddings=False,
+    )
+
+    assert ("admin", "mayexport", "file") in extract_relations(
+        "If the user is an admin or owner, export is allowed."
+    )
+    assert ("owner", "mayexport", "file") in extract_relations(
+        "Admins and owners may export the file."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Admins and owners may export the file."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
 def test_exp23_ledger_permission_scope_blocks_wrong_actor_and_direction():
     result = regulate_candidates(
         [
