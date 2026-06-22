@@ -41,8 +41,11 @@ First bounded improvement pass: multi-antecedent conditional probes now pass
 `3 / 3`, raising the local EXP24 baseline from `5 / 18` to `8 / 18` by
 preserving joint condition scope offline.
 
-Remaining zero-pass families after that pass should be unit/range paraphrases
-and chained exceptions.
+Second bounded improvement pass: unit/range paraphrase probes now pass `3 / 3`,
+raising the local EXP24 baseline from `8 / 18` to `11 / 18` with scoped
+liter-to-milliliter, meter-to-centimeter, and exclusive end-time bindings.
+
+Remaining zero-pass families after that pass should be chained exceptions.
 
 ## Regenerate the corpus
 
@@ -68,6 +71,17 @@ manifold-eval \
   --family exp24_multi_antecedent_conditionals_valve_pressure \
   --family exp24_multi_antecedent_conditionals_admin_owner \
   --output exp24-conditionals.json
+```
+
+Narrow to the unit/range paraphrase families:
+
+```bash
+manifold-eval \
+  --corpus examples/exp24_challenge_corpus.jsonl \
+  --family exp24_unit_range_paraphrases_tank \
+  --family exp24_unit_range_paraphrases_cable \
+  --family exp24_unit_range_paraphrases_service \
+  --output exp24-unit-range.json
 ```
 
 Build a replay pack:

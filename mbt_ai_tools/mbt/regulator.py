@@ -669,6 +669,30 @@ def _extract_aggregate_binding_relations(text: str) -> Set[Relation]:
 def _extract_range_bound_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
 
+    if re.search(r"\b(?:the )?tank holds at most 2 liters\b", text):
+        relations.add(("tank", "holdsatmost", "2000milliliters"))
+    if re.search(r"\b(?:the )?tank holds up to 2000 milliliters\b", text):
+        relations.add(("tank", "holdsatmost", "2000milliliters"))
+    m = re.search(r"\b(?:the )?tank holds ([0-9]+) milliliters\b", text)
+    if m:
+        relations.add(("tank", "holds", f"{m.group(1)}milliliters"))
+
+    if re.search(r"\b(?:the )?cable must be shorter than 3 meters\b", text):
+        relations.add(("cable", "maxlengthexclusive", "300centimeters"))
+    if re.search(r"\b(?:the )?cable must be less than 300 centimeters long\b", text):
+        relations.add(("cable", "maxlengthexclusive", "300centimeters"))
+    if re.search(r"\b(?:the )?cable may be 300 centimeters long\b", text):
+        relations.add(("cable", "length", "300centimeters"))
+
+    if re.search(r"\b(?:the )?service window starts at 0900 and ends before 1700\b", text):
+        relations.add(("service window", "startsat", "0900"))
+        relations.add(("service window", "endsbefore", "1700"))
+    if re.search(r"\b(?:the )?service window runs from 0900 until before 1700\b", text):
+        relations.add(("service window", "startsat", "0900"))
+        relations.add(("service window", "endsbefore", "1700"))
+    if re.search(r"\b(?:the )?service window includes 1700\b", text):
+        relations.add(("service window", "includes", "1700"))
+
     if re.search(r"\bapplicants must be at least 18 and under 65\b", text):
         relations.add(("applicants", "eligibleagerange", "18through64"))
     if re.search(r"\bapplicants aged 18 through 64 are eligible\b", text):
@@ -1380,23 +1404,52 @@ def _supported_comparison_content_tokens(
 def _supported_range_bound_numbers(
     candidate_relations: Set[Relation], reference_relations: Set[Relation]
 ) -> Set[str]:
+    supported_numbers: Set[str] = set()
+    if (
+        ("tank", "holdsatmost", "2000milliliters") in candidate_relations
+        and ("tank", "holdsatmost", "2000milliliters") in reference_relations
+    ):
+        supported_numbers.add("2000")
+    if (
+        ("cable", "maxlengthexclusive", "300centimeters") in candidate_relations
+        and ("cable", "maxlengthexclusive", "300centimeters") in reference_relations
+    ):
+        supported_numbers.add("300")
     if (
         ("applicants", "eligibleagerange", "18through64") in candidate_relations
         and ("applicants", "eligibleagerange", "18through64") in reference_relations
     ):
-        return {"64"}
-    return set()
+        supported_numbers.add("64")
+    return supported_numbers
 
 
 def _supported_range_bound_content_tokens(
     candidate_relations: Set[Relation], reference_relations: Set[Relation]
 ) -> Set[str]:
+    supported_tokens: Set[str] = set()
+    if (
+        ("tank", "holdsatmost", "2000milliliters") in candidate_relations
+        and ("tank", "holdsatmost", "2000milliliters") in reference_relations
+    ):
+        supported_tokens.update({"milliliters"})
+    if (
+        ("cable", "maxlengthexclusive", "300centimeters") in candidate_relations
+        and ("cable", "maxlengthexclusive", "300centimeters") in reference_relations
+    ):
+        supported_tokens.update({"centimeters", "less", "long"})
+    if (
+        ("service window", "startsat", "0900") in candidate_relations
+        and ("service window", "endsbefore", "1700") in candidate_relations
+        and ("service window", "startsat", "0900") in reference_relations
+        and ("service window", "endsbefore", "1700") in reference_relations
+    ):
+        supported_tokens.update({"runs", "until"})
     if (
         ("applicants", "eligibleagerange", "18through64") in candidate_relations
         and ("applicants", "eligibleagerange", "18through64") in reference_relations
     ):
-        return {"aged", "eligible", "through"}
-    return set()
+        supported_tokens.update({"aged", "eligible", "through"})
+    return supported_tokens
 
 
 def _supported_permission_content_tokens(

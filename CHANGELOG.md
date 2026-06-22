@@ -11,6 +11,8 @@
   boundary.
 - Added offline multi-antecedent conditional and role-permission bindings for
   the first EXP24 improvement pass.
+- Added scoped unit/range paraphrase bindings for the EXP24 tank, cable, and
+  service-window probes.
 
 ## 0.1.4 - 2026-06-21
 

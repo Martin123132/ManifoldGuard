@@ -1061,3 +1061,60 @@ def test_exp23_applicant_age_range_preserves_under_bound_paraphrase():
     assert result.emitted_text == "Applicants aged 18 through 64 are eligible."
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_tank_liter_to_milliliter_bound_preserves_upper_limit():
+    result = regulate_candidates(
+        [
+            "The tank holds 2500 milliliters.",
+            "The tank holds up to 2000 milliliters.",
+        ],
+        ["The tank holds at most 2 liters."],
+        use_embeddings=False,
+    )
+
+    assert ("tank", "holdsatmost", "2000milliliters") in extract_relations(
+        "The tank holds at most 2 liters."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The tank holds up to 2000 milliliters."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_cable_meter_to_centimeter_bound_preserves_exclusive_limit():
+    result = regulate_candidates(
+        [
+            "The cable may be 300 centimeters long.",
+            "The cable must be less than 300 centimeters long.",
+        ],
+        ["The cable must be shorter than 3 meters."],
+        use_embeddings=False,
+    )
+
+    assert ("cable", "maxlengthexclusive", "300centimeters") in extract_relations(
+        "The cable must be shorter than 3 meters."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The cable must be less than 300 centimeters long."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_service_window_preserves_exclusive_end_time():
+    result = regulate_candidates(
+        [
+            "The service window includes 17:00.",
+            "The service window runs from 09:00 until before 17:00.",
+        ],
+        ["The service window starts at 09:00 and ends before 17:00."],
+        use_embeddings=False,
+    )
+
+    assert ("service window", "endsbefore", "1700") in extract_relations(
+        "The service window starts at 09:00 and ends before 17:00."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The service window runs from 09:00 until before 17:00."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
