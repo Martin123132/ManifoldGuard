@@ -2,6 +2,16 @@
 
 > Compatibility note: `manifold-check` and `manifold-eval` are the preferred CLI commands. Existing automation can continue using `mbt-check` and `mbt-eval` during the transition.
 
+## Public and compatibility names
+
+| Surface | Current name | Compatibility status |
+| --- | --- | --- |
+| Product | `ManifoldGuard` | Public name |
+| Install package | `manifold-guard` | Public package name |
+| Python import | `mbt_ai_tools` | Legacy import path retained |
+| Preferred CLIs | `manifold-check`, `manifold-eval` | Use for new docs and automation |
+| Legacy CLI aliases | `mbt-check`, `mbt-eval` | Retained for existing automation |
+
 This document records install and smoke-test commands for package-index releases.
 
 The package is not required for local development. Source checkout installs remain supported:

@@ -5,7 +5,7 @@ Generated at: `2026-06-14T00:00:00+00:00`
 ## Summary
 
 - Status: `passed`
-- Corpus: `C:\Users\ollet\OneDrive\Documents\ManifoldGuard\mbt_ai_tools\data\regression_corpus.jsonl`
+- Corpus: `mbt_ai_tools/data/regression_corpus.jsonl`
 - Mode: `offline`
 - Cases: `229`
 - Passed: `229`

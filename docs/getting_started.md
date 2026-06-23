@@ -7,6 +7,16 @@ ManifoldGuard does not try to know external truth. It compares candidate
 outputs against references you supply and blocks candidates that drift from
 that reference structure.
 
+## Public and legacy names
+
+Use `ManifoldGuard` as the public product name and install it as
+`manifold-guard`.
+
+The Python import path remains `mbt_ai_tools` for compatibility with earlier
+project versions. Prefer `manifold-check` and `manifold-eval` for new CLI
+usage; `mbt-check` and `mbt-eval` remain compatibility aliases for existing
+automation.
+
 ## Install
 
 For normal offline use:

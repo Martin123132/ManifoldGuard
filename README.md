@@ -5,6 +5,10 @@
 > Rebrand note: ManifoldGuard is the public package/product name for the project
 > previously published as `mbt-ai-tools`. The `mbt_ai_tools` import path and
 > `mbt-check` / `mbt-eval` CLI aliases remain available for compatibility.
+>
+> Naming map: product `ManifoldGuard`; install package `manifold-guard`;
+> legacy Python import `mbt_ai_tools`; preferred CLIs `manifold-check` and
+> `manifold-eval`; legacy CLI aliases `mbt-check` and `mbt-eval`.
 
 [![Offline regression tests](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/tests.yml)
 [![Docs and manifest quality](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml/badge.svg)](https://github.com/Martin123132/ManifoldGuard/actions/workflows/docs-quality.yml)
