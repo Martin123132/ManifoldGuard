@@ -1,4 +1,18 @@
 
+"""
+Legacy exploratory notebook export.
+
+This file is preserved as historical scratch/demo material and is not the
+canonical ManifoldGuard package surface. Public ManifoldGuard docs should use
+the product name `ManifoldGuard`, package `manifold-guard`, import
+`mbt_ai_tools`, and CLIs `manifold-check` / `manifold-eval`.
+
+Any MTS or Motion-TimeSpace wording below belongs to earlier exploratory
+geometry notes and should not be treated as the current public brand. Any
+token/authentication messages are example notebook output only; do not commit
+real credentials or private tokens.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import solve_banded
