@@ -1118,3 +1118,74 @@ def test_exp24_service_window_preserves_exclusive_end_time():
     assert result.emitted_text == "The service window runs from 09:00 until before 17:00."
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_employee_exception_chain_preserves_multiple_exclusions():
+    result = regulate_candidates(
+        [
+            "Contractors may enter.",
+            "Contractors and interns may not enter, and security may enter after hours.",
+        ],
+        ["All employees may enter except contractors and interns; security may enter after hours."],
+        use_embeddings=False,
+    )
+
+    assert ("contractors", "is", "enter") in extract_relations("Contractors may enter.")
+    assert ("contractors", "exceptfrom", "enter") in extract_relations(
+        "All employees may enter except contractors and interns; security may enter after hours."
+    )
+    assert ("interns", "exceptfrom", "enter") in extract_relations(
+        "All employees may enter except contractors and interns; security may enter after hours."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "Contractors and interns may not enter, and security may enter after hours."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_image_exception_chain_preserves_png_allowance_and_exclusions():
+    result = regulate_candidates(
+        [
+            "The importer accepts SVG files.",
+            "The importer accepts PNG files but not SVG or animated GIFs.",
+        ],
+        ["The importer accepts images except SVG and animated GIFs; it accepts PNG."],
+        use_embeddings=False,
+    )
+
+    assert ("importer", "accept", "svg") in extract_relations(
+        "The importer accepts SVG files."
+    )
+    assert ("importer", "exceptfrom", "animated gifs") in extract_relations(
+        "The importer accepts images except SVG and animated GIFs; it accepts PNG."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The importer accepts PNG files but not SVG or animated GIFs."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_clinic_exception_chain_preserves_multiple_visitor_exclusions():
+    result = regulate_candidates(
+        [
+            "The clinic treats all adults including walk-ins.",
+            "The clinic treats adults except walk-ins and unregistered visitors.",
+        ],
+        ["The clinic treats adults except walk-ins and unregistered visitors."],
+        use_embeddings=False,
+    )
+
+    assert ("clinic", "treat", "walkins") in extract_relations(
+        "The clinic treats all adults including walk-ins."
+    )
+    assert ("clinic", "exceptfrom", "unregistered visitors") in extract_relations(
+        "The clinic treats adults except walk-ins and unregistered visitors."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "The clinic treats adults except walk-ins and unregistered visitors."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True

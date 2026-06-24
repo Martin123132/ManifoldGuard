@@ -45,7 +45,12 @@ Second bounded improvement pass: unit/range paraphrase probes now pass `3 / 3`,
 raising the local EXP24 baseline from `8 / 18` to `11 / 18` with scoped
 liter-to-milliliter, meter-to-centimeter, and exclusive end-time bindings.
 
-Remaining zero-pass families after that pass should be chained exceptions.
+Third bounded improvement pass: chained exception probes now pass `3 / 3`,
+raising the local EXP24 baseline from `11 / 18` to `14 / 18` by splitting
+multi-item exclusions and preserving allowed side clauses offline.
+
+Remaining zero-pass families after that pass are alias-bound permissions,
+compact sensor binding, and all-bad dose range reuse.
 
 ## Regenerate the corpus
 

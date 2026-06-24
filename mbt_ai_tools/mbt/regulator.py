@@ -724,21 +724,65 @@ def _extract_exception_scope_relations(text: str) -> Set[Relation]:
     if re.search(r"\bsupervisors can enter after hours\b", text):
         relations.add(("supervisors", "is", "enter after hours"))
 
+    for m in re.finditer(
+        r"\ball employees may enter except ([a-z][a-z0-9 ]+?)"
+        r"(?: security may enter after hours|$)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add((obj, "exceptfrom", "enter"))
+    if re.search(r"\bsecurity may enter after hours\b", text):
+        relations.add(("security", "is", "enter after hours"))
+    for m in re.finditer(r"\b([a-z][a-z0-9 ]+?) may enter(?! after hours)\b", text):
+        for subj in _split_exception_objects(m.group(1)):
+            relations.add((subj, "is", "enter"))
+
     if re.search(r"\b(?:the )?importer accepts images except animated gifs\b", text):
         relations.add(("importer", "accept", "images"))
         relations.add(("importer", "exceptfrom", "animated gifs"))
+    for m in re.finditer(
+        r"\b(?:the )?importer accepts images except ([a-z][a-z0-9 ]+?)"
+        r"(?: it accepts|$)",
+        text,
+    ):
+        relations.add(("importer", "accept", "images"))
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add(("importer", "exceptfrom", obj))
     if re.search(r"\b(?:it|the importer) accepts static gifs\b", text) and re.search(
         r"\b(?:the )?importer accepts\b", text
     ):
         relations.add(("importer", "accept", "static gifs"))
+    for m in re.finditer(
+        r"\bit accepts ([a-z][a-z0-9 ]+?)(?: files?)?(?=$| and | but |,)",
+        text,
+    ):
+        if re.search(r"\b(?:the )?importer accepts\b", text):
+            obj = _clean_exception_object(m.group(1))
+            if obj:
+                relations.add(("importer", "accept", obj))
 
     if re.search(r"\b(?:the )?clinic treats adults except emergency walkins\b", text):
         relations.add(("clinic", "treat", "adults"))
         relations.add(("clinic", "exceptfrom", "emergency walkins"))
+    for m in re.finditer(
+        r"\b(?:the )?clinic treats adults except ([a-z][a-z0-9 ]+?)"
+        r"(?=$| but |,)",
+        text,
+    ):
+        relations.add(("clinic", "treat", "adults"))
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add(("clinic", "exceptfrom", obj))
     if re.search(
         r"\b(?:the )?clinic treats all adults including emergency walkins\b", text
     ):
         relations.add(("clinic", "treat", "emergency walkins"))
+    for m in re.finditer(
+        r"\b(?:the )?clinic treats all adults including ([a-z][a-z0-9 ]+?)"
+        r"(?=$| but |,)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add(("clinic", "treat", obj))
 
     if re.search(r"\b(?:the )?museum is open every weekday except monday\b", text):
         relations.add(("museum", "openon", "weekday"))
@@ -777,13 +821,45 @@ def _extract_exception_scope_negated_relations(text: str) -> Set[Relation]:
     if re.search(r"\binterns cannot enter (?:the )?lab\b", text):
         relations.add(("interns", "is", "enter lab"))
 
+    for m in re.finditer(
+        r"\ball employees may enter except ([a-z][a-z0-9 ]+?)"
+        r"(?: security may enter after hours|$)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add((obj, "is", "enter"))
+    for m in re.finditer(r"\b([a-z][a-z0-9 ]+?) may not enter\b", text):
+        for subj in _split_exception_objects(m.group(1)):
+            relations.add((subj, "is", "enter"))
+
     if re.search(r"\b(?:the )?importer accepts images except animated gifs\b", text):
         relations.add(("importer", "accept", "animated gifs"))
     if re.search(r"\b(?:the )?importer accepts static gifs but not animated gifs\b", text):
         relations.add(("importer", "accept", "animated gifs"))
+    for m in re.finditer(
+        r"\b(?:the )?importer accepts images except ([a-z][a-z0-9 ]+?)"
+        r"(?: it accepts|$)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add(("importer", "accept", obj))
+    for m in re.finditer(
+        r"\b(?:the )?importer accepts [a-z0-9 ]+? but not ([a-z][a-z0-9 ]+?)"
+        r"(?=$| and | but |,)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add(("importer", "accept", obj))
 
     if re.search(r"\b(?:the )?clinic treats adults except emergency walkins\b", text):
         relations.add(("clinic", "treat", "emergency walkins"))
+    for m in re.finditer(
+        r"\b(?:the )?clinic treats adults except ([a-z][a-z0-9 ]+?)"
+        r"(?=$| but |,)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add(("clinic", "treat", obj))
 
     if re.search(r"\b(?:the )?museum is open every weekday except monday\b", text):
         relations.add(("museum", "openon", "monday"))
@@ -794,15 +870,13 @@ def _extract_exception_scope_negated_relations(text: str) -> Set[Relation]:
         r"\b(?:the )?importer accepts [a-z0-9 ]+? except ([a-z][a-z0-9 ]+?)(?: files?)?(?=$| and | but |,)",
         text,
     ):
-        obj = _clean_exception_object(m.group(1))
-        if obj:
+        for obj in _split_exception_objects(m.group(1)):
             relations.add(("importer", "accept", obj))
     for m in re.finditer(
         r"\b(?:the )?importer accepts [a-z0-9 ]+? but not ([a-z][a-z0-9 ]+?)(?: files?)?(?=$| and | but |,)",
         text,
     ):
-        obj = _clean_exception_object(m.group(1))
-        if obj:
+        for obj in _split_exception_objects(m.group(1)):
             relations.add(("importer", "accept", obj))
 
     for m in re.finditer(
@@ -1562,6 +1636,8 @@ def _has_unsupported_negation(
     ref_objects = {r[2] for r in ref_relations}
     ref_predicates = {r[1] for r in ref_relations}
     for negation in negations:
+        if _is_spurious_exception_negation(negation):
+            continue
         if _negation_supported_by_reference(text, negation, ref_negated_relations):
             continue
         subj, pred, obj = negation
@@ -1602,9 +1678,43 @@ def _negation_supported_by_reference(
     negation: Relation,
     reference_negated_relations: Set[Relation],
 ) -> bool:
-    return any(
+    if any(
         _relations_match(negation, reference_negation, text)
         for reference_negation in reference_negated_relations
+    ):
+        return True
+    variants = _split_relation_variants(negation)
+    return bool(variants) and all(
+        any(
+            _relations_match(variant, reference_negation, text)
+            for reference_negation in reference_negated_relations
+        )
+        for variant in variants
+    )
+
+
+def _split_relation_variants(relation: Relation) -> List[Relation]:
+    subj, pred, obj = relation
+    subjects = (
+        _split_exception_objects(subj)
+        if re.search(r"\b(?:and|or)\b", subj)
+        else [subj]
+    )
+    objects = (
+        _split_exception_objects(obj)
+        if re.search(r"\b(?:and|or)\b", obj)
+        else [obj]
+    )
+    variants = [(subject, pred, object_) for subject in subjects for object_ in objects]
+    return [variant for variant in variants if variant != relation]
+
+
+def _is_spurious_exception_negation(relation: Relation) -> bool:
+    subj, pred, _ = relation
+    return pred == "is" and (
+        subj.endswith(" but")
+        or " but " in subj
+        or subj.startswith("importer accepts ")
     )
 
 
@@ -1727,6 +1837,17 @@ def _clean_exception_object(value: str) -> str:
         if cleaned.endswith(suffix):
             cleaned = cleaned[: -len(suffix)].strip()
     return cleaned
+
+
+def _split_exception_objects(value: str) -> List[str]:
+    return [
+        cleaned
+        for cleaned in (
+            _clean_exception_object(part)
+            for part in re.split(r"\s+(?:and|or)\s+", value)
+        )
+        if cleaned
+    ]
 
 
 def _lemma_predicate(predicate: str) -> str:
