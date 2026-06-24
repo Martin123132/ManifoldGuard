@@ -1016,6 +1016,50 @@ def test_exp24_admin_owner_permission_preserves_allowed_roles():
     assert result.evaluations[1].safe_to_emit is True
 
 
+def test_exp24_rao_alias_permission_preserves_approver_binding():
+    result = regulate_candidates(
+        [
+            "Lee may approve invoices.",
+            "Dr. Rao may approve invoices.",
+        ],
+        ["Mira Rao, also called Dr. Rao, may approve invoices. Lee may view invoices."],
+        use_embeddings=False,
+    )
+
+    assert ("dr rao", "mayapprove", "invoices") in extract_relations(
+        "Mira Rao, also called Dr. Rao, may approve invoices. Lee may view invoices."
+    )
+    assert ("lee", "mayview", "invoices") in extract_relations(
+        "Mira Rao, also called Dr. Rao, may approve invoices. Lee may view invoices."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Dr. Rao may approve invoices."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_backup_alias_permission_preserves_device_binding():
+    result = regulate_candidates(
+        [
+            "Device B may restart the router.",
+            "Device A may restart the router.",
+        ],
+        ["Device A is the backup unit. The backup unit may restart the router."],
+        use_embeddings=False,
+    )
+
+    assert ("device a", "mayrestart", "router") in extract_relations(
+        "Device A is the backup unit. The backup unit may restart the router."
+    )
+    assert ("device b", "mayrestart", "router") in extract_relations(
+        "Device B may restart the router."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Device A may restart the router."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
 def test_exp23_ledger_permission_scope_blocks_wrong_actor_and_direction():
     result = regulate_candidates(
         [

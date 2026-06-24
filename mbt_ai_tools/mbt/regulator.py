@@ -212,6 +212,7 @@ _SUFFIX_ENTITY_HEADS = {
     "axis",
     "battery",
     "boiler",
+    "device",
     "gate",
     "model",
     "plan",
@@ -632,6 +633,11 @@ def _extract_conditional_scope_relations(text: str, *, allow_partial: bool = Tru
 def _extract_permission_scope_relations(text: str) -> Set[Relation]:
     relations: Set[Relation] = set()
 
+    permission_actor = (
+        r"((?:dr [a-z][a-z0-9]*)|device [a-z0-9]+|(?:the )?backup unit|"
+        r"[a-z][a-z0-9]*)"
+    )
+
     if re.search(r"\bif (?:the )?user is an admin or owner export is allowed\b", text):
         relations.add(("admin", "mayexport", "file"))
         relations.add(("owner", "mayexport", "file"))
@@ -649,6 +655,31 @@ def _extract_permission_scope_relations(text: str) -> Set[Relation]:
         relations.add(("team blue", "mayview", "ledger"))
     for m in re.finditer(r"\b(?:the )?ledger may edit (team [a-z0-9]+)\b", text):
         relations.add(("ledger", "mayedit", _clean_relation_span(m.group(1))))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*(?: [a-z][a-z0-9]*)?) also called "
+        r"((?:dr )?[a-z][a-z0-9]*(?: [a-z][a-z0-9]*)?) may approve invoices\b",
+        text,
+    ):
+        canonical = _clean_relation_span(m.group(1))
+        alias = _clean_relation_span(m.group(2))
+        relations.add((canonical, "mayapprove", "invoices"))
+        relations.add((alias, "mayapprove", "invoices"))
+    for m in re.finditer(rf"\b{permission_actor} may approve invoices\b", text):
+        relations.add((_clean_relation_span(m.group(1)), "mayapprove", "invoices"))
+    for m in re.finditer(rf"\b{permission_actor} may view invoices\b", text):
+        relations.add((_clean_relation_span(m.group(1)), "mayview", "invoices"))
+
+    backup_aliases = [
+        _clean_relation_span(m.group(1))
+        for m in re.finditer(r"\b(device [a-z0-9]+) is (?:the )?backup unit\b", text)
+    ]
+    for m in re.finditer(rf"\b{permission_actor} may restart (?:the )?router\b", text):
+        actor = _clean_relation_span(m.group(1))
+        relations.add((actor, "mayrestart", "router"))
+        if actor == "backup unit":
+            for alias in backup_aliases:
+                relations.add((alias, "mayrestart", "router"))
 
     return relations
 
