@@ -724,6 +724,11 @@ def _extract_range_bound_relations(text: str) -> Set[Relation]:
     if re.search(r"\b(?:the )?service window includes 1700\b", text):
         relations.add(("service window", "includes", "1700"))
 
+    if re.search(r"\b(?:the )?dose must be at least 5 mg and below 10 mg\b", text):
+        relations.add(("dose", "allowedrange", "gte5mglt10mg"))
+    for m in re.finditer(r"\b(?:a )?([0-9]+) mg dose is allowed\b", text):
+        relations.add(("dose", "allowedamount", f"{m.group(1)}mg"))
+
     if re.search(r"\bapplicants must be at least 18 and under 65\b", text):
         relations.add(("applicants", "eligibleagerange", "18through64"))
     if re.search(r"\bapplicants aged 18 through 64 are eligible\b", text):
@@ -1046,6 +1051,12 @@ def _extract_scope_binding_relations(text: str) -> Set[Relation]:
         text,
     ):
         relations.add((_clean_scope_subject(m.group(1)), "measure", _clean_span(m.group(2))))
+    for m in re.finditer(
+        r"\b(sensor [a-z0-9]+) monitors ([a-z][a-z0-9 ]+?)"
+        r"(?=$| and sensor [a-z0-9]+| and | but | while )",
+        text,
+    ):
+        relations.add((_clean_scope_subject(m.group(1)), "monitor", _clean_span(m.group(2))))
 
     for m in re.finditer(r"\b(axis [a-z0-9]+) moved during calibration\b", text):
         relations.add((_clean_scope_subject(m.group(1)), "move", "during calibration"))

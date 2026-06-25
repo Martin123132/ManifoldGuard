@@ -569,7 +569,9 @@ The current development seed lives in `examples/exp24_challenge_corpus.jsonl`.
 EXP24 opens the `0.1.5` track with multi-antecedent conditionals, alias-bound
 permissions, unit/range paraphrases, chained exceptions, compact bindings, and
 all-bad token-reuse near misses. The workflow is documented in
-`docs/exp24_challenge.md`, and the broader development direction is recorded in
+`docs/exp24_challenge.md`. Current local EXP24 seed status is `18 / 18` after
+scoped compact sensor and dose-range blocking improvements; EXP24 remains a
+development probe, not a benchmark claim. The broader development direction is recorded in
 `docs/roadmap.md`.
 
 ```bash

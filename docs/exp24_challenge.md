@@ -53,8 +53,12 @@ Fourth bounded improvement pass: alias-bound permission probes now pass `3 / 3`,
 raising the local EXP24 baseline from `14 / 18` to `16 / 18` with scoped
 approval and restart permission bindings.
 
-Remaining failing probes after that pass are compact sensor binding and
-all-bad dose range reuse.
+Fifth bounded improvement pass: compact sensor binding and all-bad dose range
+reuse now pass `2 / 2`, raising the local EXP24 baseline from `16 / 18` to
+`18 / 18` with scoped sensor-monitor assignments and exclusive dose-range
+boundary blocking.
+
+Remaining failing probes after that pass: none in the seeded EXP24 corpus.
 
 ## Regenerate the corpus
 

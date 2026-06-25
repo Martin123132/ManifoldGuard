@@ -409,6 +409,46 @@ def test_validate_embedding_extra_rejects_unbounded_sentence_transformers(docs_q
         docs_quality.validate_embedding_extra(tmp_path / "pyproject.toml")
 
 
+def test_validate_license_notice_and_contact_accepts_company_policy(docs_quality, tmp_path: Path):
+    license_path = tmp_path / "LICENSE"
+    license_path.write_text(
+        "\n".join(
+            [
+                "Required Notice: Copyright (c) 2026 TWO HANDS NETWORK LTD.",
+                "Required Notice: ManifoldGuard is source-available for personal and non-commercial use. Commercial use requires a separate written license from the licensor.",
+                "",
+                "# PolyForm Noncommercial License 1.0.0",
+                "",
+                "Contact us",
+                "For collaboration, information on existing products, or other enquiries, please contact (via Email):",
+                "",
+                "Glyn : glyn@twohandsnetwork.co.uk",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert docs_quality.validate_license_notice_and_contact(license_path) is None
+
+
+def test_validate_license_notice_and_contact_flags_missing_contact(docs_quality, tmp_path: Path):
+    license_path = tmp_path / "LICENSE"
+    license_path.write_text(
+        "\n".join(
+            [
+                "Required Notice: Copyright (c) 2026 TWO HANDS NETWORK LTD.",
+                "Required Notice: ManifoldGuard is source-available for personal and non-commercial use. Commercial use requires a separate written license from the licensor.",
+                "",
+                "# PolyForm Noncommercial License 1.0.0",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="License notice/contact contract"):
+        docs_quality.validate_license_notice_and_contact(license_path)
+
+
 def test_validate_release_changelog_alignment_passes_for_matching_version(
     docs_quality,
     tmp_path: Path,

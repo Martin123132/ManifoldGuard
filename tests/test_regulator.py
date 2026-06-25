@@ -1233,3 +1233,46 @@ def test_exp24_clinic_exception_chain_preserves_multiple_visitor_exclusions():
     )
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_sensor_monitoring_compact_binding_preserves_assignments():
+    result = regulate_candidates(
+        [
+            "Sensor red monitors humidity and sensor blue monitors heat.",
+            "Sensor red monitors heat and sensor blue monitors humidity.",
+        ],
+        ["Sensor red monitors heat and sensor blue monitors humidity."],
+        use_embeddings=False,
+    )
+
+    assert ("sensor red", "monitor", "heat") in extract_relations(
+        "Sensor red monitors heat and sensor blue monitors humidity."
+    )
+    assert ("sensor red", "monitor", "humidity") in extract_relations(
+        "Sensor red monitors humidity and sensor blue monitors heat."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Sensor red monitors heat and sensor blue monitors humidity."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp24_dose_range_all_bad_reuse_blocks_boundary_candidates():
+    result = regulate_candidates(
+        [
+            "A 4 mg dose is allowed.",
+            "A 10 mg dose is allowed.",
+        ],
+        ["The dose must be at least 5 mg and below 10 mg."],
+        use_embeddings=False,
+    )
+
+    assert ("dose", "allowedrange", "gte5mglt10mg") in extract_relations(
+        "The dose must be at least 5 mg and below 10 mg."
+    )
+    assert ("dose", "allowedamount", "10mg") in extract_relations(
+        "A 10 mg dose is allowed."
+    )
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [False, False]

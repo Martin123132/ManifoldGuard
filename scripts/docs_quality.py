@@ -450,6 +450,24 @@ def validate_embedding_extra(pyproject_path: Path) -> None:
         )
 
 
+def validate_license_notice_and_contact(license_path: Path) -> None:
+    text = license_path.read_text(encoding="utf-8")
+    required_snippets = [
+        "Required Notice: Copyright (c) 2026 TWO HANDS NETWORK LTD.",
+        "source-available for personal and non-commercial use",
+        "Commercial use",
+        "PolyForm Noncommercial License 1.0.0",
+        "Contact us",
+        "glyn@twohandsnetwork.co.uk",
+    ]
+    missing = [snippet for snippet in required_snippets if snippet not in text]
+    if missing:
+        raise RuntimeError(
+            "License notice/contact contract missing required text: "
+            + ", ".join(missing)
+        )
+
+
 def validate_install_modes(manifest: dict) -> None:
     install_modes = manifest.get("install_modes")
     ci_policy = manifest.get("ci_policy")
@@ -826,6 +844,12 @@ def main() -> int:
 
     try:
         validate_embedding_extra(pyproject_path)
+    except Exception as exc:
+        print(exc)
+        return 1
+
+    try:
+        validate_license_notice_and_contact(manifest_path.parent.parent / "LICENSE")
     except Exception as exc:
         print(exc)
         return 1
