@@ -729,6 +729,28 @@ def _extract_range_bound_relations(text: str) -> Set[Relation]:
     for m in re.finditer(r"\b(?:a )?([0-9]+) mg dose is allowed\b", text):
         relations.add(("dose", "allowedamount", f"{m.group(1)}mg"))
 
+    for m in re.finditer(
+        r"\b(?:the )?([a-z][a-z0-9 ]+?) weighs ([0-9]+) kg and holds ([0-9]+) liters\b",
+        text,
+    ):
+        subject = _clean_span(m.group(1))
+        relations.add((subject, "weighs", f"{m.group(2)}kg"))
+        relations.add((subject, "holds", f"{m.group(3)}liters"))
+    for m in re.finditer(
+        r"\b(?:the )?([a-z][a-z0-9 ]+?) flies ([0-9]+) km and carries ([0-9]+) kg\b",
+        text,
+    ):
+        subject = _clean_span(m.group(1))
+        relations.add((subject, "flies", f"{m.group(2)}km"))
+        relations.add((subject, "carries", f"{m.group(3)}kg"))
+    for m in re.finditer(
+        r"\b(?:the )?([a-z][a-z0-9 ]+?) charges at ([0-9]+) watts and lasts ([0-9]+) hours\b",
+        text,
+    ):
+        subject = _clean_span(m.group(1))
+        relations.add((subject, "chargesat", f"{m.group(2)}watts"))
+        relations.add((subject, "lasts", f"{m.group(3)}hours"))
+
     if re.search(r"\bapplicants must be at least 18 and under 65\b", text):
         relations.add(("applicants", "eligibleagerange", "18through64"))
     if re.search(r"\bapplicants aged 18 through 64 are eligible\b", text):

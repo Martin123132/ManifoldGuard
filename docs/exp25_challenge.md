@@ -36,6 +36,10 @@ relation, negation, literal-drift, or reporting improvements.
 
 Initial local baseline after seed creation: `1 / 18`.
 
+First bounded improvement pass: compact dimension binding probes now pass
+`3 / 3`, raising the local EXP25 baseline from `1 / 18` to `4 / 18` with scoped
+weight/volume, range/payload, and power/duration relation bindings.
+
 ## Regenerate the corpus
 
 ```bash

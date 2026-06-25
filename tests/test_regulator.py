@@ -1276,3 +1276,69 @@ def test_exp24_dose_range_all_bad_reuse_blocks_boundary_candidates():
     assert result.action == "block"
     assert result.emitted_text is None
     assert [evaluation.safe_to_emit for evaluation in result.evaluations] == [False, False]
+
+
+def test_exp25_container_dimension_binding_preserves_weight_and_volume():
+    result = regulate_candidates(
+        [
+            "The container weighs 2 kg and holds 3 liters.",
+            "The container weighs 3 kg and holds 2 liters.",
+        ],
+        ["The container weighs 3 kg and holds 2 liters."],
+        use_embeddings=False,
+    )
+
+    assert ("container", "weighs", "3kg") in extract_relations(
+        "The container weighs 3 kg and holds 2 liters."
+    )
+    assert ("container", "holds", "2liters") in extract_relations(
+        "The container weighs 3 kg and holds 2 liters."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The container weighs 3 kg and holds 2 liters."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_drone_dimension_binding_preserves_range_and_payload():
+    result = regulate_candidates(
+        [
+            "The drone flies 4 km and carries 12 kg.",
+            "The drone flies 12 km and carries 4 kg.",
+        ],
+        ["The drone flies 12 km and carries 4 kg."],
+        use_embeddings=False,
+    )
+
+    assert ("drone", "flies", "12km") in extract_relations(
+        "The drone flies 12 km and carries 4 kg."
+    )
+    assert ("drone", "carries", "4kg") in extract_relations(
+        "The drone flies 12 km and carries 4 kg."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The drone flies 12 km and carries 4 kg."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_battery_dimension_binding_preserves_power_and_duration():
+    result = regulate_candidates(
+        [
+            "The battery charges at 5 watts and lasts 20 hours.",
+            "The battery charges at 20 watts and lasts 5 hours.",
+        ],
+        ["The battery charges at 20 watts and lasts 5 hours."],
+        use_embeddings=False,
+    )
+
+    assert ("battery", "chargesat", "20watts") in extract_relations(
+        "The battery charges at 20 watts and lasts 5 hours."
+    )
+    assert ("battery", "lasts", "5hours") in extract_relations(
+        "The battery charges at 20 watts and lasts 5 hours."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "The battery charges at 20 watts and lasts 5 hours."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
