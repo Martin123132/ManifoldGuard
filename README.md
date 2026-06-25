@@ -574,6 +574,12 @@ scoped compact sensor and dose-range blocking improvements; EXP24 remains a
 development probe, not a benchmark claim. The broader development direction is recorded in
 `docs/roadmap.md`.
 
+The next exploratory seed lives in `examples/exp25_challenge_corpus.jsonl`.
+EXP25 opens the next development surface with temporal role binding, nested
+conditionals, quantifier thresholds, compact dimension binding, scoped
+exceptions, and all-bad token-reuse near misses. Its workflow is documented in
+`docs/exp25_challenge.md`; EXP25 is a development probe, not a benchmark claim.
+
 ```bash
 uv run python examples/build_challenge_corpus.py
 manifold-eval --corpus examples/challenge_corpus.jsonl --output challenge-evaluation.json

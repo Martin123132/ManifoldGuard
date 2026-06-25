@@ -11,18 +11,20 @@ working plan, not a public guarantee.
 - EXP22 is closed at `18 / 18` for the checked seed cases.
 - EXP23 is closed locally at `18 / 18` for the checked seed cases on the
   `0.1.4` development track.
+- EXP24 is closed locally at `18 / 18` for the checked seed cases on the
+  `0.1.5` development track.
 
 ## Next development track
 
-EXP24 should guide the `0.1.5` cycle. Keep EXP23 as a closed milestone corpus
-and use EXP24 to find the next small, stable failure family.
+EXP25 should guide the next development cycle. Keep EXP24 as a closed milestone
+corpus and use EXP25 to find the next small, stable failure family.
 
 Recommended order:
 
-- measure the EXP24 baseline
+- measure the EXP25 baseline
 - choose the clearest failing family with minimal API risk
 - promote focused tests for that family
-- rerun EXP24 and record the before/after evidence
+- rerun EXP25 and record the before/after evidence
 - leave public claims tied to release evidence, not exploratory pass rates
 
 ## Product hardening
