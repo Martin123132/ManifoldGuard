@@ -27,6 +27,8 @@
 - Added nested-conditional support for EXP25 badge/room, sensor-alarm, and
   verified-owner export probes, raising the local EXP25 baseline from `7 / 18`
   to `10 / 18`.
+- Added scoped-exception support for EXP25 exporter and staff/auditor probes,
+  raising the local EXP25 baseline from `10 / 18` to `12 / 18`.
 - Clarified README and getting-started guidance around what ManifoldGuard does,
   what it does not do, and how to run a first offline relation-binding demo.
 

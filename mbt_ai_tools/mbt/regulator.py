@@ -866,6 +866,22 @@ def _extract_exception_scope_relations(text: str) -> Set[Relation]:
         relations.add(("supervisors", "is", "enter after hours"))
 
     for m in re.finditer(
+        r"\ball staff may enter except ([a-z][a-z0-9 ]+?)"
+        r"(?: auditors may enter with escort|$)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add((obj, "exceptfrom", "enter"))
+    if re.search(r"\bauditors may enter with escort\b", text):
+        relations.add(("auditors", "is", "enter with escort"))
+    for m in re.finditer(r"\b([a-z][a-z0-9 ]+?) may enter with escort\b", text):
+        raw_subject = m.group(1)
+        if "may not enter" in raw_subject:
+            continue
+        for subj in _split_exception_objects(raw_subject):
+            relations.add((subj, "is", "enter with escort"))
+
+    for m in re.finditer(
         r"\ball employees may enter except ([a-z][a-z0-9 ]+?)"
         r"(?: security may enter after hours|$)",
         text,
@@ -875,12 +891,25 @@ def _extract_exception_scope_relations(text: str) -> Set[Relation]:
     if re.search(r"\bsecurity may enter after hours\b", text):
         relations.add(("security", "is", "enter after hours"))
     for m in re.finditer(r"\b([a-z][a-z0-9 ]+?) may enter(?! after hours)\b", text):
-        for subj in _split_exception_objects(m.group(1)):
+        raw_subject = m.group(1)
+        if "may not enter" in raw_subject:
+            continue
+        for subj in _split_exception_objects(raw_subject):
             relations.add((subj, "is", "enter"))
 
     if re.search(r"\b(?:the )?importer accepts images except animated gifs\b", text):
         relations.add(("importer", "accept", "images"))
         relations.add(("importer", "exceptfrom", "animated gifs"))
+
+    if re.search(r"\b(?:the )?exporter supports csv except encrypted csv json is supported\b", text):
+        relations.add(("exporter", "support", "csv"))
+        relations.add(("exporter", "exceptfrom", "encrypted csv"))
+        relations.add(("json", "is", "supported"))
+    if re.search(r"\bjson is supported\b", text):
+        relations.add(("json", "is", "supported"))
+    if re.search(r"\bencrypted csv is supported\b", text):
+        relations.add(("encrypted csv", "is", "supported"))
+
     for m in re.finditer(
         r"\b(?:the )?importer accepts images except ([a-z][a-z0-9 ]+?)"
         r"(?: it accepts|$)",
@@ -963,6 +992,17 @@ def _extract_exception_scope_negated_relations(text: str) -> Set[Relation]:
         relations.add(("interns", "is", "enter lab"))
 
     for m in re.finditer(
+        r"\ball staff may enter except ([a-z][a-z0-9 ]+?)"
+        r"(?: auditors may enter with escort|$)",
+        text,
+    ):
+        for obj in _split_exception_objects(m.group(1)):
+            relations.add((obj, "is", "enter"))
+    for m in re.finditer(r"\b([a-z][a-z0-9 ]+?) may not enter\b", text):
+        for subj in _split_exception_objects(m.group(1)):
+            relations.add((subj, "is", "enter"))
+
+    for m in re.finditer(
         r"\ball employees may enter except ([a-z][a-z0-9 ]+?)"
         r"(?: security may enter after hours|$)",
         text,
@@ -977,6 +1017,12 @@ def _extract_exception_scope_negated_relations(text: str) -> Set[Relation]:
         relations.add(("importer", "accept", "animated gifs"))
     if re.search(r"\b(?:the )?importer accepts static gifs but not animated gifs\b", text):
         relations.add(("importer", "accept", "animated gifs"))
+
+    if re.search(r"\b(?:the )?exporter supports csv except encrypted csv json is supported\b", text):
+        relations.add(("encrypted csv", "is", "supported"))
+    if re.search(r"\bencrypted csv is not\b", text):
+        relations.add(("encrypted csv", "is", "supported"))
+
     for m in re.finditer(
         r"\b(?:the )?importer accepts images except ([a-z][a-z0-9 ]+?)"
         r"(?: it accepts|$)",

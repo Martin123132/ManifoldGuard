@@ -48,6 +48,10 @@ Third bounded improvement pass: nested conditional probes now pass `3 / 3`,
 raising the local EXP25 baseline from `7 / 18` to `10 / 18` with scoped
 two-antecedent condition bindings and verified-owner export role scope.
 
+Fourth bounded improvement pass: scoped exception probes now pass `3 / 3`,
+raising the local EXP25 baseline from `10 / 18` to `12 / 18` by preserving
+export-format exclusions and staff/auditor entry exceptions.
+
 ## Regenerate the corpus
 
 ```bash

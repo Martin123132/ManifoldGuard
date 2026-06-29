@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from mbt_ai_tools import evaluate_candidate, extract_relations, regulate_candidates
+from mbt_ai_tools.mbt.regulator import _extract_negated_relations
 
 
 def test_mixed_candidate_pool_emits_supported_candidate_without_embeddings():
@@ -1478,5 +1479,53 @@ def test_exp25_verified_owner_nested_condition_preserves_role_scope():
     )
     assert result.action == "emit"
     assert result.emitted_text == "Verified owners may export."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_exporter_scoped_exception_preserves_encrypted_csv_denial():
+    result = regulate_candidates(
+        [
+            "Encrypted CSV is supported.",
+            "JSON is supported, but encrypted CSV is not.",
+        ],
+        ["The exporter supports CSV except encrypted CSV; JSON is supported."],
+        use_embeddings=False,
+    )
+
+    assert ("exporter", "exceptfrom", "encrypted csv") in extract_relations(
+        "The exporter supports CSV except encrypted CSV; JSON is supported."
+    )
+    assert ("encrypted csv", "is", "supported") in _extract_negated_relations(
+        "The exporter supports CSV except encrypted CSV; JSON is supported."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "JSON is supported, but encrypted CSV is not."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_staff_scoped_exception_preserves_auditor_escort_scope():
+    result = regulate_candidates(
+        [
+            "Visitors may enter with escort.",
+            "Visitors and contractors may not enter, and auditors may enter with escort.",
+        ],
+        [
+            "All staff may enter except visitors and contractors; auditors may enter with escort."
+        ],
+        use_embeddings=False,
+    )
+
+    assert ("visitors", "is", "enter") in _extract_negated_relations(
+        "All staff may enter except visitors and contractors; auditors may enter with escort."
+    )
+    assert ("auditors", "is", "enter with escort") in extract_relations(
+        "All staff may enter except visitors and contractors; auditors may enter with escort."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "Visitors and contractors may not enter, and auditors may enter with escort."
+    )
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
