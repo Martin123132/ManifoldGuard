@@ -1408,3 +1408,75 @@ def test_exp25_signature_threshold_preserves_exact_count():
     assert result.emitted_text == "Three signatures are required."
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_badge_room_nested_condition_preserves_both_antecedents():
+    result = regulate_candidates(
+        [
+            "The robot enters when the badge is valid.",
+            "The robot enters when the badge is valid and the room is unlocked.",
+        ],
+        ["If the badge is valid, then if the room is unlocked, the robot enters."],
+        use_embeddings=False,
+    )
+
+    assert ("robot", "enterwhen", "badgevalidroomunlocked") in extract_relations(
+        "If the badge is valid, then if the room is unlocked, the robot enters."
+    )
+    assert ("robot", "enterwhen", "badgevalid") in extract_relations(
+        "The robot enters when the badge is valid."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "The robot enters when the badge is valid and the room is unlocked."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_sensor_alarm_nested_condition_preserves_both_antecedents():
+    result = regulate_candidates(
+        [
+            "The alarm stays off when sensor B is silent.",
+            "The alarm stays off when sensor A is armed and sensor B is silent.",
+        ],
+        ["If sensor A is armed, then if sensor B is silent, the alarm stays off."],
+        use_embeddings=False,
+    )
+
+    assert ("alarm", "staysoffwhen", "sensoraarmedsensorbsilent") in extract_relations(
+        "If sensor A is armed, then if sensor B is silent, the alarm stays off."
+    )
+    assert ("alarm", "staysoffwhen", "sensorbsilent") in extract_relations(
+        "The alarm stays off when sensor B is silent."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == (
+        "The alarm stays off when sensor A is armed and sensor B is silent."
+    )
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_verified_owner_nested_condition_preserves_role_scope():
+    result = regulate_candidates(
+        [
+            "Verified viewers may export.",
+            "Verified owners may export.",
+        ],
+        [
+            "If the account is verified, then if the requester is an owner, export is allowed."
+        ],
+        use_embeddings=False,
+    )
+
+    assert ("verified owner", "mayexport", "export") in extract_relations(
+        "If the account is verified, then if the requester is an owner, export is allowed."
+    )
+    assert ("verified viewer", "mayexport", "export") in extract_relations(
+        "Verified viewers may export."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Verified owners may export."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True

@@ -44,6 +44,10 @@ Second bounded improvement pass: quantifier-threshold probes now pass `3 / 3`,
 raising the local EXP25 baseline from `4 / 18` to `7 / 18` with scoped minimum,
 maximum, and exact-count relation bindings.
 
+Third bounded improvement pass: nested conditional probes now pass `3 / 3`,
+raising the local EXP25 baseline from `7 / 18` to `10 / 18` with scoped
+two-antecedent condition bindings and verified-owner export role scope.
+
 ## Regenerate the corpus
 
 ```bash

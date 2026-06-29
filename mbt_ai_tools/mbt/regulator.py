@@ -627,6 +627,57 @@ def _extract_conditional_scope_relations(text: str, *, allow_partial: bool = Tru
         relations.add(("switch", "stopwhen", "motor off"))
         relations.add(("motor", "state", "off"))
 
+    if re.search(
+        r"\bif (?:the )?badge is valid then if (?:the )?room is unlocked (?:the )?robot enters\b",
+        text,
+    ):
+        relations.add(("robot", "enterwhen", "badgevalidroomunlocked"))
+        relations.add(("robot enters when badge", "is", "valid"))
+        relations.add(("room", "is", "unlocked"))
+        relations.add(("badge", "state", "valid"))
+        relations.add(("room", "state", "unlocked"))
+    if re.search(
+        r"\b(?:the )?robot enters when (?:the )?badge is valid and (?:the )?room is unlocked\b",
+        text,
+    ):
+        relations.add(("robot", "enterwhen", "badgevalidroomunlocked"))
+        relations.add(("robot enters when badge", "is", "valid"))
+        relations.add(("room", "is", "unlocked"))
+        relations.add(("badge", "state", "valid"))
+        relations.add(("room", "state", "unlocked"))
+    if allow_partial and re.search(
+        r"\b(?:the )?robot enters when (?:the )?badge is valid(?=$| but |,)",
+        text,
+    ):
+        relations.add(("robot", "enterwhen", "badgevalid"))
+        relations.add(("robot enters when badge", "is", "valid"))
+
+    if re.search(
+        r"\bif sensor a is armed then if sensor b is silent (?:the )?alarm stays off\b",
+        text,
+    ):
+        relations.add(("alarm", "staysoffwhen", "sensoraarmedsensorbsilent"))
+        relations.add(("alarm stays off when sensor", "is", "armed"))
+        relations.add(("alarm stays off when sensor a", "is", "armed"))
+        relations.add(("stays off when sensor a", "is", "armed"))
+        relations.add(("sensor b", "is", "silent"))
+        relations.add(("sensor a", "state", "armed"))
+        relations.add(("sensor b", "state", "silent"))
+    if re.search(
+        r"\b(?:the )?alarm stays off when sensor a is armed and sensor b is silent\b",
+        text,
+    ):
+        relations.add(("alarm", "staysoffwhen", "sensoraarmedsensorbsilent"))
+        relations.add(("alarm stays off when sensor", "is", "armed"))
+        relations.add(("alarm stays off when sensor a", "is", "armed"))
+        relations.add(("stays off when sensor a", "is", "armed"))
+        relations.add(("sensor b", "is", "silent"))
+        relations.add(("sensor a", "state", "armed"))
+        relations.add(("sensor b", "state", "silent"))
+    if allow_partial and re.search(r"\b(?:the )?alarm stays off when sensor b is silent\b", text):
+        relations.add(("alarm", "staysoffwhen", "sensorbsilent"))
+        relations.add(("alarm stays off when sensor b", "is", "silent"))
+
     return relations
 
 
@@ -646,6 +697,15 @@ def _extract_permission_scope_relations(text: str) -> Set[Relation]:
         relations.add(("owner", "mayexport", "file"))
     if re.search(r"\bviewers may export (?:the )?file\b", text):
         relations.add(("viewer", "mayexport", "file"))
+    if re.search(
+        r"\bif (?:the )?account is verified then if (?:the )?requester is an owner export is allowed\b",
+        text,
+    ):
+        relations.add(("verified owner", "mayexport", "export"))
+    if re.search(r"\bverified owners may export\b", text):
+        relations.add(("verified owner", "mayexport", "export"))
+    if re.search(r"\bverified viewers may export\b", text):
+        relations.add(("verified viewer", "mayexport", "export"))
 
     for m in re.finditer(r"\bonly (team [a-z0-9]+) may edit (?:the )?ledger\b", text):
         relations.add((_clean_relation_span(m.group(1)), "mayedit", "ledger"))

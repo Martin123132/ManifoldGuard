@@ -597,10 +597,10 @@ The current exploratory seed lives in `examples/exp25_challenge_corpus.jsonl`.
 EXP25 opens the next development surface with temporal role binding, nested
 conditionals, quantifier thresholds, compact dimension binding, scoped
 exceptions, and all-bad token-reuse near misses. Current local EXP25 seed
-status is `7 / 18` after compact dimension-binding and quantifier-threshold
-passes. Its workflow is documented in `docs/exp25_challenge.md`; EXP25 is a
-development probe, not a benchmark claim. The broader development direction is
-recorded in `docs/roadmap.md`.
+status is `10 / 18` after compact dimension-binding, quantifier-threshold, and
+nested-conditional passes. Its workflow is documented in
+`docs/exp25_challenge.md`; EXP25 is a development probe, not a benchmark claim.
+The broader development direction is recorded in `docs/roadmap.md`.
 
 ```bash
 uv run python examples/build_challenge_corpus.py

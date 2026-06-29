@@ -24,6 +24,9 @@
   from `1 / 18` to `4 / 18`.
 - Added quantifier-threshold support for EXP25 minimum, maximum, and exact-count
   probes, raising the local EXP25 baseline from `4 / 18` to `7 / 18`.
+- Added nested-conditional support for EXP25 badge/room, sensor-alarm, and
+  verified-owner export probes, raising the local EXP25 baseline from `7 / 18`
+  to `10 / 18`.
 - Clarified README and getting-started guidance around what ManifoldGuard does,
   what it does not do, and how to run a first offline relation-binding demo.
 
