@@ -52,6 +52,10 @@ Fourth bounded improvement pass: scoped exception probes now pass `3 / 3`,
 raising the local EXP25 baseline from `10 / 18` to `12 / 18` by preserving
 export-format exclusions and staff/auditor entry exceptions.
 
+Fifth bounded improvement pass: temporal role-binding probes now pass `3 / 3`,
+raising the local EXP25 baseline from `12 / 18` to `15 / 18` by preserving
+actor, object, and before/after order across paraphrases.
+
 ## Regenerate the corpus
 
 ```bash

@@ -1529,3 +1529,69 @@ def test_exp25_staff_scoped_exception_preserves_auditor_escort_scope():
     )
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_valve_pump_temporal_role_binding_preserves_actor_object_order():
+    result = regulate_candidates(
+        [
+            "Mira repaired the pump before Sol inspected the valve.",
+            "Sol repaired the pump before Mira inspected the valve.",
+        ],
+        ["Sol repaired the pump before Mira inspected the valve."],
+        use_embeddings=False,
+    )
+
+    assert ("sol", "repairbefore", "pump") in extract_relations(
+        "Sol repaired the pump before Mira inspected the valve."
+    )
+    assert ("mira", "inspectafter", "valve") in extract_relations(
+        "Mira inspected the valve after Sol repaired the pump."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Sol repaired the pump before Mira inspected the valve."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_draft_temporal_role_binding_preserves_approve_reject_order():
+    result = regulate_candidates(
+        [
+            "Ana rejected draft A after Jo approved draft B.",
+            "Jo rejected draft A before Ana approved draft B.",
+        ],
+        ["Ana approved draft B after Jo rejected draft A."],
+        use_embeddings=False,
+    )
+
+    assert ("ana", "approveafter", "drafta") not in extract_relations(
+        "Jo rejected draft A before Ana approved draft B."
+    )
+    assert ("ana", "approveafter", "draftb") in extract_relations(
+        "Ana approved draft B after Jo rejected draft A."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Jo rejected draft A before Ana approved draft B."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_vial_temporal_role_binding_preserves_label_seal_order():
+    result = regulate_candidates(
+        [
+            "Noor sealed vial 2 after Iris labeled vial 1.",
+            "Noor labeled vial 1 before Iris sealed vial 2.",
+        ],
+        ["Iris sealed vial 2 after Noor labeled vial 1."],
+        use_embeddings=False,
+    )
+
+    assert ("iris", "sealafter", "vial 2") in extract_relations(
+        "Iris sealed vial 2 after Noor labeled vial 1."
+    )
+    assert ("noor", "labelbefore", "vial 1") in extract_relations(
+        "Noor labeled vial 1 before Iris sealed vial 2."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Noor labeled vial 1 before Iris sealed vial 2."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True

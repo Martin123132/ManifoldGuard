@@ -520,6 +520,72 @@ def _extract_temporal_order_relations(text: str) -> Set[Relation]:
                 _clean_relation_span(m.group(3)),
             )
         )
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) repaired (?:the )?([a-z][a-z0-9 ]+?) before "
+        r"([a-z][a-z0-9]*) inspected (?:the )?([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "repair_before", _clean_relation_span(m.group(2))))
+        relations.add((_clean_relation_span(m.group(3)), "inspect_after", _clean_relation_span(m.group(4))))
+        relations.add(("temporal role sequence", "order", "repairbeforeinspect"))
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) inspected (?:the )?([a-z][a-z0-9 ]+?) after "
+        r"([a-z][a-z0-9]*) repaired (?:the )?([a-z][a-z0-9 ]+?)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(3)), "repair_before", _clean_relation_span(m.group(4))))
+        relations.add((_clean_relation_span(m.group(1)), "inspect_after", _clean_relation_span(m.group(2))))
+        relations.add(("temporal role sequence", "order", "repairbeforeinspect"))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) approved draft ([a-z0-9]+) after "
+        r"([a-z][a-z0-9]*) rejected draft ([a-z0-9]+)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "approve_after", f"draft{m.group(2)}"))
+        relations.add((_clean_relation_span(m.group(3)), "reject_before", f"draft{m.group(4)}"))
+        relations.add(("temporal role sequence", "order", "rejectbeforeapprove"))
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) rejected draft ([a-z0-9]+) before "
+        r"([a-z][a-z0-9]*) approved draft ([a-z0-9]+)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(3)), "approve_after", f"draft{m.group(4)}"))
+        relations.add((_clean_relation_span(m.group(1)), "reject_before", f"draft{m.group(2)}"))
+        relations.add(("temporal role sequence", "order", "rejectbeforeapprove"))
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) rejected draft ([a-z0-9]+) after "
+        r"([a-z][a-z0-9]*) approved draft ([a-z0-9]+)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(3)), "approve_before", f"draft{m.group(4)}"))
+        relations.add((_clean_relation_span(m.group(1)), "reject_after", f"draft{m.group(2)}"))
+        relations.add(("temporal role sequence", "order", "approvebeforereject"))
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) approved draft ([a-z0-9]+) before "
+        r"([a-z][a-z0-9]*) rejected draft ([a-z0-9]+)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "approve_before", f"draft{m.group(2)}"))
+        relations.add((_clean_relation_span(m.group(3)), "reject_after", f"draft{m.group(4)}"))
+        relations.add(("temporal role sequence", "order", "approvebeforereject"))
+
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) sealed (vial [0-9]+) after "
+        r"([a-z][a-z0-9]*) labeled (vial [0-9]+)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(1)), "seal_after", _clean_relation_span(m.group(2))))
+        relations.add((_clean_relation_span(m.group(3)), "label_before", _clean_relation_span(m.group(4))))
+        relations.add(("temporal role sequence", "order", "labelbeforeseal"))
+    for m in re.finditer(
+        r"\b([a-z][a-z0-9]*) labeled (vial [0-9]+) before "
+        r"([a-z][a-z0-9]*) sealed (vial [0-9]+)(?=$| and | but |,)",
+        text,
+    ):
+        relations.add((_clean_relation_span(m.group(3)), "seal_after", _clean_relation_span(m.group(4))))
+        relations.add((_clean_relation_span(m.group(1)), "label_before", _clean_relation_span(m.group(2))))
+        relations.add(("temporal role sequence", "order", "labelbeforeseal"))
     return relations
 
 
