@@ -1342,3 +1342,69 @@ def test_exp25_battery_dimension_binding_preserves_power_and_duration():
     assert result.emitted_text == "The battery charges at 20 watts and lasts 5 hours."
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_reviewer_threshold_preserves_minimum_approval_count():
+    result = regulate_candidates(
+        [
+            "One reviewer approval is enough for release.",
+            "Release requires approval from two or more reviewers.",
+        ],
+        ["At least two reviewers must approve before release."],
+        use_embeddings=False,
+    )
+
+    assert ("release", "minapprovals", "2reviewers") in extract_relations(
+        "At least two reviewers must approve before release."
+    )
+    assert ("release", "minapprovals", "1reviewer") in extract_relations(
+        "One reviewer approval is enough for release."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Release requires approval from two or more reviewers."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_failed_check_threshold_preserves_maximum_count():
+    result = regulate_candidates(
+        [
+            "Two failed checks are allowed.",
+            "At most one failed check is allowed.",
+        ],
+        ["No more than one failed check is allowed."],
+        use_embeddings=False,
+    )
+
+    assert ("failed check", "maxallowed", "1") in extract_relations(
+        "No more than one failed check is allowed."
+    )
+    assert ("failed check", "allowedcount", "2") in extract_relations(
+        "Two failed checks are allowed."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "At most one failed check is allowed."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_signature_threshold_preserves_exact_count():
+    result = regulate_candidates(
+        [
+            "Two signatures are required.",
+            "Three signatures are required.",
+        ],
+        ["Exactly three signatures are required."],
+        use_embeddings=False,
+    )
+
+    assert ("signatures", "exactrequired", "3") in extract_relations(
+        "Exactly three signatures are required."
+    )
+    assert ("signatures", "exactrequired", "2") in extract_relations(
+        "Two signatures are required."
+    )
+    assert result.action == "emit"
+    assert result.emitted_text == "Three signatures are required."
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is True

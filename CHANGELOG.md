@@ -13,6 +13,19 @@
   the first EXP24 improvement pass.
 - Added scoped unit/range paraphrase bindings for the EXP24 tank, cable, and
   service-window probes.
+- Added chained-exception, alias-permission, compact-sensor, and dose-range
+  hardening to close the EXP24 seed locally at `18 / 18`.
+- Added the exploratory EXP25 challenge corpus seed for the next development
+  surface across temporal role binding, nested conditionals, quantifier
+  thresholds, compact dimension binding, scoped exceptions, and all-bad
+  token-reuse near misses.
+- Added compact dimension-binding support for EXP25 weight/volume,
+  range/payload, and power/duration probes, raising the local EXP25 baseline
+  from `1 / 18` to `4 / 18`.
+- Added quantifier-threshold support for EXP25 minimum, maximum, and exact-count
+  probes, raising the local EXP25 baseline from `4 / 18` to `7 / 18`.
+- Clarified README and getting-started guidance around what ManifoldGuard does,
+  what it does not do, and how to run a first offline relation-binding demo.
 
 ## 0.1.4 - 2026-06-21
 

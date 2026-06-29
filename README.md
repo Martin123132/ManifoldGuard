@@ -76,6 +76,29 @@ For a fuller onboarding path, see `docs/getting_started.md`.
 For a starter personal corpus, see `examples/personal_corpus_template.jsonl`.
 For extension guidance, see `docs/extending.md`.
 
+## What It Does and Does Not Do
+
+ManifoldGuard is a reference-bounded output regulator. It is strongest when you
+give it compact trusted statements and ask whether candidate outputs preserve
+the same entities, numbers, units, roles, relations, negations, and scoped
+conditions.
+
+It does:
+
+- block unsupported candidate drift from supplied references
+- emit a supported candidate when at least one candidate stays inside scope
+- abstain when every candidate is unsafe
+- run offline by default with `--no-embeddings` / `use_embeddings=False`
+- expose optional embedding-backed diagnostics when explicitly installed
+
+It does not:
+
+- fact-check the world without references
+- prove that a reference is true
+- inspect or modify model weights
+- replace human review for legal, medical, financial, or safety-critical use
+- turn exploratory EXP pass rates into public benchmark claims
+
 ## Core Claim
 
 ManifoldGuard treats hallucination as semantic or relational drift from supplied
@@ -565,20 +588,19 @@ rougher than EXP21, with guidance in `docs/exp22_challenge.md`.
 The EXP23 development seed lives in `examples/exp23_challenge_corpus.jsonl`.
 EXP23 closed the `0.1.4` track at `18 / 18` for the checked seed cases.
 
-The current development seed lives in `examples/exp24_challenge_corpus.jsonl`.
-EXP24 opens the `0.1.5` track with multi-antecedent conditionals, alias-bound
-permissions, unit/range paraphrases, chained exceptions, compact bindings, and
-all-bad token-reuse near misses. The workflow is documented in
-`docs/exp24_challenge.md`. Current local EXP24 seed status is `18 / 18` after
-scoped compact sensor and dose-range blocking improvements; EXP24 remains a
-development probe, not a benchmark claim. The broader development direction is recorded in
-`docs/roadmap.md`.
+The EXP24 development seed lives in `examples/exp24_challenge_corpus.jsonl`.
+EXP24 closed the `0.1.5` track at `18 / 18` for the checked seed cases. Its
+workflow is documented in `docs/exp24_challenge.md`; EXP24 remains development
+evidence, not a benchmark claim.
 
-The next exploratory seed lives in `examples/exp25_challenge_corpus.jsonl`.
+The current exploratory seed lives in `examples/exp25_challenge_corpus.jsonl`.
 EXP25 opens the next development surface with temporal role binding, nested
 conditionals, quantifier thresholds, compact dimension binding, scoped
-exceptions, and all-bad token-reuse near misses. Its workflow is documented in
-`docs/exp25_challenge.md`; EXP25 is a development probe, not a benchmark claim.
+exceptions, and all-bad token-reuse near misses. Current local EXP25 seed
+status is `7 / 18` after compact dimension-binding and quantifier-threshold
+passes. Its workflow is documented in `docs/exp25_challenge.md`; EXP25 is a
+development probe, not a benchmark claim. The broader development direction is
+recorded in `docs/roadmap.md`.
 
 ```bash
 uv run python examples/build_challenge_corpus.py

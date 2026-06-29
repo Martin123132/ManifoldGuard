@@ -63,6 +63,9 @@ In offline mode, ManifoldGuard mainly checks:
 
 ## First CLI check
 
+Try this first when you want to see the core behavior without any model
+downloads:
+
 ```bash
 manifold-check \
   --reference "The capital of France is Paris." \
@@ -87,6 +90,20 @@ manifold-check \
   --no-embeddings \
   --explain
 ```
+
+Try a relation-binding example next:
+
+```bash
+manifold-check \
+  --reference "The drone flies 12 km and carries 4 kg." \
+  --candidate "The drone flies 4 km and carries 12 kg." \
+  --candidate "The drone flies 12 km and carries 4 kg." \
+  --no-embeddings
+```
+
+The first candidate reuses the same numbers and units but swaps which value is
+bound to range and payload. The second candidate stays inside the supplied
+reference structure.
 
 ## First Python check
 
@@ -183,7 +200,7 @@ truth, it probably belongs outside ManifoldGuard or needs explicit references.
 ## Common mistakes
 
 - Expecting ManifoldGuard to fact-check without references.
-- Treating EXP21 challenge pass rates as public release claims.
+- Treating exploratory EXP challenge pass rates as public release claims.
 - Using embedding mode in CI in a way that downloads models.
 - Adding broad claims to docs before adding reproducible evidence.
 - Putting unrelated facts into one long reference instead of multiple focused
@@ -194,6 +211,6 @@ truth, it probably belongs outside ManifoldGuard or needs explicit references.
 - `README.md`: project overview and quick commands
 - `docs/report_schema.md`: report fields and output contracts
 - `docs/benchmark.md`: evidence tiers and public claim boundaries
-- `docs/exp21_challenge.md`: challenge corpus workflow
+- `docs/exp25_challenge.md`: current exploratory challenge workflow
 - `docs/extending.md`: extension paths for personal corpora and code changes
 - `CLAIMS.md`: supported and unsupported public claims

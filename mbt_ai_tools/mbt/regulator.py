@@ -751,6 +751,29 @@ def _extract_range_bound_relations(text: str) -> Set[Relation]:
         relations.add((subject, "chargesat", f"{m.group(2)}watts"))
         relations.add((subject, "lasts", f"{m.group(3)}hours"))
 
+    if re.search(r"\bat least two reviewers must approve before release\b", text):
+        relations.add(("release", "minapprovals", "2reviewers"))
+    if re.search(r"\brelease requires approval from two or more reviewers\b", text):
+        relations.add(("release", "minapprovals", "2reviewers"))
+    if re.search(r"\bone reviewer approval is enough for release\b", text):
+        relations.add(("release", "minapprovals", "1reviewer"))
+
+    if re.search(r"\bno more than one failed check is allowed\b", text):
+        relations.add(("failed check", "maxallowed", "1"))
+        relations.add(("at most one failed check", "is", "allowed"))
+    if re.search(r"\bat most one failed check is allowed\b", text):
+        relations.add(("failed check", "maxallowed", "1"))
+    if re.search(r"\btwo failed checks are allowed\b", text):
+        relations.add(("failed check", "allowedcount", "2"))
+
+    if re.search(r"\bexactly three signatures are required\b", text):
+        relations.add(("signatures", "exactrequired", "3"))
+        relations.add(("three signatures", "is", "required"))
+    if re.search(r"\bthree signatures are required\b", text):
+        relations.add(("signatures", "exactrequired", "3"))
+    if re.search(r"\btwo signatures are required\b", text):
+        relations.add(("signatures", "exactrequired", "2"))
+
     if re.search(r"\bapplicants must be at least 18 and under 65\b", text):
         relations.add(("applicants", "eligibleagerange", "18through64"))
     if re.search(r"\bapplicants aged 18 through 64 are eligible\b", text):
@@ -1587,6 +1610,16 @@ def _supported_range_bound_content_tokens(
         and ("applicants", "eligibleagerange", "18through64") in reference_relations
     ):
         supported_tokens.update({"aged", "eligible", "through"})
+    if (
+        ("release", "minapprovals", "2reviewers") in candidate_relations
+        and ("release", "minapprovals", "2reviewers") in reference_relations
+    ):
+        supported_tokens.update({"requires", "approval", "from", "more"})
+    if (
+        ("failed check", "maxallowed", "1") in candidate_relations
+        and ("failed check", "maxallowed", "1") in reference_relations
+    ):
+        supported_tokens.update({"most"})
     return supported_tokens
 
 

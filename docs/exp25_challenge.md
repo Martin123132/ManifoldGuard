@@ -40,6 +40,10 @@ First bounded improvement pass: compact dimension binding probes now pass
 `3 / 3`, raising the local EXP25 baseline from `1 / 18` to `4 / 18` with scoped
 weight/volume, range/payload, and power/duration relation bindings.
 
+Second bounded improvement pass: quantifier-threshold probes now pass `3 / 3`,
+raising the local EXP25 baseline from `4 / 18` to `7 / 18` with scoped minimum,
+maximum, and exact-count relation bindings.
+
 ## Regenerate the corpus
 
 ```bash
