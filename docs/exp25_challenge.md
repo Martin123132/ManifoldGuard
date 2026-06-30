@@ -3,9 +3,10 @@
 EXP25 is the exploratory challenge surface after the completed EXP24 seed.
 
 EXP24 is intentionally left as a closed development milestone at `18 / 18`.
-EXP25 opens the next development track with harder probes around temporal role
-binding, nested conditionals, quantifier thresholds, compact dimension binding,
-scoped exceptions, and all-bad token-reuse near misses.
+EXP25 is now also closed locally at `18 / 18` for the checked seed cases. It
+covers harder probes around temporal role binding, nested conditionals,
+quantifier thresholds, compact dimension binding, scoped exceptions, and
+all-bad token-reuse near misses.
 
 ## Scope
 
@@ -30,9 +31,9 @@ The initial seed probes:
 - scoped exceptions with allowed and denied classes
 - all-bad token-reuse near misses
 
-These cases are development probes, not public benchmark claims. A low pass
-rate is useful if it exposes stable failure modes worth turning into geometry,
-relation, negation, literal-drift, or reporting improvements.
+These cases are development probes, not public benchmark claims. They are useful
+for finding stable failure modes worth turning into geometry, relation,
+negation, literal-drift, or reporting improvements.
 
 Initial local baseline after seed creation: `1 / 18`.
 
@@ -76,6 +77,8 @@ manifold-eval \
   --output exp25-evaluation.json
 ```
 
+Expected local result for the current checked seed: `18 / 18`.
+
 Narrow to the temporal role-binding families:
 
 ```bash
@@ -109,7 +112,9 @@ python scripts/build_eval_replay_pack.py \
 
 ## Promotion boundary
 
-Use EXP25 to find the next reliable improvement boundary.
+EXP25 is closed for the current checked seed. Use it as supporting development
+evidence during release-candidate review, not as a standalone public benchmark
+claim.
 
 Promote an EXP25 case only when:
 
@@ -119,5 +124,6 @@ Promote an EXP25 case only when:
 - public docs avoid implying external fact-checking
 - release evidence and `CLAIMS.md` agree with the promoted scope
 
-Until then, EXP25 remains a private-development style challenge surface for
-finding the next useful failures.
+Until then, EXP25 remains a development challenge surface. Any future EXP26-style
+seed should start from fresh failure discovery rather than extending public
+claims from this pass rate alone.

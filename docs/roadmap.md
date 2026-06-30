@@ -13,18 +13,22 @@ working plan, not a public guarantee.
   `0.1.4` development track.
 - EXP24 is closed locally at `18 / 18` for the checked seed cases on the
   `0.1.5` development track.
+- EXP25 is closed locally at `18 / 18` for the checked seed cases and should be
+  treated as supporting development evidence, not a public benchmark claim.
 
-## Next development track
+## Next release-candidate track
 
-EXP25 should guide the next development cycle. Keep EXP24 as a closed milestone
-corpus and use EXP25 to find the next small, stable failure family.
+The next bounded work is `0.1.5` release-candidate hardening. Keep EXP24 and
+EXP25 as closed milestone corpora, then verify the public release evidence
+without broadening product claims.
 
 Recommended order:
 
-- measure the EXP25 baseline
-- choose the clearest failing family with minimal API risk
-- promote focused tests for that family
-- rerun EXP25 and record the before/after evidence
+- rerun the frozen regression suite and release evidence checks
+- confirm EXP24 and EXP25 remain reproducible development evidence
+- review `CLAIMS.md`, README, and package metadata for claim/version alignment
+- prepare release notes without promoting challenge-corpus pass rates into
+  benchmark claims
 - leave public claims tied to release evidence, not exploratory pass rates
 
 ## Product hardening

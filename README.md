@@ -594,23 +594,27 @@ workflow is documented in `docs/exp24_challenge.md`; EXP24 remains development
 evidence, not a benchmark claim.
 
 The current exploratory seed lives in `examples/exp25_challenge_corpus.jsonl`.
-EXP25 opens the next development surface with temporal role binding, nested
-conditionals, quantifier thresholds, compact dimension binding, scoped
-exceptions, and all-bad token-reuse near misses. Current local EXP25 seed
-status is `18 / 18` after compact dimension-binding, quantifier-threshold,
-nested-conditional, scoped-exception, temporal role-binding, and all-bad
-token-reuse passes. Its workflow is documented in `docs/exp25_challenge.md`;
-EXP25 is a development probe, not a benchmark claim. The broader development
-direction is recorded in `docs/roadmap.md`.
+EXP25 covers temporal role binding, nested conditionals, quantifier thresholds,
+compact dimension binding, scoped exceptions, and all-bad token-reuse near
+misses. Current local EXP25 seed status is `18 / 18` after compact
+dimension-binding, quantifier-threshold, nested-conditional, scoped-exception,
+temporal role-binding, and all-bad token-reuse passes. Its workflow is
+documented in `docs/exp25_challenge.md`; EXP25 is development evidence, not a
+benchmark claim. The broader development direction is recorded in
+`docs/roadmap.md`.
 
 ```bash
-uv run python examples/build_challenge_corpus.py
-manifold-eval --corpus examples/challenge_corpus.jsonl --output challenge-evaluation.json
+uv run python examples/build_exp25_challenge_corpus.py
+manifold-eval --corpus examples/exp25_challenge_corpus.jsonl --output exp25-evaluation.json
 python scripts/build_eval_replay_pack.py \
-  --evaluation challenge-evaluation.json \
-  --corpus examples/challenge_corpus.jsonl \
-  --output challenge-replay.md
+  --evaluation exp25-evaluation.json \
+  --corpus examples/exp25_challenge_corpus.jsonl \
+  --output exp25-replay.md
 ```
+
+For release candidates, treat EXP25 as supporting development evidence only.
+Release claims should still come from the frozen regression suite, release
+evidence artifact, and `CLAIMS.md`.
 
 Run the tests:
 
