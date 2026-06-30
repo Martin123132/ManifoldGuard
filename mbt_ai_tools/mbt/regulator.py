@@ -369,6 +369,7 @@ def extract_relations(text: str) -> Set[Relation]:
     relations.update(_extract_ordinal_binding_relations(normalized))
     relations.update(_extract_conditional_scope_relations(normalized))
     relations.update(_extract_permission_scope_relations(normalized))
+    relations.update(_extract_token_reuse_binding_relations(normalized))
     relations.update(_extract_aggregate_binding_relations(normalized))
     relations.update(_extract_range_bound_relations(normalized))
     relations.update(_extract_scope_binding_relations(normalized))
@@ -411,6 +412,7 @@ def _extract_relations_from_segment(segment: str) -> Set[Relation]:
     relations.update(_extract_ordinal_binding_relations(segment))
     relations.update(_extract_conditional_scope_relations(segment, allow_partial=False))
     relations.update(_extract_permission_scope_relations(segment))
+    relations.update(_extract_token_reuse_binding_relations(segment))
     relations.update(_extract_aggregate_binding_relations(segment))
     relations.update(_extract_range_bound_relations(segment))
     relations.update(_extract_scope_binding_relations(segment))
@@ -586,6 +588,63 @@ def _extract_temporal_order_relations(text: str) -> Set[Relation]:
         relations.add((_clean_relation_span(m.group(3)), "seal_after", _clean_relation_span(m.group(4))))
         relations.add((_clean_relation_span(m.group(1)), "label_before", _clean_relation_span(m.group(2))))
         relations.add(("temporal role sequence", "order", "labelbeforeseal"))
+    return relations
+
+
+def _extract_token_reuse_binding_relations(text: str) -> Set[Relation]:
+    relations: Set[Relation] = set()
+
+    for m in re.finditer(
+        r"\broute ([a-z0-9]+) goes to dock ([0-9]+)(?=$|\s+route [a-z0-9]+| and | but |,)",
+        text,
+    ):
+        relations.add((f"route{m.group(1)}", "goesto", f"dock{m.group(2)}"))
+    for m in re.finditer(
+        r"\bdock ([0-9]+) goes to route ([a-z0-9]+)(?=$|\s+route [a-z0-9]+| and | but |,)",
+        text,
+    ):
+        relations.add((f"dock{m.group(1)}", "goesto", f"route{m.group(2)}"))
+
+    for m in re.finditer(
+        r"\bonly team ([a-z0-9]+) may deploy service ([a-z0-9]+)",
+        text,
+    ):
+        relations.add((f"team{m.group(1)}", "maydeploy", f"service{m.group(2)}"))
+    for m in re.finditer(
+        r"\bteam ([a-z0-9]+) may deploy service ([a-z0-9]+)",
+        text,
+    ):
+        relations.add((f"team{m.group(1)}", "maydeploy", f"service{m.group(2)}"))
+    for m in re.finditer(
+        r"\bteam ([a-z0-9]+) may monitor (?:service ([a-z0-9]+)|it)",
+        text,
+    ):
+        service = m.group(2)
+        if service:
+            relations.add((f"team{m.group(1)}", "maymonitor", f"service{service}"))
+    for m in re.finditer(
+        r"\bonly team [a-z0-9]+ may deploy service ([a-z0-9]+) "
+        r"team ([a-z0-9]+) may monitor it",
+        text,
+    ):
+        relations.add((f"team{m.group(2)}", "maymonitor", f"service{m.group(1)}"))
+    for m in re.finditer(
+        r"\bservice ([a-z0-9]+) may deploy team ([a-z0-9]+)",
+        text,
+    ):
+        relations.add((f"service{m.group(1)}", "maydeploy", f"team{m.group(2)}"))
+
+    for m in re.finditer(
+        r"\bfreezer ([a-z0-9]+) must stay (below|above) ([0-9]+) c",
+        text,
+    ):
+        relations.add((f"freezer{m.group(1)}", f"stay{m.group(2)}", f"{m.group(3)}c"))
+    for m in re.finditer(
+        r"\bfreezer ([a-z0-9]+) (below|above) ([0-9]+) c",
+        text,
+    ):
+        relations.add((f"freezer{m.group(1)}", f"stay{m.group(2)}", f"{m.group(3)}c"))
+
     return relations
 
 

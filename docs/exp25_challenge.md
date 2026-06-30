@@ -56,6 +56,11 @@ Fifth bounded improvement pass: temporal role-binding probes now pass `3 / 3`,
 raising the local EXP25 baseline from `12 / 18` to `15 / 18` by preserving
 actor, object, and before/after order across paraphrases.
 
+Sixth bounded improvement pass: all-bad token-reuse probes now pass `3 / 3`,
+raising the local EXP25 baseline from `15 / 18` to `18 / 18` by preserving
+route/dock, service-permission, and freezer-threshold bindings even when every
+candidate reuses reference-like tokens.
+
 ## Regenerate the corpus
 
 ```bash

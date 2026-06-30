@@ -32,6 +32,9 @@
 - Added temporal role-binding support for EXP25 repair/inspect,
   approve/reject, and label/seal paraphrase probes, raising the local EXP25
   baseline from `12 / 18` to `15 / 18`.
+- Added token-reuse binding support for EXP25 route/dock,
+  service-permission, and freezer-threshold all-bad probes, raising the local
+  EXP25 baseline from `15 / 18` to `18 / 18`.
 - Clarified README and getting-started guidance around what ManifoldGuard does,
   what it does not do, and how to run a first offline relation-binding demo.
 

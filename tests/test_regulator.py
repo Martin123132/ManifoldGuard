@@ -1595,3 +1595,69 @@ def test_exp25_vial_temporal_role_binding_preserves_label_seal_order():
     assert result.emitted_text == "Noor labeled vial 1 before Iris sealed vial 2."
     assert result.evaluations[0].safe_to_emit is False
     assert result.evaluations[1].safe_to_emit is True
+
+
+def test_exp25_route_dock_all_bad_token_reuse_blocks_swaps():
+    result = regulate_candidates(
+        [
+            "Route A goes to dock 7 and Route B goes to dock 4.",
+            "Dock 4 goes to Route B.",
+        ],
+        ["Route A goes to dock 4; Route B goes to dock 7."],
+        use_embeddings=False,
+    )
+
+    assert ("routea", "goesto", "dock4") in extract_relations(
+        "Route A goes to dock 4; Route B goes to dock 7."
+    )
+    assert ("routea", "goesto", "dock7") in extract_relations(
+        "Route A goes to dock 7 and Route B goes to dock 4."
+    )
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is False
+
+
+def test_exp25_service_deploy_all_bad_token_reuse_blocks_permission_swaps():
+    result = regulate_candidates(
+        [
+            "Team Red may deploy service X.",
+            "Service X may deploy Team Blue.",
+        ],
+        ["Only Team Blue may deploy service X; Team Red may monitor it."],
+        use_embeddings=False,
+    )
+
+    assert ("teamblue", "maydeploy", "servicex") in extract_relations(
+        "Only Team Blue may deploy service X; Team Red may monitor it."
+    )
+    assert ("teamred", "maydeploy", "servicex") in extract_relations(
+        "Team Red may deploy service X."
+    )
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is False
+
+
+def test_exp25_freezer_all_bad_token_reuse_blocks_threshold_swaps():
+    result = regulate_candidates(
+        [
+            "Freezer A must stay above 2 C and Freezer B below -10 C.",
+            "Freezer B must stay below -10 C.",
+        ],
+        ["Freezer A must stay below -10 C; Freezer B must stay above 2 C."],
+        use_embeddings=False,
+    )
+
+    assert ("freezera", "staybelow", "10c") in extract_relations(
+        "Freezer A must stay below -10 C; Freezer B must stay above 2 C."
+    )
+    assert ("freezerb", "staybelow", "10c") in extract_relations(
+        "Freezer B must stay below -10 C."
+    )
+    assert result.action == "block"
+    assert result.emitted_text is None
+    assert result.evaluations[0].safe_to_emit is False
+    assert result.evaluations[1].safe_to_emit is False
