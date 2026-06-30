@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.5 - Unreleased
+## 0.1.5 - 2026-07-01
 
 - Started the 0.1.5 development cycle after the public 0.1.4 PyPI release.
 - Added the exploratory EXP24 challenge corpus seed for broader post-EXP23
