@@ -37,6 +37,9 @@
   EXP25 baseline from `15 / 18` to `18 / 18`.
 - Clarified EXP25 corpus commands, roadmap status, and release-candidate claim
   boundaries after closing the checked EXP25 seed at `18 / 18`.
+- Added a Dependabot guard to keep optional `sentence-transformers` major
+  updates from widening the supported embedding extra beyond the checked `<3`
+  range.
 - Clarified README and getting-started guidance around what ManifoldGuard does,
   what it does not do, and how to run a first offline relation-binding demo.
 
